@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#16181f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CFA Level II Study</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-180.png">
+<link rel="icon" href="static/icon-192.png">
+<link rel="stylesheet" href="static/site.css">
+<script src="static/lock-config.js"></script>
+<script src="static/lock.js"></script>
+<script src="static/profile.js"></script>
+<style>
+  body { min-height: 100vh; }
+  .login { max-width: 470px; margin: 0 auto; padding: 9vh var(--gutter, 16px) 40px; }
+  .login h1 { font-size: 32px; margin: 4px 0 8px; letter-spacing: -.01em; }
+  .login form { display: grid; gap: 10px; margin-top: 22px; }
+  .login label { font-weight: 600; font-size: 14px; }
+  .login input[type=text] { font: inherit; font-size: 18px; padding: 13px 14px; border: 1px solid var(--line-strong, #555); border-radius: 12px; background: var(--card, #222); color: var(--ink, #eee); width: 100%; box-sizing: border-box; }
+  .login input[type=text]:focus { outline: 2px solid var(--accent, #8aa8ff); outline-offset: 1px; }
+  .login .go { font-size: 17px; min-height: 50px; }
+  .login .err { color: var(--bad, #f66); min-height: 1.4em; margin: 0; font-size: 14px; }
+  .login .known { margin-top: 26px; display: grid; gap: 8px; }
+  .login .known h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted, #aaa); margin: 0; }
+  .login .known .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .login .known button { font: inherit; cursor: pointer; border: 1px solid var(--line-strong, #555); background: var(--card, #222); color: var(--ink, #eee); border-radius: 999px; padding: 8px 16px; min-height: 40px; }
+  .login .known button:hover { border-color: var(--accent, #8aa8ff); }
+  .login details { margin-top: 28px; color: var(--muted, #aaa); font-size: 14px; }
+  .login details summary { cursor: pointer; }
+  .login details p { margin: 8px 0 0; }
+  .again { margin-bottom: 4px; }
+  .pwrow { display: grid; gap: 10px; }
+  .pwrow[hidden] { display: none; }
+  .login input[type=password] { font: inherit; font-size: 18px; padding: 13px 14px; border: 1px solid var(--line-strong, #555); border-radius: 12px; background: var(--card, #222); color: var(--ink, #eee); width: 100%; box-sizing: border-box; }
+  .login input[type=password]:focus { outline: 2px solid var(--accent, #8aa8ff); outline-offset: 1px; }
+  .login .chk { display: flex; align-items: center; gap: 8px; font-weight: 400; font-size: 14px; color: var(--muted, #aaa); }
+  .snap { margin-top: 26px; }
+</style>
+</head>
+<body>
+<main class="login">
+  <span class="eyebrow">CFA Level II</span>
+  <h1>Who's studying?</h1>
+  <p class="lede">Type a username to open your progress. A new name starts a new profile. There is no password: the name only keeps each person's progress apart.</p>
+  <div id="again" class="again" hidden><button type="button" class="btn primary go" id="cont"></button><p class="muted small"><a href="#" id="notme">Not you? Sign out</a></p></div>
+  <form id="f" autocomplete="off">
+    <label for="u">Username</label>
+    <input id="u" type="text" maxlength="24" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" required>
+    <div id="pwrow" hidden class="pwrow">
+      <label for="pw">Passcode</label>
+      <input id="pw" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="current-password" enterkeyhint="go">
+      <label class="chk"><input type="checkbox" id="showpw"> Show the passcode</label>
+      <label class="chk"><input type="checkbox" id="rem" checked> Keep this device unlocked</label>
+    </div>
+    <p class="err" id="err" role="alert"></p>
+    <button class="btn primary go" type="submit">Continue</button>
+  </form>
+  <div class="known" id="known" hidden><h2>Profiles on this device</h2><div class="row" id="names"></div></div>
+  <details><summary>How profiles work</summary>
+    <p>Your progress (the study path, ticked outcomes, what you've read, case-study answers) is saved in this browser under your username. Each username has its own progress and nobody else's.</p>
+    <p>Because there is no account or server, a profile lives on the device where you made it. To carry yours to another device, choose <b>Export my progress</b> from the profile menu, then <b>Import progress</b> on the other device.</p>
+    <p>Anyone who types the same name on the same device opens the same profile.</p>
+  </details>
+  <p class="muted small snap">A copy of the CFA Level II study material, built 2026-09-30. It does not update. The study material in it is encrypted.</p>
+</main>
+<script>
+(() => {
+  const P = window.StudyProfile, L = window.StudyLock, $ = (id) => document.getElementById(id);
+  const next = (() => {
+    const n = new URLSearchParams(location.search).get("next") || "";
+    return /^(app|cases)\.html(#.*)?$/.test(n) ? n : "app.html#path";
+  })();
+  const go = () => { const u = P.user(); location.href = u ? next.replace(/^([^#]*)/, "$1?as=" + encodeURIComponent(u.name)) : next; };
+  const needs = () => !!(L && L.locked && !L.hasKey());   // a locked copy asks for the passcode until this device is unlocked
+  if (L && L.locked) { $("pwrow").hidden = !needs(); $("showpw").onchange = () => { $("pw").type = $("showpw").checked ? "text" : "password"; }; }
+  const me = P.user();
+  if (me && !needs()) {
+    $("again").hidden = false;
+    $("cont").textContent = "Continue as " + me.name;
+    $("cont").onclick = go;
+    $("notme").onclick = (e) => { e.preventDefault(); P.signOut(); };
+  }
+  const names = P.list().sort((a, b) => (b.last || 0) - (a.last || 0));
+  if (names.length) {
+    $("known").hidden = false;
+    for (const u of names) {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = u.name;
+      b.onclick = () => { if (needs()) { $("u").value = u.name; $("err").textContent = "Enter the passcode first."; $("pw").focus(); return; } P.signIn(u.name); go(); };
+      $("names").appendChild(b);
+    }
+  }
+  $("u").value = P.lastName();
+  setTimeout(() => { (needs() && $("u").value ? $("pw") : $("u")).focus(); }, 50);
+  $("f").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("f").querySelector("button[type=submit]");
+    try {
+      if (!P.valid($("u").value)) { P.signIn($("u").value); }   // throws the message about what a username can be
+      if (needs()) { btn.disabled = true; btn.textContent = "Unlocking…"; await L.unlock($("pw").value, $("rem").checked); }
+      P.signIn($("u").value);
+      go();
+    } catch (err) { $("err").textContent = err.message; btn.disabled = false; btn.textContent = "Continue"; }
+  });
+  $("u").addEventListener("input", () => { $("err").textContent = ""; });
+  $("pw").addEventListener("input", () => { $("err").textContent = ""; });
+})();
+</script>
+</body>
+</html>

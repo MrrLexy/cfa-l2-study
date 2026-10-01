@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CFA Level II Study · Case studies</title>
+<link rel="stylesheet" href="static/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-180.png">
+<link rel="icon" href="static/icon-192.png">
+<meta name="theme-color" content="#16181f">
+<script src="static/lock-config.js"></script>
+<script src="static/lock.js"></script>
+<script src="static/profile.js"></script>
+<script>StudyProfile.guard();</script>
+<link rel="stylesheet" href="static/katex/katex.min.css">
+<script defer src="static/katex/katex.min.js"></script>
+<style>
+  :root { --page-max: 1320px; }
+  main { max-width: var(--page-max); margin: 0 auto; padding: var(--sp-6) var(--gutter) var(--sp-8); }
+  .status { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--muted); white-space: nowrap; }
+  .offline { display: none; margin-top: var(--sp-3); color: var(--bad); font-size: var(--fs-sm); }
+  h1.site-title { font-size: var(--fs-xl); letter-spacing: -.02em; }
+  .lede { color: var(--muted); font-size: var(--fs-md); margin: 6px 0 0; max-width: 760px; }
+
+  /* picker */
+  .picker { margin-top: var(--sp-6); }
+  .step { margin-top: var(--sp-5); }
+  .step:first-child { margin-top: 0; }
+  .step > .eyebrow { display: block; margin-bottom: var(--sp-2); }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); border-radius: var(--r-pill); padding: 6px 14px;
+          font-size: var(--fs-sm); font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; }
+  .pill:hover { border-color: var(--accent); }
+  .pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .pill .n { font-size: var(--fs-xs); font-weight: 600; opacity: .75; font-variant-numeric: tabular-nums; }
+  .modgrid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .modcard { padding: var(--sp-4); text-align: left; font: inherit; color: inherit; width: 100%; display: flex; flex-direction: column; gap: 6px; }
+  .modcard[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .modcard .name { font-weight: 700; }
+  .modcard .facts { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .setgrid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .setcard { padding: var(--sp-4); display: flex; flex-direction: column; gap: 8px; }
+  .setcard .t { font-weight: 700; font-size: 16.5px; line-height: 1.3; }
+  .setcard .src { font-size: 13px; color: var(--muted); }
+  .setcard .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; padding-top: 4px; }
+  .setcard .go { font-size: 13px; font-weight: 600; color: var(--accent); }
+
+  /* one set */
+  .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: var(--sp-5); font-size: var(--fs-sm); color: var(--muted); }
+  .sethead { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-3); flex-wrap: wrap; margin: var(--sp-3) 0 var(--sp-5); }
+  .sethead h2 { font-size: var(--fs-xl); line-height: 1.2; letter-spacing: -.015em; margin: 0 0 4px; }
+  .sethead .src { color: var(--muted); font-size: 15px; margin: 0; }
+  .score { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+  .score b { font-size: 26px; font-variant-numeric: tabular-nums; line-height: 1; }
+  .score .progress { width: 120px; }
+  .case { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+  .vig { position: sticky; top: var(--sp-3); max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 0; }
+  .vig > summary { list-style: none; cursor: default; padding: var(--sp-4) var(--sp-5) 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .vig > summary::-webkit-details-marker { display: none; }
+  .vig > summary .tog { display: none; }
+  .vig .body { padding: var(--sp-2) var(--sp-5) var(--sp-5); }
+  .qs { display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0; }
+  .q { padding: var(--sp-5); scroll-margin-top: 16px; }
+  .q .qh { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: var(--sp-2); }
+  .q .stem { font-size: 16.5px; font-weight: 600; line-height: 1.45; }
+  .q .stem p { margin: 0 0 .5em; } .q .stem p:last-child { margin-bottom: 0; }
+  .opts { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-4); }
+  .opt { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; text-align: left; cursor: pointer;
+         border: 1.5px solid var(--line-strong); background: var(--card); color: var(--ink); border-radius: var(--r); padding: 10px 12px; font-size: 15.5px; line-height: 1.45; min-height: 48px; }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .opt:disabled { cursor: default; }
+  .opt .L { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;
+            background: var(--sunk); color: var(--muted); }
+  .opt .v { padding-top: 2px; overflow-wrap: anywhere; }
+  .opt .v p { margin: 0; }
+  .opt.right { border-color: var(--good); background: var(--good-soft); }
+  .opt.right .L { background: var(--good); color: var(--card); }
+  .opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+  .opt.wrong .L { background: var(--bad); color: var(--card); }
+  .opt.dim { opacity: .62; }
+  .verdict { margin-top: var(--sp-4); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .verdict.good { color: var(--good); } .verdict.bad { color: var(--bad); }
+  .expl { margin-top: var(--sp-2); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
+  .expl p { margin: 0 0 .6em; } .expl p:last-child { margin-bottom: 0; }
+  .los { font-size: 13px; color: var(--muted); margin-top: var(--sp-2); }
+  .setfoot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-2); margin-top: var(--sp-2); }
+  .jump { display: none; }
+
+  /* markdown content */
+  .md { font-size: 15.5px; line-height: 1.6; overflow-wrap: break-word; }
+  .md p { margin: 0 0 .8em; }
+  .md h3, .md h4, .md h5 { font-size: 15.5px; margin: 1.2em 0 .5em; }
+  .md ul, .md ol { margin: 0 0 .8em; padding-left: 1.4em; }
+  .md li { margin: .2em 0; }
+  .md .table-wrap { margin: .4em 0 1em; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); }
+  .md .table { font-size: 14.5px; }
+  .md .table th { white-space: normal; background: var(--sunk); text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink); }
+  .md .table td { padding: 8px 10px; }
+  .md .table td.r, .md .table th.r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .md .table td.c, .md .table th.c { text-align: center; }
+  .md .cap { font-weight: 700; font-size: 14px; margin: 1.1em 0 .3em; }
+  .md code { font-family: var(--mono); font-size: .9em; background: var(--sunk); padding: 1px 5px; border-radius: 5px; }
+  .katex { font-size: 1.06em; }
+  .katex-display { margin: .5em 0; padding: .4em .6em; background: var(--sunk); border-radius: var(--r-sm); overflow-x: auto; overflow-y: hidden; }
+  .expl .katex-display { background: var(--card); }
+
+  @media (max-width: 960px) {
+    .case { grid-template-columns: minmax(0, 1fr); }
+    .vig { position: static; max-height: none; overflow: visible; }
+    .vig > summary { cursor: pointer; padding-bottom: var(--sp-4); }
+    .vig[open] > summary { padding-bottom: 0; }
+    .vig > summary .tog { display: inline-flex; }
+    .jump { display: inline-flex; }
+  }
+  @media (max-width: 520px) {
+    main { padding-top: var(--sp-5); }
+    .q, .card { padding: var(--sp-4); }
+    .vig { padding: 0; }
+    .vig > summary { padding: var(--sp-3) var(--sp-4); }
+    .vig[open] > summary { padding-bottom: 0; }
+    .vig .body { padding: var(--sp-2) var(--sp-4) var(--sp-4); }
+    .score .progress { width: 80px; }
+    .md .table { font-size: 13.5px; }
+    .md .table td, .md .table th { padding: 7px 7px; }
+  }
+</style>
+</head>
+<body>
+<header class="site-bar"><div class="site-bar-in">
+  <a class="site-brand" href="app.html#path">CFA Level II Study</a>
+  <div class="site-nav" role="navigation" aria-label="Pages"><a href="app.html">Study Map</a><a href="cases.html">Case studies</a></div>
+  <div id="userbar"></div>
+</div></header>
+<main>
+  <div class="site-head"><span class="eyebrow">Item-set practice</span>
+    <span class="status"><i class="dot" id="livedot"></i><span id="updated">Loading…</span></span></div>
+  <h1 class="site-title" id="title">Case studies</h1>
+  <p class="lede" id="lede">Exam-style item sets: a vignette and four questions. Your answers stay on this device.</p>
+  <div class="offline" id="offline">The case studies couldn't be loaded.</div>
+  <div id="view"></div>
+</main>
+<script src="static/data/study-path.js"></script>
+<script src="static/data/los-cards.js"></script>
+<script src="static/data/guide-narratives.js"></script>
+<script src="static/data/glossary.js"></script>
+<script src="static/data/mapdata.js"></script>
+<script src="static/data/casedata.js"></script>
+<script src="static/standalone.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many || one + "s"}`;
+
+// ------------------------------------------------------------------ saved answers (this device only)
+const STORE = "site-cases-v1", NAV = "site-cases-nav";
+function loadJSON(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v && typeof v === "object" ? v : d; } catch { return d; } }
+function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+let answers = loadJSON(STORE, {});   // "file/setId" -> { questionId: "A" }
+let nav = loadJSON(NAV, {});         // { vol, mod, set }
+
+// ------------------------------------------------------------------ Markdown (paragraphs, lists, headings, tables) + KaTeX
+function math(tex, display) {
+  if (!window.katex) return esc(display ? `\\[${tex}\\]` : `\\(${tex}\\)`);
+  try { return katex.renderToString(tex, { displayMode: display, throwOnError: false }); } catch { return esc(tex); }
+}
+function inline(s, slots) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<em>$2</em>")
+    .replace(/(^|[^\w])_([^_\s][^_]*?)_(?!\w)/g, "$1<em>$2</em>")
+    .replace(/\u0001(\d+)\u0002/g, (_, i) => slots[+i]);
+}
+const NUMERIC = /^[\s(−\-+$€£]*[\d.,]+\s*(%|bp|bps|x|×|years?|yrs?|m|mn|bn|million|billion)?\)?\s*$|^[−\-–]+$|^n\/?a$/i;
+function table(rows, slots) {
+  const split = (l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
+  const head = split(rows[0]), sep = rows[1] && /^\s*\|?[\s:\-|]+\|?\s*$/.test(rows[1]) ? split(rows[1]) : null;
+  const align = head.map((_, i) => { const a = sep && sep[i] || ""; return /^:-+:$/.test(a) ? "c" : /-+:$/.test(a) ? "r" : /^:-/.test(a) ? "" : null; });
+  const body = rows.slice(sep ? 2 : 1).map(split);
+  const cls = (i, txt) => { const a = align[i]; const k = a !== null && a !== undefined ? a : i > 0 && NUMERIC.test(txt.replace(/\u0001\d+\u0002/g, "1")) ? "r" : ""; return k ? ` class="${k}"` : ""; };
+  return `<div class="table-wrap"><table class="table"><thead><tr>${head.map((h, i) => `<th${align[i] ? ` class="${align[i]}"` : i > 0 && body.every((r) => !(r[i] || "").trim() || NUMERIC.test((r[i] || "").replace(/\u0001\d+\u0002/g, "1"))) ? ' class="r"' : ""}>${inline(h, slots)}</th>`).join("")}</tr></thead>
+    <tbody>${body.map((r) => `<tr>${head.map((_, i) => `<td${cls(i, r[i] || "")}>${inline(r[i] || "", slots)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function md(src) {
+  const slots = [];
+  const text = String(src ?? "").replace(/\r\n?/g, "\n").replace(/\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$/g, (m, d, i, dd) => {
+    slots.push(math(d ?? dd ?? i, i === undefined)); return `\u0001${slots.length - 1}\u0002`;
+  });
+  const lines = text.split("\n"), out = [];
+  let para = [];
+  const flush = () => { if (para.length) out.push(`<p>${inline(para.join(" "), slots)}</p>`); para = []; };
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (!l.trim()) { flush(); continue; }
+    if (/^\s*\|/.test(l)) {
+      flush(); const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(lines[i++]);
+      i--; out.push(table(rows, slots)); continue;
+    }
+    const h = l.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { flush(); const lv = Math.min(5, h[1].length + 2); out.push(`<h${lv}>${inline(h[2], slots)}</h${lv}>`); continue; }
+    if (/^\s*([-*+]|\d+[.)])\s+/.test(l)) {
+      flush(); const ordered = /^\s*\d/.test(l), items = [];
+      while (i < lines.length && /^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) {
+        let item = lines[i++].replace(/^\s*([-*+]|\d+[.)])\s+/, "");
+        while (i < lines.length && lines[i].trim() && /^\s{2,}\S/.test(lines[i]) && !/^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) item += " " + lines[i++].trim();
+        items.push(`<li>${inline(item, slots)}</li>`);
+      }
+      i--; out.push(ordered ? `<ol>${items.join("")}</ol>` : `<ul>${items.join("")}</ul>`); continue;
+    }
+    // a lone bold line directly above a table reads as the exhibit caption
+    if (/^\s*\*\*[^*]+\*\*\s*$/.test(l) && lines[i + 1] && /^\s*\|/.test(lines[i + 1])) { flush(); out.push(`<div class="cap">${inline(l.trim().slice(2, -2), slots)}</div>`); continue; }
+    if (/^\s*\u0001\d+\u0002\s*$/.test(l) && /katex-display|\\\[/.test(slots[+l.match(/\d+/)[0]])) { flush(); out.push(inline(l.trim(), slots)); continue; }
+    para.push(l.trim());
+  }
+  flush();
+  return `<div class="md">${out.join("")}</div>`;
+}
+
+// ------------------------------------------------------------------ data
+let D = null, sig = "";
+const natural = (s) => { const m = String(s).match(/(\d+)\s*$/); return m ? +m[1] : 9999; };
+function volumes() { return (D && D.volumes) || []; }
+function modulesOf(v) {
+  const mods = [];
+  for (const s of v.sets) { const m = String(s.module || "Other"); if (!mods.includes(m)) mods.push(m); }
+  return mods.sort((a, b) => natural(a) - natural(b) || a.localeCompare(b));
+}
+const key = (v, s) => `${v.file}/${s.id}`;
+function progress(v, s) {
+  const a = answers[key(v, s)] || {}, qs = s.questions || [];
+  const done = qs.filter((q) => a[q.id]).length, right = qs.filter((q) => a[q.id] && a[q.id] === q.answer).length;
+  return { done, right, total: qs.length, finished: qs.length > 0 && done === qs.length };
+}
+function find() {
+  const v = volumes().find((x) => x.file === nav.vol) || volumes()[0];
+  if (!v) return {};
+  const mods = modulesOf(v);
+  const mod = mods.includes(nav.mod) ? nav.mod : mods[0];
+  const set = nav.set ? v.sets.find((s) => String(s.id) === String(nav.set)) : null;
+  return { v, mods, mod, set };
+}
+function go(patch, scroll) {
+  nav = { ...nav, ...patch }; saveJSON(NAV, nav);
+  const h = nav.set ? `#set=${encodeURIComponent(nav.vol + "/" + nav.set)}` : "";
+  history.replaceState(null, "", location.pathname + location.search + h);
+  draw(true);
+  if (scroll) window.scrollTo({ top: 0 });
+}
+
+// ------------------------------------------------------------------ drawing
+let drawnKey = "";
+function chip(p) {
+  if (p.finished) return `<span class="chip ${p.right === p.total ? "good" : p.right >= p.total / 2 ? "accent" : "warn"}">Done · ${p.right}/${p.total}</span>`;
+  if (p.done) return `<span class="chip accent">${p.done} of ${p.total} answered</span>`;
+  return `<span class="chip">Not started</span>`;
+}
+function drawPicker({ v, mods, mod }) {
+  const vols = volumes();
+  const volPills = vols.map((x) => `<button type="button" class="pill" data-vol="${esc(x.file)}" aria-pressed="${x === v}">${esc(x.volume)}<span class="n">${x.sets.length}</span></button>`).join("");
+  const modCards = mods.map((m) => {
+    const sets = v.sets.filter((s) => (s.module || "Other") === m);
+    const done = sets.filter((s) => progress(v, s).finished).length;
+    const title = (sets.find((s) => s.module_title) || {}).module_title || "";
+    return `<button type="button" class="card card-link modcard" data-mod="${esc(m)}" aria-pressed="${m === mod}">
+      <span class="name">${esc(m)}</span>${title ? `<span class="facts">${esc(title)}</span>` : ""}
+      <span class="facts">${plural(sets.length, "set")} · ${done} done</span>
+      <div class="progress thin good"><i style="width:${sets.length ? Math.round(100 * done / sets.length) : 0}%"></i></div></button>`;
+  }).join("");
+  const sets = v.sets.filter((s) => (s.module || "Other") === mod);
+  const setCards = sets.map((s, i) => {
+    const p = progress(v, s);
+    return `<a class="card card-link setcard" href="#set=${encodeURIComponent(v.file + "/" + s.id)}" data-set="${esc(s.id)}">
+      <span class="eyebrow">Set ${i + 1}</span><span class="t">${esc(s.title || "Item set " + (i + 1))}</span>
+      ${s.source ? `<span class="src">${esc(s.source)}</span>` : ""}
+      <span class="foot">${chip(p)}<span class="go">${p.finished ? "Review" : p.done ? "Resume" : "Start"} ›</span></span></a>`;
+  }).join("");
+  $("view").innerHTML = `<div class="picker">
+    <div class="step"><span class="eyebrow">Volume</span><div class="pills">${volPills}</div></div>
+    <div class="step"><span class="eyebrow">Module</span><div class="modgrid">${modCards}</div></div>
+    <div class="step"><span class="eyebrow">${esc(mod)} · ${plural(sets.length, "item set")}</span>
+      <div class="setgrid">${setCards || `<div class="empty-state">No sets in this module yet. New sets appear here automatically.</div>`}</div></div></div>`;
+}
+function drawSet({ v, set }) {
+  const a = answers[key(v, set)] || {}, p = progress(v, set);
+  const sets = v.sets.filter((s) => (s.module || "Other") === (set.module || "Other"));
+  const idx = sets.indexOf(set), prev = sets[idx - 1], next = sets[idx + 1];
+  const narrow = matchMedia("(max-width: 960px)").matches;
+  const vigOpen = !narrow || !document.querySelector(".vig") || document.querySelector(".vig").open;
+  const qs = (set.questions || []).map((q, n) => {
+    const got = a[q.id], answered = !!got;
+    const opts = Object.entries(q.options || {}).map(([L, txt]) => {
+      let c = "";
+      if (answered) c = L === q.answer ? "right" : L === got ? "wrong" : "dim";
+      return `<button type="button" class="opt ${c}" data-q="${esc(q.id)}" data-opt="${esc(L)}" ${answered ? "disabled" : ""}
+       ><span class="L">${esc(L)}</span><span class="v">${md(txt).replace(/^<div class="md">|<\/div>$/g, "")}</span></button>`;
+    }).join("");
+    return `<article class="card q" id="q-${esc(q.id)}"><div class="qh"><span class="eyebrow">Question ${n + 1} of ${set.questions.length}</span>
+        <button type="button" class="btn ghost sm jump" data-jump>Vignette ↑</button></div>
+      <div class="stem">${md(q.stem)}</div>
+      <div class="opts" role="group" aria-label="Answer options">${opts}</div>
+      ${answered ? `<div class="verdict ${got === q.answer ? "good" : "bad"}">${got === q.answer ? "✓ Correct" : `✗ Incorrect: you chose ${esc(got)}, the answer is ${esc(q.answer)}`}</div>
+        <div class="expl">${md(q.explanation)}</div>${q.los ? `<div class="los">LOS: ${esc(q.los)}</div>` : ""}` : ""}</article>`;
+  }).join("");
+  $("view").innerHTML = `<nav class="crumbs" aria-label="Breadcrumb"><button type="button" class="btn sm" data-back>‹ All sets</button>
+      <span>${esc(v.volume)} · ${esc(set.module || "")} · set ${idx + 1} of ${sets.length}</span></nav>
+    <div class="sethead"><div><h2>${esc(set.title || "Item set")}</h2>${set.source ? `<p class="src">${esc(set.source)}</p>` : ""}</div>
+      <div class="score" aria-live="polite"><div><div class="eyebrow">Score</div><b>${p.right}/${p.total}</b></div>
+        <div><div class="progress ${p.finished ? "good" : ""}"><i style="width:${p.total ? Math.round(100 * p.done / p.total) : 0}%"></i></div>
+          <div class="muted" style="font-size:13px;margin-top:4px">${p.done} of ${p.total} answered</div></div>
+        <button type="button" class="btn sm" data-reset ${p.done ? "" : "disabled"}>Reset set</button></div></div>
+    <div class="case">
+      <details class="card vig" id="vig" ${vigOpen ? "open" : ""}><summary><span class="eyebrow">Vignette</span><span class="chip tog">Show / hide</span></summary>
+        <div class="body">${md(set.vignette)}</div></details>
+      <div class="qs">${qs}
+        <div class="setfoot">${prev ? `<button type="button" class="btn" data-goto="${esc(prev.id)}">‹ Previous set</button>` : "<span></span>"}
+          ${next ? `<button type="button" class="btn ${p.finished ? "primary" : ""}" data-goto="${esc(next.id)}">Next set ›</button>` : `<button type="button" class="btn" data-back>All sets</button>`}</div></div>
+    </div>`;
+  const vig = $("vig");
+  vig.querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 960px)").matches) e.preventDefault(); });
+}
+function draw(force) {
+  const f = find();
+  if (!f.v) {
+    $("view").innerHTML = `<div class="empty-state" style="margin-top:24px">No item sets yet. They appear here as soon as they're written (this page checks every minute).</div>`;
+    drawnKey = ""; return;
+  }
+  nav.vol = f.v.file; nav.mod = f.set ? f.set.module || "Other" : f.mod;
+  saveJSON(NAV, nav);
+  const total = volumes().reduce((n, x) => n + x.sets.length, 0);
+  $("lede").textContent = `${plural(total, "item set")} across ${plural(volumes().length, "volume")}. Read the vignette, answer the four questions, then study the worked explanations. Your answers stay on this device.`;
+  const k = f.set ? "set:" + key(f.v, f.set) + ":" + JSON.stringify(f.set) + JSON.stringify(answers[key(f.v, f.set)] || {}) : "pick:" + sig + JSON.stringify(nav) + JSON.stringify(answers);
+  if (!force && k === drawnKey) return;
+  drawnKey = k;
+  $("lede").hidden = !!f.set;
+  if (f.set) drawSet(f); else drawPicker(f);
+  if (window.Site) Site.fill($("view"));
+}
+
+// ------------------------------------------------------------------ events
+$("view").addEventListener("click", (e) => {
+  const t = e.target;
+  const vol = t.closest("[data-vol]"); if (vol) return go({ vol: vol.dataset.vol, mod: null, set: null });
+  const mod = t.closest("[data-mod]"); if (mod) return go({ mod: mod.dataset.mod, set: null });
+  const st = t.closest("[data-set]"); if (st) { e.preventDefault(); return go({ set: st.dataset.set }, true); }
+  const gt = t.closest("[data-goto]"); if (gt) return go({ set: gt.dataset.goto }, true);
+  if (t.closest("[data-back]")) return go({ set: null }, true);
+  if (t.closest("[data-jump]")) { const v = $("vig"); v.open = true; v.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  const f = find();
+  if (t.closest("[data-reset]") && f.set) {
+    if (!confirm("Clear your answers for this set?")) return;
+    delete answers[key(f.v, f.set)]; saveJSON(STORE, answers); draw(true); return;
+  }
+  const o = t.closest("[data-opt]");
+  if (o && f.set && !o.disabled) {
+    const k = key(f.v, f.set);
+    answers[k] = { ...(answers[k] || {}), [o.dataset.q]: o.dataset.opt };
+    saveJSON(STORE, answers);
+    const y = window.scrollY; draw(true); window.scrollTo(0, y);
+  }
+});
+window.addEventListener("storage", (e) => { if (e.key === STORE) { answers = loadJSON(STORE, {}); draw(true); } });
+function fromHash() {
+  const m = location.hash.match(/set=([^&]+)/);
+  if (!m) return;
+  const [vol, ...rest] = decodeURIComponent(m[1]).split("/");
+  nav = { ...nav, vol, set: rest.join("/") };
+}
+
+// ------------------------------------------------------------------ data, refreshed every 60 s
+async function load() {
+  try {
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 10000);
+    const r = await fetch("casedata", { cache: "no-store", signal: ctl.signal });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    D = { volumes: Array.isArray(d.volumes) ? d.volumes : [] };
+    sig = JSON.stringify(D.volumes.map((v) => [v.file, v.sets.map((s) => [s.id, s.module, s.title])]));
+    $("offline").style.display = "none";
+    $("livedot").className = "dot on";
+    $("updated").textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    draw(false);
+  } catch {
+    $("offline").style.display = "block";
+    $("livedot").className = "dot off";
+    $("updated").textContent = "Offline";
+    if (!D) $("view").innerHTML = `<div class="empty-state" style="margin-top:24px">The item sets couldn't be loaded.</div>`;
+  }
+}
+function start() { fromHash(); load();  }
+window.addEventListener("hashchange", () => { fromHash(); if (!location.hash) nav.set = null; draw(true); });
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+</script>
+</body>
+</html>
