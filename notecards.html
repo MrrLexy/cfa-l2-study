@@ -71,6 +71,11 @@
   .nc.sum .two h5:first-child { margin-top: 0; }
   .nc.sum .two li, .nc.sum .two p { break-inside: avoid; }
   .sheet .empty { padding: 6mm; text-align: center; color: #6b7280; }
+  .nc.eq .nc-top span:first-child { color: #7a4a00; } .nc.case .nc-top span:first-child { color: #1f6b4a; }
+  .nc.eq { border-left: 2.2pt solid #c98a1b; } .nc.case { border-left: 2.2pt solid #2f8f63; }
+  .sheet.self .ans { display: none; }
+  .sheet .lines { display: none; }
+  .sheet.self .lines { display: block; height: 30mm; margin-top: 1.5mm; background: repeating-linear-gradient(to bottom, transparent 0, transparent 6.9mm, var(--rule) 6.9mm, var(--rule) 7.1mm); }
 
   @media (max-width: 560px) { .sheet { padding: 3mm; --nc-pt: 9.5pt !important; } }
   @page { margin: 10mm 10mm 13mm; }
@@ -95,14 +100,16 @@
 <main>
   <div class="site-head"><span class="eyebrow">Print and download</span></div>
   <h1 class="site-title">Note cards</h1>
-  <p class="lede">One card for every learning outcome, with its answer and formulas, and a summary card for each module. Print them, or save them as a PDF to keep on any device.</p>
+  <p class="lede">Four kinds of card: a summary of each module, a card for every learning outcome with its answer, an equation card that says when to use each formula and what to pull from the case, and a case study card with the details to look for. Print them, save them as a PDF, or print a self-test copy with the answers left blank.</p>
   <div class="offline" id="offline">The note cards couldn't be loaded.</div>
   <div class="nc-controls" id="controls" hidden>
     <div class="row"><span class="eyebrow">Subject</span><select id="phase" aria-label="Subject"></select><select id="module" aria-label="Module"></select></div>
     <div class="row"><span class="eyebrow">On the cards</span>
       <label class="opt"><input type="checkbox" id="o-sum" checked> Module summaries</label>
       <label class="opt"><input type="checkbox" id="o-los" checked> Outcome cards</label>
-      <label class="opt"><input type="checkbox" id="o-for"> Formula cards</label>
+      <label class="opt"><input type="checkbox" id="o-for"> Equation cards</label>
+      <label class="opt"><input type="checkbox" id="o-case"> Case study cards</label>
+      <label class="opt"><input type="checkbox" id="o-self"> Self-test (answers left blank)</label>
       <select id="size" aria-label="Text size"><option value="9">Small text</option><option value="10" selected>Standard text</option><option value="11.5">Large text</option></select></div>
     <div class="row"><button type="button" class="btn primary" id="print">Print or save as PDF</button><a class="btn" id="pdf" hidden download>Download the PDF</a>
       <span class="nc-count" id="count"></span></div>
@@ -114,6 +121,7 @@
 <script src="static/data/los-cards.js"></script>
 <script src="static/data/guide-narratives.js"></script>
 <script src="static/data/mapdata.js"></script>
+<script src="static/data/casedata.js"></script>
 <script src="static/data/notecards-index.js"></script>
 <script src="static/standalone.js"></script>
 <script>
@@ -172,7 +180,7 @@ function md(src) {
 const one = (s) => md(s).replace(/^<div class="md"><p>([\s\S]*)<\/p><\/div>$/, "$1");   // a single line, no paragraph wrapper
 
 // ------------------------------------------------------------------ data
-let P = null, L = null, N = null, F = {}, PDFS = null;
+let P = null, L = null, N = null, F = {}, C = {}, PDFS = null;
 const q = new URLSearchParams(location.search);
 const cap = (s) => s ? s[0].toUpperCase() + s.slice(1) : s;
 const phaseOf = (id) => P.phases.find((p) => p.id === id) || P.phases[0];
@@ -213,15 +221,38 @@ function outcomeCard(k, c, total, namesOnly, seen) {
   const forms = fresh.map(formulaHTML).join("") + (!again.length ? "" : `<div class="foot"><b>${namesOnly ? "Formulas" : "Also uses"}:</b> ${again.map((f) =>
     one(f.name) + (seen.has(f.name) ? ` (outcome ${seen.get(f.name)})` : "")).join("; ")}</div>`);
   return `<article class="nc"><div class="nc-top"><span>Outcome ${c.i + 1} of ${total}</span><span>${esc(k)}</span></div><h4>${esc(cap(c.text))}</h4>
-    ${ans}${forms}${sourceLine(k, c)}</article>`;
+    <div class="ans">${ans}${forms}</div><div class="lines"></div>${sourceLine(k, c)}</article>`;
 }
+// an equation card: when to reach for the formula, what to find in the case, and the usual slip
 function formulaCards(k) {
   const fs = (F[k] && F[k].formulas) || [];
-  return fs.map((f, i) => `<article class="nc"><div class="nc-top"><span>Formula ${i + 1} of ${fs.length}</span><span>${esc(k)}</span></div>${formulaHTML(f).replace('<div class="f">', '<div class="f" style="background:none;padding:0;margin:0">')}</article>`).join("");
+  return fs.map((f, i) => {
+    const vars = f.vars || (f.variables || []).map((v) => [v.latex, v.meaning]);
+    return `<article class="nc eq"><div class="nc-top"><span>Equation ${i + 1} of ${fs.length}</span><span>${esc(k)}</span></div><h4>${one(f.name)}</h4>
+      ${f.use ? `<h5>Use it when</h5><p>${one(f.use)}</p>` : ""}
+      <div class="ans">${md("\\[" + f.latex + "\\]")}
+        ${vars.length ? `<h5>Find in the case</h5><ul>${vars.map(([l, m]) => `<li>${one("\\(" + l + "\\)")} ${one(m)}</li>`).join("")}</ul>` : ""}
+        ${f.pitfall ? `<h5>Watch for</h5><p>${one(f.pitfall)}</p>` : ""}
+        ${(f.builds_on || []).length ? `<div class="foot"><b>Builds on:</b> ${f.builds_on.map((x) => one(x)).join("; ")}</div>` : ""}</div><div class="lines"></div></article>`;
+  }).join("");
+}
+// a case study card: what the case is about, the details to look for, what its questions test and the traps in them
+function caseCards(k) {
+  const fams = C[k] ? [...C[k].values()] : [];
+  return fams.map((vs, i) => {
+    vs.sort((a, b) => (a.variant || 1) - (b.variant || 1));
+    const st = vs[0], topic = (q) => { const m = String(q.explanation || "").match(/\(([^()]+)\)\s*$/); return m ? m[1].replace(/^[^,]*,\s*/, "").replace(/\.$/, "") : ""; };
+    const tests = st.questions.map((q) => topic(q) || q.los || "").filter(Boolean), traps = [...new Set(st.questions.map((q) => q.trap).filter(Boolean))];
+    return `<article class="nc case"><div class="nc-top"><span>Case study ${i + 1} of ${fams.length}</span><span>${esc(k)}</span></div><h4>${esc(st.family_title || st.title)}</h4>
+      ${tests.length ? `<h5>The questions test</h5><ol>${tests.map((x) => `<li>${one(cap(x))}</li>`).join("")}</ol>` : ""}
+      <div class="ans">${(st.look_for || []).length ? `<h5>Key details to look for</h5><ul>${st.look_for.map((x) => `<li>${one(x)}</li>`).join("")}</ul>` : ""}
+        ${traps.length ? `<h5>Traps</h5><ul>${traps.map((x) => `<li>${one(x)}</li>`).join("")}</ul>` : ""}</div><div class="lines"></div>
+      <div class="foot">${vs.length > 1 ? `${vs.length} variations` : "One set"} in Case studies: ${esc(vs.map((x) => x.title).join("; "))}.</div></article>`;
+  }).join("");
 }
 
 function draw() {
-  const p = phaseOf($("phase").value), only = $("module").value, show = { sum: $("o-sum").checked, los: $("o-los").checked, f: $("o-for").checked };
+  const p = phaseOf($("phase").value), only = $("module").value, show = { sum: $("o-sum").checked, los: $("o-los").checked, f: $("o-for").checked, c: $("o-case").checked }, self = $("o-self").checked;
   const list = mods(p).filter((k) => !only || k === only);
   const subject = p.title.replace(/^\d+\.\s*/, "");
   let cards = 0;
@@ -230,6 +261,7 @@ function draw() {
     const seen = new Map();
     if (show.los) parts.push(...L[k].los.map((c) => outcomeCard(k, c, L[k].los.length, show.f, seen)));
     if (show.f) parts.push(formulaCards(k));
+    if (show.c) parts.push(caseCards(k));
     const html = parts.filter(Boolean).join("");
     cards += ((sum + html).match(/<article /g) || []).length;
     return !(sum + html) ? "" : `<section class="mod${n ? "" : " first"}"><div class="mod-h"><b>${esc(P.modules[k].title)}</b><span>${esc(k)} · ${plural(nLos(k), "outcome")}</span></div>
@@ -237,20 +269,26 @@ function draw() {
   }).join("");
   const title = `${LEVEL} note cards`;
   $("sheet").style.setProperty("--nc-pt", $("size").value + "pt");
+  $("sheet").classList.toggle("self", self);
   $("sheet").innerHTML = `<div class="cover"><div class="kicker">${esc(title)}</div><h1>${esc(only ? P.modules[only].title : subject)}</h1>
       <p>${only ? esc(only) : plural(list.length, "module")} · ${plural(list.reduce((t, k) => t + nLos(k), 0), "learning outcome")} · ${plural(cards, "card")}</p>
       ${only ? "" : `<ol>${list.map((k) => `<li>${esc(P.modules[k].title)}</li>`).join("")}</ol>`}
-      <p class="how">Each card carries the material itself: the outcome, its answer and its formulas. The last line of a card names the curriculum reading it comes from, so you can read the full text in your own copy.</p></div>
+      <p class="how">Each card carries the material itself. An outcome or summary card ends with the curriculum reading it comes from, so you can read the full text in your own copy.${self ? " This is a self-test copy: write your answer in the ruled space, then check it against the full cards." : ""}</p></div>
     ${body || `<div class="empty">Nothing to print with these choices. Tick at least one kind of card.</div>`}`;
   $("count").textContent = plural(cards, "card");
   document.title = `${title} - ${only ? P.modules[only].title : subject}`;
   $("footer-style").textContent = `@page { @bottom-left { content: ${JSON.stringify(`${title} · ${only || subject}`)}; font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #6b7280; }
     @bottom-right { content: counter(page) " / " counter(pages); font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #6b7280; } }`;
-  const standard = !only && show.sum && show.los && !show.f, file = standard && PDFS && PDFS.files && PDFS.files[p.id];
+  // two ready-made PDFs per subject: the outcome cards (with summaries) and the method cards (equations and case studies)
+  const kind = only || self ? "" : show.sum && show.los && !show.f && !show.c ? "outcomes" : !show.sum && !show.los && show.f && show.c ? "methods" : "";
+  const file = kind && PDFS && PDFS.files && PDFS.files[p.id] && PDFS.files[p.id][kind];
   $("pdf").hidden = !file;
-  if (file) { $("pdf").href = "static/notecards/" + file.name; $("pdf").textContent = `Download the PDF (${plural(file.pages, "page")})`; $("pdf").dataset.id = p.id; }
+  if (file) { $("pdf").href = "static/notecards/" + file.name; $("pdf").textContent = `Download the PDF (${plural(file.pages, "page")})`; $("pdf").dataset.id = p.id + "-" + kind; $("pdf").dataset.name = file.name; }
   const u = new URLSearchParams({ p: p.id });
   if (only) u.set("m", only);
+  const kinds = [["sum", show.sum], ["los", show.los], ["eq", show.f], ["case", show.c]].filter((x) => x[1]).map((x) => x[0]).join(",");
+  if (kinds !== "sum,los") u.set("show", kinds);
+  if (self) u.set("self", "1");
   history.replaceState(null, "", location.pathname + "?" + u);
   fit();
 }
@@ -274,6 +312,13 @@ async function load() {
     const [sp, los, narr] = await Promise.all([get("static/study-path.json"), get("static/los-cards.json"), get("static/guide-narratives.json")]);
     P = sp; L = los.modules || {}; N = narr.modules || {};
     try { F = (await get("mapdata")).formulas || {}; } catch { F = {}; }
+    try {   // case studies, grouped by module and then by case (a case can have several variations)
+      for (const v of (await get("casedata")).volumes || []) for (const st of v.sets) {
+        const m = (C[st.module] = C[st.module] || new Map()), f = st.family || st.id;
+        if (!m.has(f)) m.set(f, []);
+        m.get(f).push(st);
+      }
+    } catch { C = {}; }
     try { PDFS = await get("static/notecards/index.json"); } catch { PDFS = null; }
     const phases = P.phases.filter((p) => mods(p).some(nLos) || mods(p).length);
     if (!phases.length) throw new Error("empty");
@@ -282,6 +327,8 @@ async function load() {
     $("phase").value = (viaModule || phaseOf(q.get("p"))).id;
     $("module").dataset.want = m || "";
     fillModules();
+    if (q.get("show") !== null) { const want = q.get("show").split(","); for (const [id, key] of [["o-sum", "sum"], ["o-los", "los"], ["o-for", "eq"], ["o-case", "case"]]) $(id).checked = want.includes(key); }
+    $("o-self").checked = q.get("self") === "1";
     $("controls").hidden = $("sheet").hidden = false;
     draw();
     document.documentElement.dataset.ready = "1";
@@ -291,14 +338,14 @@ async function load() {
 }
 function start() {
   $("phase").addEventListener("change", () => { fillModules(); draw(); });
-  for (const id of ["module", "o-sum", "o-los", "o-for", "size"]) $(id).addEventListener("change", draw);
+  for (const id of ["module", "o-sum", "o-los", "o-for", "o-case", "o-self", "size"]) $(id).addEventListener("change", draw);
   $("print").addEventListener("click", () => window.print());
   // where the PDFs are packed inside the app's data, the file is unpacked here and handed to the browser to save
   const got = new Set();
   $("pdf").addEventListener("click", async (e) => {
     if (!PDFS || !PDFS.packed) return;
     e.preventDefault();
-    const a = $("pdf"), id = a.dataset.id, f = PDFS.files[id], label = a.textContent;
+    const a = $("pdf"), id = a.dataset.id, f = { name: a.dataset.name }, label = a.textContent;
     a.textContent = "Preparing the PDF…";
     try {
       if (!got.has(id)) await new Promise((ok, no) => { const s = document.createElement("script"); s.src = `static/data/notecards-${id}.js`; s.onload = ok; s.onerror = no; document.head.appendChild(s); });

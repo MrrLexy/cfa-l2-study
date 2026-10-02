@@ -85,6 +85,26 @@
   .expl { margin-top: var(--sp-2); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
   .expl p { margin: 0 0 .6em; } .expl p:last-child { margin-bottom: 0; }
   .los { font-size: 13px; color: var(--muted); margin-top: var(--sp-2); }
+  .trap { margin-top: var(--sp-2); border-left: 3px solid var(--warn, #c98a1b); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
+  .trap p { margin: 0 0 .4em; } .trap p:last-child { margin: 0; }
+  .varbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: calc(-1 * var(--sp-3)) 0 var(--sp-4); }
+  .varbar .vnote { font-size: 14px; color: var(--muted); }
+  .look > summary { padding: var(--sp-3) var(--sp-4); cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
+  .look > summary::-webkit-details-marker { display: none; }
+  .look .body { padding: 0 var(--sp-4) var(--sp-3); font-size: 15px; }
+  .look ul { margin: 0; padding-left: 1.2em; } .look li { margin-bottom: 4px; }
+  .exambox { padding: var(--sp-4); display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: space-between; align-items: center; margin-bottom: var(--sp-4); }
+  .exambox p { margin: 4px 0 0; color: var(--muted); font-size: 14.5px; max-width: 60ch; }
+  .exambox .row, .xhead .row { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
+  .xhead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-3); align-items: center; margin: var(--sp-3) 0 var(--sp-4); }
+  .xhead .clock { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 18px; }
+  .xhead .clock.over { color: var(--bad); }
+  .opt.picked { border-color: var(--accent); background: var(--accent-soft); }
+  .xres { display: grid; gap: var(--sp-4); }
+  .xres .big { font-size: 34px; font-weight: 800; letter-spacing: -.02em; }
+  .xres table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .xres th, .xres td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .xres td.r, .xres th.r { text-align: right; font-variant-numeric: tabular-nums; }
   .setfoot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-2); margin-top: var(--sp-2); }
   .jump { display: none; }
 
@@ -229,6 +249,18 @@ function modulesOf(v) {
   return mods.sort((a, b) => natural(a) - natural(b) || a.localeCompare(b));
 }
 const key = (v, s) => `${v.file}/${s.id}`;
+// a case can have several variations (sets that share a family): same skills, different numbers and angle
+const famOf = (s) => s.family || s.id;
+function families(v, mod) {
+  const out = new Map();
+  for (const s of v.sets) {
+    if (mod !== undefined && (s.module || "Other") !== mod) continue;
+    if (!out.has(famOf(s))) out.set(famOf(s), []);
+    out.get(famOf(s)).push(s);
+  }
+  for (const a of out.values()) a.sort((x, y) => (x.variant || 1) - (y.variant || 1));
+  return [...out.values()];
+}
 function progress(v, s) {
   const a = answers[key(v, s)] || {}, qs = s.questions || [];
   const done = qs.filter((q) => a[q.id]).length, right = qs.filter((q) => a[q.id] && a[q.id] === q.answer).length;
@@ -270,23 +302,38 @@ function drawPicker({ v, mods, mod }) {
       <div class="progress thin good"><i style="width:${sets.length ? Math.round(100 * done / sets.length) : 0}%"></i></div></button>`;
   }).join("");
   const sets = v.sets.filter((s) => (s.module || "Other") === mod);
-  const setCards = sets.map((s, i) => {
-    const p = progress(v, s);
+  const setCards = families(v, mod).map((vs, i) => {
+    const s = vs.find((x) => !progress(v, x).finished) || vs[0], p = progress(v, s), done = vs.filter((x) => progress(v, x).finished).length;
     return `<a class="card card-link setcard" href="#set=${encodeURIComponent(v.file + "/" + s.id)}" data-set="${esc(s.id)}">
-      <span class="eyebrow">Set ${i + 1}</span><span class="t">${esc(s.title || "Item set " + (i + 1))}</span>
+      <span class="eyebrow">Case ${i + 1}${vs.length > 1 ? ` · ${vs.length} variations` : ""}</span><span class="t">${esc(vs[0].family_title || s.title || "Item set " + (i + 1))}</span>
       ${s.source ? `<span class="src">${esc(s.source)}</span>` : ""}
-      <span class="foot">${chip(p)}<span class="go">${p.finished ? "Review" : p.done ? "Resume" : "Start"} ›</span></span></a>`;
+      <span class="foot">${vs.length > 1 ? `<span class="chip ${done === vs.length ? "good" : done ? "accent" : ""}">${done} of ${vs.length} variations done</span>` : chip(p)}
+        <span class="go">${done === vs.length ? "Review" : p.done || done ? "Resume" : "Start"} ›</span></span></a>`;
   }).join("");
-  $("view").innerHTML = `<div class="picker">
+  const xsets = exam ? exam.ids.length : 0, xdone = exam ? exam.ids.filter((k) => byKey.get(k) && byKey.get(k).s.questions.every((q) => (exam.picks[k] || {})[q.id])).length : 0;
+  const nfam = volumes().reduce((n, x) => n + families(x).length, 0);
+  const examBox = `<div class="card exambox"><div><span class="eyebrow">Exam box</span><div><b>Mixed item sets under exam conditions</b></div>
+      <p>Cases drawn from every subject, three minutes a question, and no feedback until you finish. The exam itself is two sessions of 11 item sets each.</p></div>
+    <div class="row">${exam && !exam.done ? `<button type="button" class="btn primary" data-exam="resume">Resume · ${xdone} of ${xsets} sets answered</button><button type="button" class="btn" data-exam="quit">End it</button>`
+      : `${nfam >= 11 ? `<button type="button" class="btn primary" data-exam="11">Full session · 11 sets · 132 min</button>` : ""}<button type="button" class="btn ${nfam >= 11 ? "" : "primary"}" data-exam="5">Short · 5 sets · 60 min</button>`}
+      ${exam && exam.done ? `<button type="button" class="btn" data-exam="resume">Last results</button>` : ""}</div></div>`;
+  $("view").innerHTML = `<div class="picker">${examBox}
     <div class="step"><span class="eyebrow">Volume</span><div class="pills">${volPills}</div></div>
     <div class="step"><span class="eyebrow">Module</span><div class="modgrid">${modCards}</div></div>
-    <div class="step"><span class="eyebrow">${esc(mod)} · ${plural(sets.length, "item set")}</span>
+    <div class="step"><span class="eyebrow">${esc(mod)} · ${plural(families(v, mod).length, "case")} · ${plural(sets.length, "item set")}</span>
       <div class="setgrid">${setCards || `<div class="empty-state">No sets in this module yet. New sets appear here automatically.</div>`}</div></div></div>`;
 }
 function drawSet({ v, set }) {
   const a = answers[key(v, set)] || {}, p = progress(v, set);
-  const sets = v.sets.filter((s) => (s.module || "Other") === (set.module || "Other"));
-  const idx = sets.indexOf(set), prev = sets[idx - 1], next = sets[idx + 1];
+  const fams = families(v, set.module || "Other"), idx = fams.findIndex((vs) => vs.includes(set)), vs = fams[idx] || [set];
+  const pick = (f) => f && (f.find((x) => !progress(v, x).finished) || f[0]);
+  const prev = pick(fams[idx - 1]), next = pick(fams[idx + 1]), other = vs.find((x) => x !== set && !progress(v, x).finished);
+  const varBar = vs.length < 2 ? "" : `<div class="varbar"><span class="eyebrow">Variation</span><div class="pills">${vs.map((x, i) =>
+    `<button type="button" class="pill" data-goto="${esc(x.id)}" aria-pressed="${x === set}">${i + 1}${progress(v, x).finished ? " ✓" : ""}</button>`).join("")}</div>
+    ${set.variant_note ? `<span class="vnote">${esc(set.variant_note)}</span>` : ""}</div>`;
+  const lookOpen = document.querySelector(".look") ? document.querySelector(".look").open : p.finished;
+  const look = !(set.look_for || []).length ? "" : `<details class="card look" ${lookOpen ? "open" : ""}><summary><span class="eyebrow">Key details to look for</span><span class="chip tog">Show / hide</span></summary>
+    <div class="body"><ul>${set.look_for.map((x) => `<li>${md(x).replace(/^<div class="md"><p>|<\/p><\/div>$/g, "")}</li>`).join("")}</ul></div></details>`;
   const narrow = matchMedia("(max-width: 960px)").matches;
   const vigOpen = !narrow || !document.querySelector(".vig") || document.querySelector(".vig").open;
   const qs = (set.questions || []).map((q, n) => {
@@ -302,26 +349,103 @@ function drawSet({ v, set }) {
       <div class="stem">${md(q.stem)}</div>
       <div class="opts" role="group" aria-label="Answer options">${opts}</div>
       ${answered ? `<div class="verdict ${got === q.answer ? "good" : "bad"}">${got === q.answer ? "✓ Correct" : `✗ Incorrect: you chose ${esc(got)}, the answer is ${esc(q.answer)}`}</div>
-        <div class="expl">${md(q.explanation)}</div>${q.los ? `<div class="los">LOS: ${esc(q.los)}</div>` : ""}` : ""}</article>`;
+        <div class="expl">${md(q.explanation)}</div>${q.trap ? `<div class="trap">${md("**The trap.** " + q.trap + (q.avoid ? "\n\n**How to avoid it.** " + q.avoid : ""))}</div>` : ""}
+        ${q.los ? `<div class="los">LOS: ${esc(q.los)}</div>` : ""}` : ""}</article>`;
   }).join("");
   $("view").innerHTML = `<nav class="crumbs" aria-label="Breadcrumb"><button type="button" class="btn sm" data-back>‹ All sets</button>
-      <span>${esc(v.volume)} · ${esc(set.module || "")} · set ${idx + 1} of ${sets.length}</span></nav>
+      <span>${esc(v.volume)} · ${esc(set.module || "")} · case ${idx + 1} of ${fams.length}</span></nav>
     <div class="sethead"><div><h2>${esc(set.title || "Item set")}</h2>${set.source ? `<p class="src">${esc(set.source)}</p>` : ""}</div>
       <div class="score" aria-live="polite"><div><div class="eyebrow">Score</div><b>${p.right}/${p.total}</b></div>
         <div><div class="progress ${p.finished ? "good" : ""}"><i style="width:${p.total ? Math.round(100 * p.done / p.total) : 0}%"></i></div>
           <div class="muted" style="font-size:13px;margin-top:4px">${p.done} of ${p.total} answered</div></div>
         <button type="button" class="btn sm" data-reset ${p.done ? "" : "disabled"}>Reset set</button></div></div>
+    ${varBar}
     <div class="case">
       <details class="card vig" id="vig" ${vigOpen ? "open" : ""}><summary><span class="eyebrow">Vignette</span><span class="chip tog">Show / hide</span></summary>
         <div class="body">${md(set.vignette)}</div></details>
-      <div class="qs">${qs}
-        <div class="setfoot">${prev ? `<button type="button" class="btn" data-goto="${esc(prev.id)}">‹ Previous set</button>` : "<span></span>"}
-          ${next ? `<button type="button" class="btn ${p.finished ? "primary" : ""}" data-goto="${esc(next.id)}">Next set ›</button>` : `<button type="button" class="btn" data-back>All sets</button>`}</div></div>
+      <div class="qs">${look}${qs}
+        <div class="setfoot">${prev ? `<button type="button" class="btn" data-goto="${esc(prev.id)}">‹ Previous case</button>` : "<span></span>"}
+          ${p.finished && other ? `<button type="button" class="btn primary" data-goto="${esc(other.id)}">Try a variation ›</button>` : ""}
+          ${next ? `<button type="button" class="btn ${p.finished && !other ? "primary" : ""}" data-goto="${esc(next.id)}">Next case ›</button>` : `<button type="button" class="btn" data-back>All sets</button>`}</div></div>
     </div>`;
   const vig = $("vig");
   vig.querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 960px)").matches) e.preventDefault(); });
 }
+// ------------------------------------------------------------------ the exam box: mixed sets, timed, marked at the end
+const XSTORE = "site-cases-exam";
+let exam = loadJSON(XSTORE, null), byKey = new Map(), clock = null;
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function startExam(n) {
+  // one variation of each case, subjects taken in turn so the session is mixed
+  const piles = shuffle(volumes().map((v) => shuffle(families(v)).map((vs) => key(v, shuffle(vs.filter((s) => !progress(v, s).finished)).concat(shuffle(vs.slice()))[0]))));
+  const ids = [];
+  while (ids.length < n && piles.some((p) => p.length)) for (const p of piles) if (p.length && ids.length < n) ids.push(p.pop());
+  exam = { ids: shuffle(ids), start: Date.now(), mins: ids.length * 12, picks: {}, at: 0, done: false };
+  saveJSON(XSTORE, exam); go({ exam: true, set: null }, true);
+}
+function finishExam() {
+  for (const k of exam.ids) if (exam.picks[k]) answers[k] = { ...exam.picks[k] };
+  saveJSON(STORE, answers);
+  exam.done = true; exam.end = Date.now(); saveJSON(XSTORE, exam); draw(true); window.scrollTo({ top: 0 });
+}
+function tick() {
+  const el = $("clock");
+  if (!el || !exam || exam.done) { clearInterval(clock); clock = null; return; }
+  const left = Math.round(exam.mins * 60 - (Date.now() - exam.start) / 1000), a = Math.abs(left);
+  el.textContent = (left < 0 ? "Over by " : "") + `${Math.floor(a / 60)}:${String(a % 60).padStart(2, "0")}`;
+  el.classList.toggle("over", left < 0);
+}
+function drawExam() {
+  const items = exam.ids.map((k) => byKey.get(k)).filter(Boolean);
+  if (!items.length) { exam = null; saveJSON(XSTORE, null); nav.exam = false; return draw(true); }
+  if (exam.done) return drawResults(items);
+  exam.at = Math.min(exam.at, items.length - 1);
+  const { v, s } = items[exam.at], k = key(v, s), got = exam.picks[k] || {};
+  const full = (x) => x.s.questions.every((q) => (exam.picks[key(x.v, x.s)] || {})[q.id]);
+  const qs = s.questions.map((q, n) => `<article class="card q"><div class="qh"><span class="eyebrow">Question ${n + 1} of ${s.questions.length}</span>
+      <button type="button" class="btn ghost sm jump" data-jump>Vignette ↑</button></div><div class="stem">${md(q.stem)}</div>
+    <div class="opts" role="group" aria-label="Answer options">${Object.entries(q.options).map(([L, txt]) => `<button type="button" class="opt ${got[q.id] === L ? "picked" : ""}" data-xq="${esc(q.id)}" data-xopt="${esc(L)}"
+      ><span class="L">${esc(L)}</span><span class="v">${md(txt).replace(/^<div class="md">|<\/div>$/g, "")}</span></button>`).join("")}</div></article>`).join("");
+  $("view").innerHTML = `<div class="xhead"><div><span class="eyebrow">Exam box · set ${exam.at + 1} of ${items.length}</span>
+      <div class="pills" style="margin-top:6px">${items.map((x, i) => `<button type="button" class="pill" data-xat="${i}" aria-pressed="${i === exam.at}">${i + 1}${full(x) ? " ✓" : ""}</button>`).join("")}</div></div>
+    <div class="row"><span class="clock" id="clock"></span><button type="button" class="btn" data-xback>Leave (keeps your place)</button><button type="button" class="btn primary" data-xdone>Finish and mark</button></div></div>
+    <div class="case"><details class="card vig" id="vig" open><summary><span class="eyebrow">Vignette</span><span class="chip tog">Show / hide</span></summary><div class="body">${md(s.vignette)}</div></details>
+      <div class="qs">${qs}<div class="setfoot">${exam.at ? `<button type="button" class="btn" data-xat="${exam.at - 1}">‹ Previous set</button>` : "<span></span>"}
+        ${exam.at < items.length - 1 ? `<button type="button" class="btn primary" data-xat="${exam.at + 1}">Next set ›</button>` : `<button type="button" class="btn primary" data-xdone>Finish and mark</button>`}</div></div></div>`;
+  $("vig").querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 960px)").matches) e.preventDefault(); });
+  if (!clock) clock = setInterval(tick, 1000);
+  tick();
+}
+function drawResults(items) {
+  const rows = new Map(), missed = [];
+  let right = 0, total = 0;
+  for (const { v, s } of items) {
+    const got = exam.picks[key(v, s)] || {}, r = rows.get(v.volume) || [0, 0];
+    s.questions.forEach((q, n) => {
+      total++; r[1]++;
+      if (got[q.id] === q.answer) { right++; r[0]++; } else missed.push({ v, s, n, q, got: got[q.id] });
+    });
+    rows.set(v.volume, r);
+  }
+  const mins = Math.round(((exam.end || Date.now()) - exam.start) / 60000);
+  $("view").innerHTML = `<div class="xres"><div class="card" style="padding:var(--sp-4)"><span class="eyebrow">Exam box · results</span>
+      <div class="big">${right} / ${total} <span class="muted" style="font-size:18px;font-weight:600">${total ? Math.round(100 * right / total) : 0}%</span></div>
+      <div class="muted">${plural(items.length, "set")} in ${mins} min (allowed ${exam.mins}). Your answers are now saved on each set, so you can open any of them to study the worked solutions.</div>
+      <div class="row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button type="button" class="btn primary" data-exam="${items.length >= 11 ? 11 : 5}">New session</button><button type="button" class="btn" data-xback>All sets</button></div></div>
+    <div class="card" style="padding:var(--sp-4)"><table><thead><tr><th>Subject</th><th class="r">Right</th><th class="r">Questions</th></tr></thead>
+      <tbody>${[...rows].map(([name, r]) => `<tr><td>${esc(name)}</td><td class="r">${r[0]}</td><td class="r">${r[1]}</td></tr>`).join("")}</tbody></table></div>
+    <div class="card" style="padding:var(--sp-4)"><span class="eyebrow">What to go back to</span>
+      ${missed.length ? `<table><thead><tr><th>Case</th><th>Missed</th><th></th></tr></thead><tbody>${missed.map((m) => `<tr><td>${esc(m.s.title || "")}<div class="muted" style="font-size:13px">${esc(m.s.module || "")}</div></td>
+        <td>Question ${m.n + 1}${m.got ? "" : " (not answered)"}${m.q.trap ? `<div class="muted" style="font-size:14px">${md(m.q.trap).replace(/^<div class="md"><p>|<\/p><\/div>$/g, "")}</div>` : ""}</td>
+        <td><a class="btn sm" href="#set=${encodeURIComponent(m.v.file + "/" + m.s.id)}" data-xopen="${esc(m.v.file)}|${esc(m.s.id)}">Review</a></td></tr>`).join("")}</tbody></table>` : `<p>Nothing missed.</p>`}</div></div>`;
+}
+
 function draw(force) {
+  byKey = new Map(volumes().flatMap((v) => v.sets.map((s) => [key(v, s), { v, s }])));
+  if (nav.exam && exam && volumes().length) {
+    if (!force && drawnKey === "exam") return;
+    $("lede").hidden = true; drawnKey = "exam"; drawExam(); if (window.Site) Site.fill($("view")); return;
+  }
   const f = find();
   if (!f.v) {
     $("view").innerHTML = `<div class="empty-state" style="margin-top:24px">No item sets yet. They appear here as soon as they're written (this page checks every minute).</div>`;
@@ -342,6 +466,32 @@ function draw(force) {
 // ------------------------------------------------------------------ events
 $("view").addEventListener("click", (e) => {
   const t = e.target;
+  const ex = t.closest("[data-exam]");
+  if (ex) {
+    const what = ex.dataset.exam;
+    if (what === "resume") return go({ exam: true, set: null }, true);
+    if (what === "quit") { if (confirm("End this session without marking it?")) { exam = null; saveJSON(XSTORE, null); draw(true); } return; }
+    if (exam && !exam.done && !confirm("Start a new session? The one in progress is dropped.")) return;
+    return startExam(+what);
+  }
+  if (nav.exam && exam) {
+    const xo = t.closest("[data-xopt]");
+    if (xo) {
+      const k = exam.ids[exam.at];
+      exam.picks[k] = { ...(exam.picks[k] || {}), [xo.dataset.xq]: xo.dataset.xopt }; saveJSON(XSTORE, exam);
+      const y = window.scrollY; draw(true); window.scrollTo(0, y); return;
+    }
+    const xa = t.closest("[data-xat]"); if (xa) { exam.at = +xa.dataset.xat; saveJSON(XSTORE, exam); draw(true); window.scrollTo({ top: 0 }); return; }
+    if (t.closest("[data-xdone]")) {
+      const open = exam.ids.reduce((n, k) => n + (byKey.get(k) ? byKey.get(k).s.questions.filter((q) => !(exam.picks[k] || {})[q.id]).length : 0), 0);
+      if (!open || confirm(`${open} question${open === 1 ? " is" : "s are"} not answered. Finish and mark anyway?`)) finishExam();
+      return;
+    }
+    if (t.closest("[data-xback]")) return go({ exam: false, set: null }, true);
+    const xr = t.closest("[data-xopen]"); if (xr) { e.preventDefault(); const [vol, set] = xr.dataset.xopen.split("|"); return go({ exam: false, vol, set }, true); }
+    if (t.closest("[data-jump]")) { const v = $("vig"); v.open = true; v.scrollIntoView({ behavior: "smooth", block: "start" }); }
+    return;
+  }
   const vol = t.closest("[data-vol]"); if (vol) return go({ vol: vol.dataset.vol, mod: null, set: null });
   const mod = t.closest("[data-mod]"); if (mod) return go({ mod: mod.dataset.mod, set: null });
   const st = t.closest("[data-set]"); if (st) { e.preventDefault(); return go({ set: st.dataset.set }, true); }
