@@ -1,6 +1,6 @@
 # CFA Level II Study
 
-An unofficial study guide for the CFA Level II exam: the study **Path** (46 sections with 862 practice questions and a review step after each), the **LOS cards** (all 365 learning outcomes, each with an answer and note cards), the **Guide** (a walkthrough of every module, with concepts and formulas), the **Map** and the **Case studies** (exam-style item sets).
+An unofficial study guide for the CFA Level II exam: the study **Path** (46 sections with 862 practice questions and a review step after each), the **LOS cards** (all 365 learning outcomes, each with an answer, and note cards to study on screen, print or download as PDFs), the **Guide** (a walkthrough of every module, with concepts and formulas), the **Map** and the **Case studies** (exam-style item sets).
 
 **This copy is passcode-protected.** The study material in it is encrypted. Open the site, type a username and the passcode you were given, and tick "Keep this device unlocked" so you only type it once per device.
 

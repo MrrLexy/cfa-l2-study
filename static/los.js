@@ -95,7 +95,7 @@
   function home() {
     const total = allTotal(), ticked = allTicked();
     const phases = P().phases.map((p) => `<section class="p-phase"><div class="p-phase-h"><h3>${E(p.title)}</h3>
-        <span class="muted small">${p.modules.reduce((t, k) => t + nTicked(k), 0)} of ${p.modules.reduce((t, k) => t + nTotal(k), 0)} ticked</span></div>
+        <span class="muted small">${p.modules.reduce((t, k) => t + nTicked(k), 0)} of ${p.modules.reduce((t, k) => t + nTotal(k), 0)} ticked · <a href="notecards.html?p=${E(p.id)}">print or PDF</a></span></div>
       <div class="p-rows">${p.modules.map((k) => `<div class="p-row los-mrow"><span class="pn">${A().NUM_OF[k]}</span>
         <div class="pt"><b>${E(A().mod(k).title)}</b><span class="muted small">${E(k)} · ${nTotal(k) || "no"} learning outcomes</span></div>
         <div class="ps"><span class="pscore" data-los-count="${E(k)}">${nTicked(k)} of ${nTotal(k)}</span><a class="btn sm" href="${hrefL(k)}">List</a>
@@ -105,7 +105,8 @@
         the formulas that go with it, and the questions that test it. Two ways through: the <b>list</b>, where you tick what you can do, and <b>note cards</b>, where you read the
         outcome, say the answer, flip and mark it got it or again. Ticks are shared with the Path, and the questions there show which outcome they test.</p>
         <div class="p-bar"><div class="progress"><i data-los-bar="*" style="width:${A().pct(ticked, total)}%"></i></div>
-          <div class="muted small"><span data-los-count="*">${ticked} of ${total}</span> outcomes ticked</div></div></div>
+          <div class="muted small"><span data-los-count="*">${ticked} of ${total}</span> outcomes ticked</div></div>
+        <div class="p-actions"><a class="btn" href="notecards.html">Print or download the note cards</a></div></div>
       ${phases}</div>`;
   }
 
@@ -127,7 +128,8 @@
       <div class="los-top"><div class="grow"><div class="progress thin"><i data-los-bar="${E(k)}" style="width:${A().pct(nTicked(k), nTotal(k))}%"></i></div>
         <div class="muted small"><span data-los-count="${E(k)}">${nTicked(k)} of ${nTotal(k)}</span> outcomes ticked</div></div>
         <div class="p-actions"><a class="btn primary" href="${hrefL(k, { mode: "cards" })}">Note cards</a>
-          <a class="btn" href="${hrefL(k, only ? {} : { only: "open" })}">${only ? "Show all" : "Only unticked"}</a></div></div>
+          <a class="btn" href="${hrefL(k, only ? {} : { only: "open" })}">${only ? "Show all" : "Only unticked"}</a>
+          <a class="btn" href="notecards.html?m=${encodeURIComponent(k)}">Print</a></div></div>
       ${rows || `<div class="card"><p>Every outcome in this module is ticked.</p></div>`}
       <nav class="g-pager p-pager"><a href="${pv ? hrefL(pv) : "#los"}" class="prev"><span class="dir">‹ ${pv ? "Previous module" : "All modules"}</span>${pv ? E(A().mod(pv).title) : ""}</a>
         <a href="${nx ? hrefL(nx) : "#los"}" class="next"><span class="dir">${nx ? "Next module" : "All modules"} ›</span>${nx ? E(A().mod(nx).title) : ""}</a></nav></div>`;
