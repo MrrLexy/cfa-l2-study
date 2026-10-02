@@ -1,1 +1,1 @@
-window.STUDY_LOCK={"id": "0415a16d", "salt": "jBoUesCEAbcEbjR7A9wPhg==", "iter": 600000, "check": "m8Q/RFcDq4OEKp1rp7AIyWrBqtc0X+fCZwmkA89TbNFCdOWdnFNQXXdCrTQ2XmdgsVDACcZbYyrP"};
+window.STUDY_LOCK={"id": "188e1582", "salt": "pibosS22AdsrSWWVQ9wbfw==", "iter": 600000, "check": "ZnX6e8LWJjcfKtyQz3z7MCt+zpz4gI+9w5GiNVmVc9hobIEmkQLcqFhpUsH1VsFOAGOp0E93UXj2"};

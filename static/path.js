@@ -104,7 +104,7 @@
       <div class="p-hero card">
         <div class="p-hero-l">
           <h2>Your study path</h2>
-          <p class="lede">${ORDERP.length} sections in the order that builds understanding. In each one you practise first, review the topics those questions covered, then finish with a fresh set of questions before moving on.</p>
+          <p class="lede">${ORDERP.length} sections in the order that builds understanding. In each one you practice first, review the topics those questions covered, then finish with a fresh set of questions before moving on.</p>
           <div class="badges"><span class="badge ${done ? "good" : ""}"><b>${done}</b> of ${ORDERP.length} sections done</span>
             <span class="badge"><b>${hrs}</b> hours left (estimate)</span>
             ${acc.n ? `<span class="badge"><b>${pct(acc.ok, acc.n)}%</b> right over ${acc.n} answers</span>` : ""}</div>

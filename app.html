@@ -1131,7 +1131,7 @@ function accuracyText(v) {
   if (!HUB) return "";
   const key = topicKey(v), st = HUB.stats && HUB.stats.by_topic && HUB.stats.by_topic[key], bank = HUB.bank_usable && HUB.bank_usable[key];
   const pool = bank ? ` Practice draws on ${bank} ${esc(v.short)} questions: new ones first, then the ones you missed.` : "";
-  if (!Array.isArray(st) || !st[1]) return `You haven't practised ${esc(v.short)} yet.${pool}`;
+  if (!Array.isArray(st) || !st[1]) return `You haven't practiced ${esc(v.short)} yet.${pool}`;
   return `So far you've answered ${plural(st[1], "question")} in ${esc(v.short)}, ${st[0]} right (${Math.round(100 * st[0] / st[1])}%).${pool}`;
 }
 function fillHub() {
@@ -1139,7 +1139,7 @@ function fillHub() {
   document.querySelectorAll("[data-hub-chip]").forEach((el) => {
     const v = VOL_BY_ID.get(el.dataset.hubChip), st = v && HUB && HUB.stats && HUB.stats.by_topic && HUB.stats.by_topic[topicKey(v)];
     el.hidden = !(Array.isArray(st) && st[1]);
-    if (!el.hidden) { const p = Math.round(100 * st[0] / st[1]); el.className = `chip ${p >= 70 ? "good" : p >= 50 ? "warn" : "bad"}`; el.textContent = `${p}% of ${st[1]} practised`; }
+    if (!el.hidden) { const p = Math.round(100 * st[0] / st[1]); el.className = `chip ${p >= 70 ? "good" : p >= 50 ? "warn" : "bad"}`; el.textContent = `${p}% of ${st[1]} practiced`; }
   });
 }
 async function loadHub() {
@@ -1310,8 +1310,8 @@ function viewGuideModule(m) {
       </section>
 
     <section class="sec" ${sec("check", "Check yourself", 0)}><h3>Check yourself</h3>
-      <div class="card g-check"><div><h4>Practise ${esc(v.name)}</h4><p class="muted" data-hub-acc="${v.id}">${accuracyText(v)}</p></div>
-        <div class="g-actions"><a class="btn primary" href="${esc(practiceHref(v))}">Practise ${esc(v.short)} questions</a>
+      <div class="card g-check"><div><h4>Practice ${esc(v.name)}</h4><p class="muted" data-hub-acc="${v.id}">${accuracyText(v)}</p></div>
+        <div class="g-actions"><a class="btn primary" href="${esc(practiceHref(v))}">Practice ${esc(v.short)} questions</a>
           <a class="btn" href="${esc((window.Site && Site.links && Site.links.cases) || "../cases/")}">Case studies</a>
           <a class="btn ghost" href="${esc(href(m))}">See it on the map</a></div></div></section>
 
@@ -1351,7 +1351,7 @@ function viewGuideHome() {
       <a href="#glossary">Glossary A–Z</a></div>
     ${VOLUMES.map((v) => `<section class="g-vol anchor" id="gvol-${v.id}"><div class="g-volh"><span class="vn">${v.vi + 1}</span><h3>${esc(v.name)}</h3>
         <span class="vmeta">${v.keys.filter((k) => read.has(k)).length}/${v.keys.length} read</span><span class="chip" data-hub-chip="${v.id}" hidden></span>
-        <a class="vprac" href="${esc(practiceHref(v))}">Practise →</a></div>
+        <a class="vprac" href="${esc(practiceHref(v))}">Practice →</a></div>
       <ol class="g-rows">${v.keys.map((k) => { const m = MODS.get(k);
         return `<li><a class="card g-row ${k === last ? "cur" : ""}" href="${esc(ghref(m))}"><span class="vn">${m.n}</span>
           <span><span class="t">${esc(m.title || m.key)}</span>${m.summary ? `<span class="s">${fmt(m.summary)}</span>` : `<span class="s">Not mapped yet</span>`}</span>
@@ -1737,7 +1737,7 @@ async function load() {
       if ($("q").value.trim()) { hits = search($("q").value); drawResults(); }
     }
     live.className = "live";
-    live.innerHTML = "<i></i>Copy from 2026-10-01";
+    live.innerHTML = "<i></i>Copy from 2026-10-02";
   } catch {
     live.className = "live stale"; live.innerHTML = "<i></i>Couldn't load the data";
     if (!DATA) $("content").innerHTML = `<p class="offline">Can't load the Study Map data.</p>`;
