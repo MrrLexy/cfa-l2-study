@@ -233,6 +233,18 @@
   }
 
   // ---- the review between the rounds
+  // a missed question in the review: the case it belongs to, your pick, the answer and why
+  function missedCard(k, id) {
+    const x = q(id), you = (peek(k).A[id] || [])[0], st = x.set && PATH.sets[x.set];
+    return `<div class="p-missed">
+      ${st ? `<details class="pm-case"><summary>Case: ${R(st.title, true)} (show)</summary><div class="rich">${R(st.vignette)}</div></details>` : ""}
+      <div class="pm-stem">${R(x.stem, true)}</div>
+      ${you && x.options[you] ? `<div class="pm-a you"><b>You picked ${E(you)}</b>${R(x.options[you], true)}</div>` : ""}
+      <div class="pm-a ok"><b>Answer ${E(x.answer)}</b>${R(x.options[x.answer], true)}</div>
+      ${x.explanation ? `<div class="pm-why rich">${R(x.explanation)}</div>` : ""}
+    </div>`;
+  }
+
   function reviewStage(k) {
     const m = mod(k), s = roundStats(k, "A"), nar = narrOf(MODS.get(k));
     if (!cnt(peek(k).A)) return `<div class="card"><p>The review is built from Round A, so start there first.</p><a class="btn primary" href="${href(k, "A")}">Go to Round A</a></div>`;
@@ -246,7 +258,7 @@
           <label class="p-seen" onclick="event.stopPropagation()"><input type="checkbox" data-act="seen" data-key="${E(k)}" data-t="${i}" ${seen[i] ? "checked" : ""}> reviewed</label></summary>
         <div class="p-rb">
           <div class="sub">What you should be able to do</div>${losList(k, t)}
-          ${bad ? `<div class="sub">Questions you missed</div>${b.missed.map((id) => `<div class="p-missed"><div>${R(q(id).stem, true)}</div><div class="muted small">Answer ${q(id).answer}: ${R(q(id).options[q(id).answer], true)}</div></div>`).join("")}` : ""}
+          ${bad ? `<div class="sub">Questions you missed</div>${b.missed.map((id) => missedCard(k, id)).join("")}` : ""}
           ${secs.length ? `<div class="sub">Read this</div>${secs.map(([w, x]) => `<details class="p-sec"><summary>${R(x.heading || "Walkthrough", true)}</summary><div class="rich g-prose">${rich(String(x.body || ""), linkCtx(MODS.get(k)))}</div>
             <a class="small" href="${guideLink(k, w)}">Open in the Guide</a></details>`).join("")}` : `<p class="muted small"><a href="${guideLink(k)}">Open the module walkthrough in the Guide</a></p>`}
         </div></details>`;

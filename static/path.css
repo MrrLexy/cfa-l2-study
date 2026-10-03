@@ -88,15 +88,25 @@
 
 /* review */
 .p-review .card { margin-top: 12px; }
-.p-rt summary { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; cursor: pointer; list-style: none; }
-.p-rt summary::-webkit-details-marker { display: none; }
+.p-rt > summary { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; cursor: pointer; list-style: none; }
+.p-rt > summary::-webkit-details-marker { display: none; }
 .p-rt.weak { border-left: 4px solid var(--warn); }
 .p-rt.solid { border-left: 4px solid var(--good); }
 .p-seen { font-size: 13px; color: var(--muted); display: inline-flex; gap: 5px; align-items: center; white-space: nowrap; }
 .p-rb { margin-top: 12px; }
 .p-rb .sub, .p-done .sub { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 12px 0 4px; }
 .p-rb .p-los { margin-left: 18px; }
-.p-missed { padding: 8px 12px; background: var(--bad-soft); border-radius: 10px; margin-top: 6px; }
+.p-missed { padding: 10px 14px; background: var(--sunk); border: 1px solid var(--line); border-radius: 10px; margin-top: 8px; display: grid; gap: 6px; }
+.p-missed .pm-stem { font-weight: 600; }
+.p-missed .pm-a { padding: 6px 10px; border-radius: 8px; font-size: 14px; }
+.p-missed .pm-a b { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; margin-right: 6px; }
+.p-missed .pm-a.you { background: var(--bad-soft); }
+.p-missed .pm-a.you b { color: var(--bad); }
+.p-missed .pm-a.ok { background: var(--good-soft); }
+.p-missed .pm-a.ok b { color: var(--good); }
+.p-missed .pm-why { font-size: 14px; }
+.p-missed .pm-case > summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+.p-missed .pm-case .rich { margin-top: 6px; font-size: 14px; }
 .p-sec { margin-top: 8px; }
 .p-sec > summary { cursor: pointer; font-weight: 600; }
 .p-sec .rich { margin-top: 8px; }
@@ -118,8 +128,8 @@
   .p-hero { grid-template-columns: 1fr; }
   .p-row { grid-template-columns: 30px minmax(0, 1fr); }
   .p-row .ps { grid-column: 2; justify-content: flex-start; }
-  .p-rt summary { grid-template-columns: 26px minmax(0, 1fr); }
-  .p-rt summary .pchip, .p-rt summary .p-seen { grid-column: 2; justify-self: start; }
+  .p-rt > summary { grid-template-columns: 26px minmax(0, 1fr); }
+  .p-rt > summary .pchip, .p-rt > summary .p-seen { grid-column: 2; justify-self: start; }
   .path .p-title { font-size: 24px; }
 }
 
