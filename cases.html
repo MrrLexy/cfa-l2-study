@@ -87,6 +87,9 @@
   .los { font-size: 13px; color: var(--muted); margin-top: var(--sp-2); }
   .trap { margin-top: var(--sp-2); border-left: 3px solid var(--warn, #c98a1b); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
   .trap p { margin: 0 0 .4em; } .trap p:last-child { margin: 0; }
+  .walk { margin-top: var(--sp-3); border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); }
+  .walk ol { margin: 6px 0 0; padding-left: 22px; } .walk li { margin: 0 0 6px; } .walk li:last-child { margin: 0; }
+  .walk .md p { margin: 0; }
   .varbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: calc(-1 * var(--sp-3)) 0 var(--sp-4); }
   .varbar .vnote { font-size: 14px; color: var(--muted); }
   .look > summary { padding: var(--sp-3) var(--sp-4); cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
@@ -331,9 +334,12 @@ function drawSet({ v, set }) {
   const varBar = vs.length < 2 ? "" : `<div class="varbar"><span class="eyebrow">Variation</span><div class="pills">${vs.map((x, i) =>
     `<button type="button" class="pill" data-goto="${esc(x.id)}" aria-pressed="${x === set}">${i + 1}${progress(v, x).finished ? " ✓" : ""}</button>`).join("")}</div>
     ${set.variant_note ? `<span class="vnote">${esc(set.variant_note)}</span>` : ""}</div>`;
-  const lookOpen = document.querySelector(".look") ? document.querySelector(".look").open : p.finished;
+  const lookOpen = document.querySelector(".look:not(.how)") ? document.querySelector(".look:not(.how)").open : p.finished;
   const look = !(set.look_for || []).length ? "" : `<details class="card look" ${lookOpen ? "open" : ""}><summary><span class="eyebrow">Key details to look for</span><span class="chip tog">Show / hide</span></summary>
     <div class="body"><ul>${set.look_for.map((x) => `<li>${md(x).replace(/^<div class="md"><p>|<\/p><\/div>$/g, "")}</li>`).join("")}</ul></div></details>`;
+  const howOpen = document.querySelector(".how") ? document.querySelector(".how").open : false;
+  const how = !(set.approach || []).length ? "" : `<details class="card look how" ${howOpen ? "open" : ""}><summary><span class="eyebrow">How to work this case</span><span class="chip tog">Show / hide</span></summary>
+    <div class="body"><ol>${set.approach.map((x) => `<li>${md(x).replace(/^<div class="md"><p>|<\/p><\/div>$/g, "")}</li>`).join("")}</ol></div></details>`;
   const narrow = matchMedia("(max-width: 960px)").matches;
   const vigOpen = !narrow || !document.querySelector(".vig") || document.querySelector(".vig").open;
   const qs = (set.questions || []).map((q, n) => {
@@ -349,6 +355,7 @@ function drawSet({ v, set }) {
       <div class="stem">${md(q.stem)}</div>
       <div class="opts" role="group" aria-label="Answer options">${opts}</div>
       ${answered ? `<div class="verdict ${got === q.answer ? "good" : "bad"}">${got === q.answer ? "✓ Correct" : `✗ Incorrect: you chose ${esc(got)}, the answer is ${esc(q.answer)}`}</div>
+        ${(q.steps || []).length ? `<div class="walk"><span class="eyebrow">Walkthrough</span><ol>${q.steps.map((x) => `<li>${md(x)}</li>`).join("")}</ol></div>` : ""}
         <div class="expl">${md(q.explanation)}</div>${q.trap ? `<div class="trap">${md("**The trap.** " + q.trap + (q.avoid ? "\n\n**How to avoid it.** " + q.avoid : ""))}</div>` : ""}
         ${q.los ? `<div class="los">LOS: ${esc(q.los)}</div>` : ""}` : ""}</article>`;
   }).join("");
@@ -363,7 +370,7 @@ function drawSet({ v, set }) {
     <div class="case">
       <details class="card vig" id="vig" ${vigOpen ? "open" : ""}><summary><span class="eyebrow">Vignette</span><span class="chip tog">Show / hide</span></summary>
         <div class="body">${md(set.vignette)}</div></details>
-      <div class="qs">${look}${qs}
+      <div class="qs">${look}${how}${qs}
         <div class="setfoot">${prev ? `<button type="button" class="btn" data-goto="${esc(prev.id)}">‹ Previous case</button>` : "<span></span>"}
           ${p.finished && other ? `<button type="button" class="btn primary" data-goto="${esc(other.id)}">Try a variation ›</button>` : ""}
           ${next ? `<button type="button" class="btn ${p.finished && !other ? "primary" : ""}" data-goto="${esc(next.id)}">Next case ›</button>` : `<button type="button" class="btn" data-back>All sets</button>`}</div></div>
