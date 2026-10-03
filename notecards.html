@@ -241,7 +241,7 @@ function caseCards(k) {
   const fams = C[k] ? [...C[k].values()] : [];
   return fams.map((vs, i) => {
     vs.sort((a, b) => (a.variant || 1) - (b.variant || 1));
-    const st = vs[0], topic = (q) => { const m = String(q.explanation || "").match(/\(([^()]+)\)\s*$/); return m ? m[1].replace(/^[^,]*,\s*/, "").replace(/\.$/, "") : ""; };
+    const st = vs[0], topic = (q) => { const m = String(q.explanation || "").match(/\n\(((?:[^()\n]|\([^()\n]*\))+)\)\s*$/); return m ? m[1].replace(/^[^,]*,\s*/, "").replace(/\.$/, "") : ""; };
     const tests = st.questions.map((q) => topic(q) || q.los || "").filter(Boolean), traps = [...new Set(st.questions.map((q) => q.trap).filter(Boolean))];
     return `<article class="nc case"><div class="nc-top"><span>Case study ${i + 1} of ${fams.length}</span><span>${esc(k)}</span></div><h4>${esc(st.family_title || st.title)}</h4>
       ${tests.length ? `<h5>The questions test</h5><ol>${tests.map((x) => `<li>${one(cap(x))}</li>`).join("")}</ol>` : ""}
