@@ -99,7 +99,7 @@
     const hrs = Math.round(minutesLeft() / 6) / 10;
     const los = ORDERP.reduce((t, k) => t + mod(k).los.length, 0), topics = ORDERP.reduce((t, k) => t + mod(k).topics.length, 0);
     const qs = cnt(PATH.questions);
-    return `<div class="path">
+    return `<div class="path p-home">
       <div class="crumbs">Path</div>
       <div class="p-hero card">
         <div class="p-hero-l">

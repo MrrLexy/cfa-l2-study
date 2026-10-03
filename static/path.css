@@ -1,5 +1,11 @@
 
-.path { max-width: 860px; margin: 0 auto; padding-bottom: 60px; }
+.path { max-width: 1000px; margin: 0 auto; padding-bottom: 60px; }
+.path.p-home { max-width: 1320px; }
+.path.los { max-width: 1160px; }
+@media (min-width: 1400px) {  /* wide screens: the list of sections and the plan's topics go two across */
+  .p-home .p-rows { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .p-topics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .path .small { font-size: 13px; }
 .path h2 { margin: 0 0 6px; font-size: 26px; letter-spacing: -.01em; }
 .path h3 { margin: 0; font-size: 19px; }

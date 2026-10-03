@@ -20,7 +20,7 @@
 <script defer src="static/katex/contrib/auto-render.min.js"></script>
 <style>
   /* colours come from static/site.css; only the diagram's edge colour and the pop-up shadow are page-specific */
-  :root { --page-max: 1280px; --edge: #b9b5ab; --header-bg: var(--bar-bg); --stick: 64px;
+  :root { --page-max: 1720px; --edge: #b9b5ab; --header-bg: var(--bar-bg); --stick: 64px;
           --pop-shadow: 0 14px 36px rgba(29, 29, 27, .18), 0 2px 6px rgba(29, 29, 27, .08); }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --edge: #57544e; --pop-shadow: 0 14px 40px rgba(0, 0, 0, .6); } }
   :root[data-theme="dark"] { --edge: #57544e; --pop-shadow: 0 14px 40px rgba(0, 0, 0, .6); }
@@ -33,7 +33,7 @@
   /* top bar */
   .top { position: sticky; top: 0; z-index: 20; background: var(--header-bg); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
          border-bottom: 1px solid var(--line); }
-  .top-in { max-width: 1280px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+  .top-in { max-width: var(--page-max); margin: 0 auto; padding: 10px clamp(16px, 2.2vw, 40px); display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
   .top h1 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); margin: 0; white-space: nowrap; }
   .top h1 a { color: inherit; text-decoration: none; }
   .navbtn { display: none; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px;
@@ -67,7 +67,7 @@
   .top-prog { height: 3px; }
   .top-prog i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .4s; }
   /* layout */
-  .layout { max-width: 1280px; margin: 0 auto; padding: 18px 16px 56px; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 22px; align-items: start; }
+  .layout { max-width: var(--page-max); margin: 0 auto; padding: 18px clamp(16px, 2.2vw, 40px) 56px; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 22px; align-items: start; }
   nav#nav { position: sticky; top: calc(var(--stick) + 8px); max-height: calc(100vh - var(--stick) - 16px); overflow-y: auto; font-size: 14px; padding-right: 4px; }
   nav .home { display: block; padding: 6px 10px; border-radius: 8px; text-decoration: none; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
   nav details { border-radius: 10px; margin-bottom: 2px; }
@@ -194,7 +194,37 @@
   details.more ul { font-size: 14px; margin: 6px 0; padding-left: 20px; }
   /* diagram */
   .dgwrap { position: relative; margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
-  .dgscroll { overflow: auto; max-height: 76vh; -webkit-overflow-scrolling: touch; border-radius: 14px; cursor: grab; }
+  .dgbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .dgscroll { overflow: auto; -webkit-overflow-scrolling: touch; border-radius: 14px; cursor: grab; }
+  .dgscroll.fit { cursor: default; } .dgscroll.fit .dg { margin: 0 auto; height: auto; }
+  /* the master map: the ten topics and how much each builds on the others */
+  .mlwrap { display: grid; grid-template-columns: minmax(0, 780px) minmax(300px, 1fr); gap: 16px 28px; align-items: start; margin-top: 12px; }
+  @media (max-width: 1100px) { .mlwrap { grid-template-columns: minmax(0, 1fr); } }
+  .mlmap { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 6px; }
+  .ml { display: block; width: 100%; height: auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .ml .e { fill: none; stroke: var(--edge); stroke-linecap: round; opacity: .55; transition: opacity .2s, stroke .2s; }
+  .ml .e.weak { opacity: .13; }
+  .ml .e.on { stroke: var(--accent); opacity: .95; }
+  .ml .n { cursor: pointer; transition: opacity .2s; }
+  .ml .n circle { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+  .ml .n .a { fill: var(--accent); font-size: 15px; font-weight: 800; text-anchor: middle; dominant-baseline: central; letter-spacing: .02em; }
+  .ml .n .l { fill: var(--ink); font-size: 14.5px; font-weight: 600; }
+  .ml .n .c { fill: var(--muted); font-size: 12px; }
+  .ml .n:hover circle, .ml .n:focus circle, .ml .n.sel circle { fill: var(--accent); }
+  .ml .n:hover .a, .ml .n:focus .a, .ml .n.sel .a { fill: var(--card); }
+  .ml .n:focus { outline: none; }
+  .ml.focus .e:not(.on) { opacity: .08; } .ml.focus .n:not(.on) { opacity: .35; }
+  @media (max-width: 620px) { .ml .n .l { font-size: 25px; } .ml .n .a { font-size: 22px; } .ml .n .c { display: none; } .mlmap { padding: 2px; } }
+  .mlpanel { min-width: 0; }
+  .mlpanel h4 { margin: 0 0 4px; font-size: 18px; }
+  .mlpanel .sub { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+  .mlrow { display: grid; grid-template-columns: minmax(0, 215px) minmax(0, 1fr) 30px; gap: 10px; align-items: center; font-size: 14px; padding: 3px 0; }
+  .mlrow .bar { height: 8px; border-radius: 99px; background: var(--track); overflow: hidden; } .mlrow .bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+  .mlrow .k { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mlrow button { all: unset; cursor: pointer; color: var(--ink); font-weight: 600; } .mlrow button:hover { color: var(--accent); }
+  .mllinks { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
+  .mllinks a { text-decoration: none; } .mllinks .k { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mlpanel .how { font-size: 14px; color: var(--muted); margin: 4px 0 0; }
   .dgscroll.drag { cursor: grabbing; }
   .dg { display: block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   .dg .edge { fill: none; stroke: var(--edge); stroke-width: 1.4; transition: opacity .2s; }
@@ -369,6 +399,17 @@
   .pop.sheet { position: fixed; left: 8px; right: 8px; top: auto !important; bottom: max(8px, env(safe-area-inset-bottom)); width: auto !important; max-width: none;
                max-height: 62vh; border-radius: 16px; animation: sheet-up .18s ease-out; }
   @keyframes sheet-up { from { opacity: 0; transform: translateY(16px); } }
+  /* wide screens: a wider frame, reading text kept to a comfortable line, collections of cards in columns */
+  @media (min-width: 1500px) { .layout { grid-template-columns: 300px minmax(0, 1fr); gap: 34px; } }
+  @media (min-width: 1400px) {
+    .lede { max-width: 900px; }
+    .fcards { grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); align-items: start; }
+    .modlist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .guide { max-width: 1280px; }
+    .guide > h2, .guide .g-prose, .guide .g-think, .guide .g-ex, .guide .g-fit, .guide .g-check, .guide .g-pending { max-width: 920px; }
+    .guide .g-concepts, .guide .miss, .guide .stack { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+    .guide details.more .miss { grid-template-columns: minmax(0, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -921,11 +962,99 @@ function badgeRow(t, withMods) {
     <span class="badge ${t.mis ? "warn" : ""}"><b>${t.mis}</b> misconceptions</span></div>`;
 }
 
+// ------------------------------------------------------------------ the master map: how the ten topics build on each other
+let ML = null;
+function topicLinks() {
+  const dir = new Map(), mods = new Map(), notes = new Map(), pair = new Map();  // dir, mods: "prerequisite>the one that builds on it"
+  const bump = (map, k, by = 1) => map.set(k, (map.get(k) || 0) + by);
+  for (const m of MODS.values()) {
+    m.concepts.forEach((c) => c.refs.forEach((r) => {
+      if ((r.kind !== "concept" && r.kind !== "module") || r.mod.vol === m.vol) return;
+      bump(dir, r.mod.vol.id + ">" + m.vol.id); bump(mods, r.mod.key + ">" + m.key);
+    }));
+    m.connects.forEach((c) => { const k = modKeyOf(c.module), t = k && MODS.get(k.key);
+      if (!t || t.vol === m.vol) return;
+      const key = [m.vol.id, t.vol.id].sort().join("|");
+      if (!notes.has(key)) notes.set(key, []);
+      notes.get(key).push({ a: m, b: t, how: c.how });
+    });
+  }
+  for (const [k, n] of dir) bump(pair, k.split(">").sort().join("|"), n);  // a pair's weight: concept links both ways, plus the module-level connections
+  for (const [key, list] of notes) bump(pair, key, list.length);
+  return { dir, mods, notes, pair };
+}
+function masterMap() {
+  const L = ML = topicLinks();
+  const W = 860, H = 620, cx = 430, cy = 310, R = 222;
+  const maxC = Math.max(1, ...VOLUMES.map((v) => totals(v.keys).c)), maxW = Math.max(1, ...L.pair.values());
+  const P = new Map(VOLUMES.map((v, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / VOLUMES.length;
+    return [v.id, { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), a, r: 26 + 16 * Math.sqrt(totals(v.keys).c / maxC) }]; }));
+  const f = (x) => x.toFixed(1);
+  const strong = new Set([...L.pair].sort((a, b) => b[1] - a[1]).slice(0, 15).map((x) => x[0]));  // the rest stay faint until a topic is picked
+  const edges = [...L.pair].sort((a, b) => a[1] - b[1]).map(([key, w]) => { const [a, b] = key.split("|"), A = P.get(a), B = P.get(b);
+    const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, qx = mx + (cx - mx) * 0.45, qy = my + (cy - my) * 0.45;
+    return `<path class="e${strong.has(key) ? "" : " weak"}" data-a="${a}" data-b="${b}" stroke-width="${f(1 + 9 * w / maxW)}" d="M${f(A.x)},${f(A.y)} Q${f(qx)},${f(qy)} ${f(B.x)},${f(B.y)}"><title>${esc(VOL_BY_ID.get(a).short)} and ${esc(VOL_BY_ID.get(b).short)}: ${plural(w, "link")}</title></path>`; }).join("");
+  const nodes = VOLUMES.map((v) => { const p = P.get(v.id), t = totals(v.keys), cos = Math.cos(p.a), sin = Math.sin(p.a);
+    const lx = p.x + cos * (p.r + 10), ly = p.y + sin * (p.r + 10) + (sin < -0.5 ? -18 : sin > 0.5 ? 14 : 0);
+    const anchor = Math.abs(cos) < 0.3 ? "middle" : cos > 0 ? "start" : "end";
+    const words = v.short.length > 12 && v.short.includes(" ") ? [v.short.slice(0, v.short.lastIndexOf(" ")), v.short.slice(v.short.lastIndexOf(" ") + 1)] : [v.short];  // long names on two lines
+    return `<g class="n" data-v="${v.id}" tabindex="0" role="button" aria-label="${esc(v.name)}"><circle cx="${f(p.x)}" cy="${f(p.y)}" r="${f(p.r)}"/>
+      <text class="a" x="${f(p.x)}" y="${f(p.y)}">${esc(v.abbr)}</text>
+      <text class="l" x="${f(lx)}" y="${f(ly)}" text-anchor="${anchor}">${words.map((w, i) => `<tspan x="${f(lx)}" dy="${i ? "1.15em" : 0}">${esc(w)}</tspan>`).join("")}</text>
+      <text class="c" x="${f(lx)}" y="${f(ly + 15 + (words.length - 1) * 17)}" text-anchor="${anchor}">${plural(t.mods, "module")} · ${plural(t.c, "concept")}</text></g>`; }).join("");
+  return `<div class="mlwrap"><div class="mlmap"><svg class="ml" id="ml" viewBox="0 0 ${W} ${H}" role="img" aria-label="How the ten topics connect">${edges}${nodes}</svg></div>
+      <div class="mlpanel card" id="mlpanel">${masterPanel(null)}</div></div>
+    <p class="muted" style="font-size:13px;margin-top:8px">A line joins two topics when concepts in one build on concepts in the other; the thicker the line, the more links. The fifteen strongest are drawn in full and the rest faintly. Hover over a topic, or tap it, to see what it builds on and what it leads into.</p>`;
+}
+function masterPanel(id) {
+  const L = ML, vol = (x) => VOL_BY_ID.get(x);
+  const row = (label, n, max) => `<div class="mlrow"><span>${label}</span><span class="bar"><i style="width:${Math.max(4, Math.round(100 * n / max))}%"></i></span><span class="k">${n}</span></div>`;
+  const pick = (x) => `<button type="button" data-v="${x}">${esc(vol(x).short)}</button>`;
+  if (!id) {
+    const top = [...L.pair].sort((a, b) => b[1] - a[1]).slice(0, 8), max = top.length ? top[0][1] : 1;
+    return `<h4>How the topics fit together</h4><p class="how">The ten topics are one body of knowledge: ${plural(L.pair.size, "pair")} of them share concepts. Pick a topic on the map, or one below.</p>
+      <div class="sub">Strongest links</div>${top.map(([key, w]) => { const [a, b] = key.split("|"); return row(`${pick(a)} · ${pick(b)}`, w, max); }).join("")}`;
+  }
+  const v = vol(id);
+  const on = [...L.dir].filter(([k]) => k.endsWith(">" + id)).map(([k, n]) => [k.split(">")[0], n]).sort((a, b) => b[1] - a[1]);
+  const into = [...L.dir].filter(([k]) => k.startsWith(id + ">")).map(([k, n]) => [k.split(">")[1], n]).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...on.map((x) => x[1]), ...into.map((x) => x[1]));
+  const ml = [...L.mods].filter(([k]) => k.split(">").some((x) => MODS.get(x).vol.id === id)).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const notes = [...L.notes].filter(([k]) => k.split("|").includes(id)).flatMap(([, list]) => list).slice(0, 3);
+  return `<h4>${esc(v.name)}</h4><a class="btn sm" href="${vhref(v)}">Open this topic's diagram →</a>
+    <div class="sub">Builds on</div>${on.length ? on.map(([o, n]) => row(pick(o), n, max)).join("") : `<p class="how">Nothing from another topic at this level.</p>`}
+    <div class="sub">Leads into</div>${into.length ? into.map(([o, n]) => row(pick(o), n, max)).join("") : `<p class="how">No other topic builds on it directly.</p>`}
+    ${ml.length ? `<div class="sub">Module to module</div><ul class="mllinks">${ml.map(([k, n]) => { const [a, b] = k.split(">").map((x) => MODS.get(x));
+      return `<li><a href="${href(a)}" title="${esc(a.title)}">${esc(a.vol.abbr)} ${a.n}</a> → <a href="${href(b)}" title="${esc(b.title)}">${esc(b.vol.abbr)} ${b.n}: ${esc(clip(b.title || b.key, 36))}</a> <span class="k">${plural(n, "link")}</span></li>`; }).join("")}</ul>` : ""}
+    ${notes.length ? `<div class="sub">For example</div>${notes.map((x) => `<p class="how"><b>${esc(x.a.vol.abbr)} ${x.a.n} and ${esc(x.b.vol.abbr)} ${x.b.n}.</b> ${fmt(x.how)}</p>`).join("")}` : ""}`;
+}
+function wireMaster() {
+  const svg = $("ml"), panel = $("mlpanel");
+  if (!svg) return;
+  let pinned = null;
+  const show = (id) => {
+    svg.classList.toggle("focus", !!id);
+    const on = new Set(id ? [id] : []);
+    svg.querySelectorAll(".e").forEach((e) => { const hit = !!id && (e.dataset.a === id || e.dataset.b === id); e.classList.toggle("on", hit); if (hit) { on.add(e.dataset.a); on.add(e.dataset.b); } });
+    svg.querySelectorAll(".n").forEach((n) => { n.classList.toggle("on", on.has(n.dataset.v)); n.classList.toggle("sel", n.dataset.v === id); });
+    panel.innerHTML = masterPanel(id);
+    typeset(panel);
+  };
+  const pick = (id) => { pinned = pinned === id ? null : id; show(pinned); };
+  svg.addEventListener("mouseover", (e) => { const n = e.target.closest(".n"); if (n && !pinned) show(n.dataset.v); });
+  svg.addEventListener("mouseleave", () => { if (!pinned) show(null); });
+  svg.addEventListener("click", (e) => { const n = e.target.closest(".n"); pick(n ? n.dataset.v : null); });
+  svg.addEventListener("keydown", (e) => { const n = e.target.closest(".n"); if (n && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(n.dataset.v); } });
+  panel.addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) { pinned = b.dataset.v; show(pinned); } });
+}
+
 function viewHome() {
   const all = totals([...MODS.keys()]);
   return `<h2>The whole Level II curriculum</h2>
     <p class="lede">Ten volumes in book order. Open a volume to see how its ideas build on each other, or a module for its concepts, formulas, worked questions and answers, and the common mistakes. For a readable walkthrough, switch to the <a href="#guide">Guide</a>.</p>
     ${badgeRow(all, true)}
+    <h3>The master map</h3>
+    ${all.c ? masterMap() : `<div class="empty-note">The master map appears once the concept map has been built.</div>`}
     <h3>Volumes</h3>
     <div class="grid">${VOLUMES.map((v) => { const t = totals(v.keys);
       return `<a class="card vcard" href="${vhref(v)}"><div class="vh"><span class="vn">${v.vi + 1}</span>${esc(v.name)}</div>
@@ -1025,17 +1154,31 @@ function viewModule(m) {
 }
 
 // ------------------------------------------------------------------ the dependency diagram
-const DG = { W: 218, GAP: 72, NH: 30, VG: 9, HH: 50, PAD: 18, TOP: 16 };
+const DG = { W: 218, GAP: 72, NH: 30, VG: 9, HH: 50, PAD: 18, TOP: 16, ROWGAP: 34, LEFT: 34, per: 0, fit: false };
+// How many module columns fit side by side in the content area: the modules wrap into rows, so the page never scrolls sideways.
+function dgFit(n) {
+  const avail = Math.max(300, ($("content") ? $("content").clientWidth : 900) - 2);
+  return { avail, per: Math.max(1, Math.min(n, Math.floor((avail - DG.PAD * 2 - DG.LEFT + DG.GAP) / (DG.W + DG.GAP)))) };
+}
 function diagram(v) {
   const mods = v.keys.map((k) => MODS.get(k));
-  const maxN = Math.max(1, ...mods.map((m) => m.concepts.length));
-  const W = DG.PAD * 2 + mods.length * DG.W + (mods.length - 1) * DG.GAP;
-  const H = DG.PAD + DG.HH + DG.TOP + maxN * (DG.NH + DG.VG) + DG.PAD;
-  const colX = (ci) => DG.PAD + ci * (DG.W + DG.GAP);
-  const nodeY = (i) => DG.PAD + DG.HH + DG.TOP + i * (DG.NH + DG.VG);
-  const col = new Map(mods.map((m, ci) => [m.key, ci]));
-  const box = (id) => { const [k, i] = id.split("::"); const ci = col.get(k);
-    return i === "h" ? { x: colX(ci), y: DG.PAD, h: DG.HH, ci } : { x: colX(ci), y: nodeY(+i), h: DG.NH, ci }; };
+  const { avail, per } = dgFit(mods.length);
+  DG.per = per;
+  // use the width there is: wider boxes first (longer names fit), then wider gaps for the arrows
+  const CW = Math.max(DG.W, Math.min(300, Math.floor((avail - DG.PAD * 2 - DG.LEFT - (per - 1) * DG.GAP) / per)));
+  const GAP = per > 1 ? Math.max(DG.GAP, Math.min(110, Math.floor((avail - DG.PAD * 2 - DG.LEFT - per * CW) / (per - 1)))) : 0;
+  const rows = [];
+  for (let i = 0; i < mods.length; i += per) rows.push(mods.slice(i, i + per));
+  const rowH = rows.map((r) => DG.HH + DG.TOP + Math.max(1, ...r.map((m) => m.concepts.length)) * (DG.NH + DG.VG));
+  const rowY = rowH.map((_, r) => DG.PAD + rowH.slice(0, r).reduce((a, b) => a + b + DG.ROWGAP, 0));
+  const W = DG.PAD * 2 + DG.LEFT + per * CW + (per - 1) * GAP;
+  const H = rowY[rows.length - 1] + rowH[rows.length - 1] + DG.PAD;
+  const at = new Map(mods.map((m, i) => [m.key, { r: Math.floor(i / per), c: i % per }]));
+  const colX = (c) => DG.PAD + DG.LEFT + c * (CW + GAP);
+  const nodeY = (r, i) => rowY[r] + DG.HH + DG.TOP + i * (DG.NH + DG.VG);
+  const col = at;
+  const box = (id) => { const [k, i] = id.split("::"); const p = at.get(k);
+    return i === "h" ? { x: colX(p.c), y: rowY[p.r], h: DG.HH } : { x: colX(p.c), y: nodeY(p.r, +i), h: DG.NH }; };
   // edges inside the volume: prerequisite -> concept that builds on it
   const edges = new Map();
   mods.forEach((m) => m.concepts.forEach((c, i) => c.refs.forEach((r) => {
@@ -1046,37 +1189,39 @@ function diagram(v) {
   const path = (a, b) => {
     const A = box(a), B = box(b);
     let sx, sy = A.y + A.h / 2, ex, ey = B.y + B.h / 2, c1, c2;
-    if (A.ci < B.ci) { sx = A.x + DG.W; ex = B.x - 2; const d = Math.max(28, (ex - sx) / 2); c1 = sx + d; c2 = ex - d; }
-    else if (A.ci > B.ci) { sx = A.x; ex = B.x + DG.W + 2; const d = Math.max(28, (sx - ex) / 2); c1 = sx - d; c2 = ex + d; }
-    else { sx = A.x; ex = B.x - 2; const d = 22 + Math.min(40, Math.abs(ey - sy) * 0.12); c1 = sx - d; c2 = ex - d; }
+    if (A.x < B.x) { sx = A.x + CW; ex = B.x - 2; const d = Math.max(28, (ex - sx) / 2); c1 = sx + d; c2 = ex - d; }
+    else if (A.x > B.x) { sx = A.x; ex = B.x + CW + 2; const d = Math.max(28, (sx - ex) / 2); c1 = sx - d; c2 = ex + d; }
+    else { sx = A.x; ex = B.x - 2; const d = 22 + Math.min(40, Math.abs(ey - sy) * 0.12); c1 = sx - d; c2 = ex - d; }  // same column (also one row above another): loop round the left
     return `M${sx},${sy} C${c1},${sy} ${c2},${ey} ${ex},${ey}`;
   };
   const edgeSvg = [...edges.values()].map(([a, b]) => `<path class="edge" data-a="${esc(a)}" data-b="${esc(b)}" d="${path(a, b)}" marker-end="url(#arr)"/>`).join("");
   const lanes = [];
-  const cols = mods.map((m, ci) => {
-    const x = colX(ci), title = m.title || m.key;
+  const cols = mods.map((m) => {
+    const p = at.get(m.key), x = colX(p.c), top = rowY[p.r], title = m.title || m.key;
     const head = `<g class="mh" data-mod="${esc(m.key)}"><title>${esc(m.key)}: ${esc(title)}</title>
-      <rect x="${x}" y="${DG.PAD}" width="${DG.W}" height="${DG.HH}" rx="10"/>
-      <text class="k" x="${x + 12}" y="${DG.PAD + 19}">MODULE ${m.n}</text><text class="t" x="${x + 12}" y="${DG.PAD + 38}">${esc(clip(title, 31))}</text></g>`;
-    const lane = `<rect class="lane" x="${x - 8}" y="${DG.PAD + DG.HH + 6}" width="${DG.W + 16}" height="${H - DG.PAD * 2 - DG.HH - 6}" rx="12"/>`;
+      <rect x="${x}" y="${top}" width="${CW}" height="${DG.HH}" rx="10"/>
+      <text class="k" x="${x + 12}" y="${top + 19}">MODULE ${m.n}</text><text class="t" x="${x + 12}" y="${top + 38}">${esc(clip(title, Math.floor((CW - 22) / 6.4)))}</text></g>`;
+    const lane = `<rect class="lane" x="${x - 8}" y="${top + DG.HH + 6}" width="${CW + 16}" height="${rowH[p.r] - DG.HH - 6}" rx="12"/>`;
     const nodes = m.concepts.length ? m.concepts.map((c, i) => {
-      const y = nodeY(i), id = `${m.key}::${i}`;
+      const y = nodeY(p.r, i), id = `${m.key}::${i}`;
       const outs = [...new Map(c.refs.filter((r) => (r.kind === "concept" || r.kind === "module") && r.mod.vol !== v)
         .map((r) => [r.mod.key, `${r.mod.vol.abbr} ${r.mod.n}`])).values()];
       const tagText = outs.length ? outs[0] + (outs.length > 1 ? ` +${outs.length - 1}` : "") : "";
       const tagW = tagText ? tagText.length * 6.2 + 10 : 0;
-      const maxChars = Math.floor((DG.W - 20 - (tagW ? tagW + 6 : 0)) / 6.3);
+      const maxChars = Math.floor((CW - 20 - (tagW ? tagW + 6 : 0)) / 6.3);
       const tip = `${c.name} — ${c.what || ""}${c.refs.length ? `\nBuilds on: ${c.refs.map((r) => r.raw).join("; ")}` : ""}`;
       return `<g class="node" data-id="${esc(id)}" tabindex="0" role="link" aria-label="${esc(c.name)}"><title>${esc(tip)}</title>
-        <rect x="${x}" y="${y}" width="${DG.W}" height="${DG.NH}" rx="8"/>
+        <rect x="${x}" y="${y}" width="${CW}" height="${DG.NH}" rx="8"/>
         <text x="${x + 10}" y="${y + 19.5}">${esc(clip(c.name, maxChars))}</text>
-        ${tagText ? `<g class="tag"><title>Builds on another volume: ${esc(outs.join(", "))}</title><rect x="${x + DG.W - tagW - 6}" y="${y + 7}" width="${tagW}" height="16" rx="4"/>
-          <text x="${x + DG.W - tagW - 1}" y="${y + 19}">${esc(tagText)}</text></g>` : ""}</g>`;
-    }).join("") : `<text class="none" x="${x + 12}" y="${nodeY(0) + 19}">Not mapped yet</text>`;
+        ${tagText ? `<g class="tag"><title>Builds on another volume: ${esc(outs.join(", "))}</title><rect x="${x + CW - tagW - 6}" y="${y + 7}" width="${tagW}" height="16" rx="4"/>
+          <text x="${x + CW - tagW - 1}" y="${y + 19}">${esc(tagText)}</text></g>` : ""}</g>`;
+    }).join("") : `<text class="none" x="${x + 12}" y="${nodeY(p.r, 0) + 19}">Not mapped yet</text>`;
     lanes.push(lane);
     return head + nodes;
   }).join("");
-  return `<div class="dgwrap"><div class="dgscroll" id="dgscroll"><svg class="dg" id="dg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(v.name)} concept dependency diagram">
+  return `<div class="dgbar"><span>${plural(mods.length, "module")} in ${plural(rows.length, "row")} · ${plural(edges.size, "link")} inside this volume</span>
+      <button type="button" class="btn sm" id="dgfit" aria-pressed="false">Fit the whole diagram on screen</button></div>
+    <div class="dgwrap"><div class="dgscroll" id="dgscroll"><svg class="dg" id="dg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(v.name)} concept dependency diagram">
       <defs><marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arr" d="M0,0 L8,4 L0,8 z"/></marker>
         <marker id="arr-on" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arr-on" d="M0,0 L8,4 L0,8 z"/></marker></defs>
       ${lanes.join("")}<g id="dgedges">${edgeSvg}</g>${cols}</svg></div></div>
@@ -1112,6 +1257,19 @@ function wireDiagram() {
   svg.addEventListener("click", (e) => { if (!PAN.moved) open(e.target.closest(".node, .mh")); });
   svg.addEventListener("keydown", (e) => { if (e.key === "Enter") open(e.target.closest(".node")); });
   sc.addEventListener("mousedown", (e) => { PAN.drag = { sc, x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop }; PAN.moved = false; });
+  // "Fit on screen": shrink the whole diagram to the height of the window, to see its shape at a glance
+  const fitBtn = $("dgfit"), W = +svg.getAttribute("width"), H = +svg.getAttribute("height");
+  const applyFit = () => {
+    const room = Math.max(260, window.innerHeight - ($("top").offsetHeight || 64) - 96);
+    const on = DG.fit && H > room;
+    sc.classList.toggle("fit", on);
+    svg.style.width = on ? Math.round(room * W / H) + "px" : "";
+    svg.style.height = on ? "auto" : "";
+    if (fitBtn) { fitBtn.setAttribute("aria-pressed", String(DG.fit)); fitBtn.textContent = DG.fit ? "Show at full size" : "Fit the whole diagram on screen"; fitBtn.hidden = !DG.fit && H <= room; }
+    if (on) sc.scrollIntoView({ block: "nearest" });
+  };
+  if (fitBtn) fitBtn.onclick = () => { DG.fit = !DG.fit; applyFit(); };
+  applyFit();
 }
 // Drag to pan the diagram with a mouse (touch scrolls natively). One set of window listeners for the page's lifetime.
 const PAN = { drag: null, moved: false };
@@ -1537,7 +1695,8 @@ document.addEventListener("keydown", (e) => {
 });
 popEl.addEventListener("focusout", (e) => { if (POP.open && e.relatedTarget && !popEl.contains(e.relatedTarget) && e.relatedTarget !== POP.trigger) closePop(false); });
 let resizeT = 0;
-window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => { setStick(); if (POP.open) placePop(); }, 120); });
+window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => { setStick(); if (POP.open) placePop();
+  if (CURVOL && !CURMOD && $("dg") && dgFit(CURVOL.keys.length).per !== DG.per) render(true); }, 120); });
 
 // ------------------------------------------------------------------ guide behaviour: lazy maths, answers on demand, step-by-step example, reading progress
 let SECOBS = null, READOBS = null, PENDING = false;
@@ -1652,7 +1811,7 @@ function render(keepScroll) {
   drawNav();
   drawSwitch(view, key);
   LAST = { view, key };
-  if (MODE === "map") { wireDiagram(); typeset($("content")); } else if (MODE === "path") PathView.wire(); else wireGuide(view, m);
+  if (MODE === "map") { wireDiagram(); wireMaster(); typeset($("content")); } else if (MODE === "path") PathView.wire(); else wireGuide(view, m);
   setStick();
   if (keepScroll && sameView) {
     $("content").querySelectorAll("details").forEach((d) => { if (openIds.includes(d.id || d.querySelector("summary").textContent.slice(0, 20))) d.open = true; });
@@ -1737,7 +1896,7 @@ async function load() {
       if ($("q").value.trim()) { hits = search($("q").value); drawResults(); }
     }
     live.className = "live";
-    live.innerHTML = "<i></i>Copy from 2026-10-02";
+    live.innerHTML = "<i></i>Copy from 2026-10-03";
   } catch {
     live.className = "live stale"; live.innerHTML = "<i></i>Couldn't load the data";
     if (!DATA) $("content").innerHTML = `<p class="offline">Can't load the Study Map data.</p>`;
