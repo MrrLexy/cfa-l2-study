@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CFA Level II Study · Case studies</title>
+<link rel="stylesheet" href="static/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-180.png">
+<link rel="icon" href="static/icon-192.png">
+<meta name="theme-color" content="#16181f">
+<script src="static/lock-config.js"></script>
+<script src="static/lock.js"></script>
+<script src="static/profile.js"></script>
+<script>StudyProfile.guard();</script>
+<link rel="stylesheet" href="static/katex/katex.min.css">
+<script defer src="static/katex/katex.min.js"></script>
+<script src="static/ties.js"></script>
+<script src="static/walk.js"></script>
+<script src="static/learn.js"></script>
+<style>
+  :root { --page-max: 1320px; }
+  main { max-width: var(--page-max); margin: 0 auto; padding: var(--sp-6) var(--gutter) var(--sp-8); }
+  .status { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--muted); white-space: nowrap; }
+  .offline { display: none; margin-top: var(--sp-3); color: var(--bad); font-size: var(--fs-sm); }
+  h1.site-title { font-size: var(--fs-xl); letter-spacing: -.02em; }
+  .lede { color: var(--muted); font-size: var(--fs-md); margin: 6px 0 0; max-width: 760px; }
+
+  /* picker */
+  .picker { margin-top: var(--sp-6); }
+  .step { margin-top: var(--sp-5); }
+  .step:first-child { margin-top: 0; }
+  .step > .eyebrow { display: block; margin-bottom: var(--sp-2); }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); border-radius: var(--r-pill); padding: 6px 14px;
+          font-size: var(--fs-sm); font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; }
+  .pill:hover { border-color: var(--accent); }
+  .pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .pill .n { font-size: var(--fs-xs); font-weight: 600; opacity: .75; font-variant-numeric: tabular-nums; }
+  .modgrid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .modcard { padding: var(--sp-4); text-align: left; font: inherit; color: inherit; width: 100%; display: flex; flex-direction: column; gap: 6px; }
+  .modcard[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .modcard .name { font-weight: 700; }
+  .modcard .facts { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .setgrid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .setcard { padding: var(--sp-4); display: flex; flex-direction: column; gap: 8px; }
+  .setcard .t { font-weight: 700; font-size: 16.5px; line-height: 1.3; }
+  .setcard .src { font-size: 13px; color: var(--muted); }
+  .setcard .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; padding-top: 4px; }
+  .setcard .go { font-size: 13px; font-weight: 600; color: var(--accent); }
+
+  /* one set */
+  .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: var(--sp-5); font-size: var(--fs-sm); color: var(--muted); }
+  .sethead { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-3); flex-wrap: wrap; margin: var(--sp-3) 0 var(--sp-5); }
+  .sethead h2 { font-size: var(--fs-xl); line-height: 1.2; letter-spacing: -.015em; margin: 0 0 4px; }
+  .sethead .src { color: var(--muted); font-size: 15px; margin: 0; }
+  .score { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+  .score b { font-size: 26px; font-variant-numeric: tabular-nums; line-height: 1; }
+  .score .progress { width: 120px; }
+  .case { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+  .vig { position: sticky; top: var(--sp-3); max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 0; }
+  .vig > summary { list-style: none; cursor: default; padding: var(--sp-4) var(--sp-5) 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .vig > summary::-webkit-details-marker { display: none; }
+  .vig > summary .tog { display: none; }
+  .vig .body { padding: var(--sp-2) var(--sp-5) var(--sp-5); }
+  .qs { display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0; }
+  .q { padding: var(--sp-5); scroll-margin-top: 16px; }
+  .q .qh { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: var(--sp-2); }
+  .q .stem { font-size: 16.5px; font-weight: 600; line-height: 1.45; }
+  .q .stem p { margin: 0 0 .5em; } .q .stem p:last-child { margin-bottom: 0; }
+  .opts { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-4); }
+  .opt { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; text-align: left; cursor: pointer;
+         border: 1.5px solid var(--line-strong); background: var(--card); color: var(--ink); border-radius: var(--r); padding: 10px 12px; font-size: 15.5px; line-height: 1.45; min-height: 48px; }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .opt:disabled { cursor: default; }
+  .opt .L { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;
+            background: var(--sunk); color: var(--muted); }
+  .opt .v { padding-top: 2px; overflow-wrap: anywhere; }
+  .opt .v p { margin: 0; }
+  .opt.right { border-color: var(--good); background: var(--good-soft); }
+  .opt.right .L { background: var(--good); color: var(--card); }
+  .opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+  .opt.wrong .L { background: var(--bad); color: var(--card); }
+  .opt.dim { opacity: .62; }
+  .verdict { margin-top: var(--sp-4); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .verdict.good { color: var(--good); } .verdict.bad { color: var(--bad); }
+  .expl { margin-top: var(--sp-2); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
+  .expl p { margin: 0 0 .6em; } .expl p:last-child { margin-bottom: 0; }
+  .los { font-size: 13px; color: var(--muted); margin-top: var(--sp-2); }
+  .trap { margin-top: var(--sp-2); border-left: 3px solid var(--warn, #c98a1b); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
+  .trap p { margin: 0 0 .4em; } .trap p:last-child { margin: 0; }
+  .walk { margin-top: var(--sp-3); border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); }
+  .walk ol { margin: 6px 0 0; padding-left: 22px; } .walk li { margin: 0 0 6px; } .walk li:last-child { margin: 0; }
+  .walk .md p { margin: 0; }
+  .varbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); margin: calc(-1 * var(--sp-3)) 0 var(--sp-4); }
+  .varbar .vnote { font-size: 14px; color: var(--muted); }
+  .look > summary { padding: var(--sp-3) var(--sp-4); cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
+  .look > summary::-webkit-details-marker { display: none; }
+  .look .body { padding: 0 var(--sp-4) var(--sp-3); font-size: 15px; }
+  .look ul { margin: 0; padding-left: 1.2em; } .look li { margin-bottom: 4px; }
+  .exambox { padding: var(--sp-4); display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: space-between; align-items: center; margin-bottom: var(--sp-4); }
+  .exambox p { margin: 4px 0 0; color: var(--muted); font-size: 14.5px; max-width: 60ch; }
+  .exambox .row, .xhead .row { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
+  .xhead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-3); align-items: center; margin: var(--sp-3) 0 var(--sp-4); }
+  .xhead .clock { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 18px; }
+  .xhead .clock.over { color: var(--bad); }
+  .opt.picked { border-color: var(--accent); background: var(--accent-soft); }
+  .xres { display: grid; gap: var(--sp-4); }
+  .xres .big { font-size: 34px; font-weight: 800; letter-spacing: -.02em; }
+  .xres table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .xres th, .xres td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .xres td.r, .xres th.r { text-align: right; font-variant-numeric: tabular-nums; }
+  .setfoot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-2); margin-top: var(--sp-2); }
+  /* an item set laid out as on the exam: the vignette on the left, one question at a time on the right, each side scrolling on its own */
+  .grow { flex: 1 1 auto; }
+  .case.one { align-items: stretch; }
+  .lpane { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+  .lpane > * { flex: none; }
+  .case.one .vig { position: static; max-height: none; overflow: visible; }
+  .lpane .look { padding: 0; }
+  .lpane .look > summary { padding: 8px var(--sp-4); }
+  .case .rpane { display: flex; flex-direction: column; min-width: 0; padding: 0; }
+  .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--line); }
+  .qtab { min-width: 46px; height: 34px; padding: 0 10px; border-radius: var(--r-sm); border: 1.5px solid var(--line-strong); background: var(--card); color: var(--ink);
+          font: inherit; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; cursor: pointer; }
+  .qtab:hover { border-color: var(--accent); }
+  .qtab.ok { border-color: var(--good); color: var(--good); } .qtab.bad { border-color: var(--bad); color: var(--bad); } .qtab.done { background: var(--sunk); }
+  .qtab.flag { box-shadow: inset 0 -3px 0 var(--warn, #c98a1b); }
+  .qtab[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+  .rscroll { flex: 1 1 auto; min-height: 0; padding: var(--sp-4) var(--sp-5); }
+  .rpane .q { padding: 0; }
+  .qbar { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--line); font-size: 14px; }
+  .optrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: stretch; }
+  .optrow > .opt:only-child { grid-column: 1 / -1; }
+  .strike { width: 38px; border: 1.5px solid var(--line); border-radius: var(--r); background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+  .strike:hover, .strike[aria-pressed="true"] { border-color: var(--line-strong); color: var(--ink); }
+  .opt.struck { opacity: .55; } .opt.struck .v { text-decoration: line-through; }
+  @media (min-width: 961px) {
+    body.inset main { padding-top: var(--sp-3); padding-bottom: var(--sp-3); }
+    body.inset .site-head, body.inset h1.site-title, body.inset .sethead .src { display: none; }
+    body.inset .crumbs { margin-top: 0; }
+    body.inset .sethead { margin: var(--sp-2) 0 var(--sp-3); align-items: center; } body.inset .sethead h2 { font-size: var(--fs-lg); margin: 0; }
+    body.inset .varbar { margin: calc(-1 * var(--sp-2)) 0 var(--sp-3); }
+    body.inset .xhead { margin: 0 0 var(--sp-3); }
+    .case.one { height: var(--ws-h, 72vh); grid-template-rows: minmax(0, 1fr); }
+    .case.one .lpane, .case.one .rpane { min-height: 0; }
+    .case.one .lpane, .case.one .rscroll { overflow-y: auto; overscroll-behavior: contain; }
+  }
+  .jump { display: none; }
+  .qbtns { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .tienote { margin: 8px 0 0; font-size: 13.5px; color: var(--muted); }
+  .vig .tienote { margin: 0 0 10px; }
+
+  /* markdown content */
+  .md { font-size: 15.5px; line-height: 1.6; overflow-wrap: break-word; }
+  .md p { margin: 0 0 .8em; }
+  .md h3, .md h4, .md h5 { font-size: 15.5px; margin: 1.2em 0 .5em; }
+  .md ul, .md ol { margin: 0 0 .8em; padding-left: 1.4em; }
+  .md li { margin: .2em 0; }
+  .md .table-wrap { margin: .4em 0 1em; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); }
+  .md .table { font-size: 14.5px; }
+  .md .table th { white-space: normal; background: var(--sunk); text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink); }
+  .md .table td { padding: 8px 10px; }
+  .md .table td.r, .md .table th.r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .md .table td.c, .md .table th.c { text-align: center; }
+  .md .cap { font-weight: 700; font-size: 14px; margin: 1.1em 0 .3em; }
+  .md code { font-family: var(--mono); font-size: .9em; background: var(--sunk); padding: 1px 5px; border-radius: 5px; }
+  .katex { font-size: 1.06em; }
+  .katex-display { margin: .5em 0; padding: .4em .6em; background: var(--sunk); border-radius: var(--r-sm); overflow-x: auto; overflow-y: hidden; }
+  .expl .katex-display { background: var(--card); }
+
+  @media (max-width: 960px) {
+    .case { grid-template-columns: minmax(0, 1fr); }
+    .vig { position: static; max-height: none; overflow: visible; }
+    .vig > summary { cursor: pointer; padding-bottom: var(--sp-4); }
+    .vig[open] > summary { padding-bottom: 0; }
+    .vig > summary .tog { display: inline-flex; }
+    .jump { display: inline-flex; }
+  }
+  @media (max-width: 520px) {
+    main { padding-top: var(--sp-5); }
+    .q, .card { padding: var(--sp-4); }
+    .vig { padding: 0; }
+    .vig > summary { padding: var(--sp-3) var(--sp-4); }
+    .vig[open] > summary { padding-bottom: 0; }
+    .vig .body { padding: var(--sp-2) var(--sp-4) var(--sp-4); }
+    .score .progress { width: 80px; }
+    .md .table { font-size: 13.5px; }
+    .md .table td, .md .table th { padding: 7px 7px; }
+  }
+</style>
+</head>
+<body>
+<header class="site-bar"><div class="site-bar-in">
+  <a class="site-brand" href="app.html#path">CFA Level II Study</a>
+  <div class="site-nav" role="navigation" aria-label="Pages"><a href="app.html" aria-label="Study Map"><span class="nav-long">Study Map</span><span class="nav-short">Map</span></a><a href="lesson.html">Lessons</a><a href="cases.html" aria-label="Case studies"><span class="nav-long">Case studies</span><span class="nav-short">Cases</span></a><a href="rapid.html" aria-label="Rapid fire"><span class="nav-long">Rapid fire</span><span class="nav-short">Rapid</span></a><a href="notecards.html" aria-label="Note cards"><span class="nav-long">Note cards</span><span class="nav-short">Cards</span></a></div>
+  <div id="userbar"></div>
+</div></header>
+<main>
+  <div class="site-head"><span class="eyebrow">Item-set practice</span>
+    <span class="status"><i class="dot" id="livedot"></i><span id="updated">Loading…</span></span></div>
+  <h1 class="site-title" id="title">Case studies</h1>
+  <p class="lede" id="lede">Exam-style item sets: a vignette and four questions. Your answers stay on this device.</p>
+  <div class="offline" id="offline">The case studies couldn't be loaded.</div>
+  <div id="view"></div>
+</main>
+<script src="static/data/study-path.js"></script>
+<script src="static/data/los-cards.js"></script>
+<script src="static/data/guide-narratives.js"></script>
+<script src="static/data/glossary.js"></script>
+<script src="static/data/mapdata.js"></script>
+<script src="static/data/casedata.js"></script>
+<script src="static/standalone.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many || one + "s"}`;
+
+// ------------------------------------------------------------------ saved answers (this device only)
+const STORE = "site-cases-v1", NAV = "site-cases-nav";
+function loadJSON(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v && typeof v === "object" ? v : d; } catch { return d; } }
+function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+let answers = loadJSON(STORE, {});   // "file/setId" -> { questionId: "A" }
+let nav = loadJSON(NAV, {});         // { vol, mod, set }
+
+// ------------------------------------------------------------------ trace the numbers (static/ties.js)
+// The same value gets the same colour in the vignette, the question and the worked solution, so the reader sees where each
+// number comes from and where it goes. Filled marks are values the case gives; outlined ones were worked out on the way.
+const TIEPREF = "site-ties";
+let tiesOn = (() => { try { return localStorage.getItem(TIEPREF) !== "off"; } catch { return true; } })();
+let TIE = null, TIE_GIVEN = false;   // what md() marks while it renders, and whether only the values the case gives count
+let tieQ = null;                     // the question whose values the vignette shows
+const hinted = new Set();            // questions not answered yet whose "which numbers?" hint was asked for
+const tieCache = new WeakMap();
+const walking = (id) => !!(window.Walk && Walk.active(id));   // the guided walkthrough (static/walk.js) shows the number marks even when they are off
+if (window.Ties) Ties.style();
+function tiesFor(set, q) {
+  if (!window.Ties) return null;
+  if (!tieCache.has(q)) tieCache.set(q, Ties.build({ source: [set.vignette, q.stem], solution: [...(q.steps || []), q.explanation, q.trap, q.avoid], options: Object.values(q.options || {}) }));
+  return tieCache.get(q);
+}
+function mdT(src, t, givenOnly) { TIE = t && t.groups.length ? t : null; TIE_GIVEN = !!givenOnly; try { return md(src); } finally { TIE = null; } }
+function vigHTML(set, a) {
+  const n = (set.questions || []).findIndex((q) => q.id === tieQ && (a[q.id] || hinted.has(q.id)));
+  const t = n >= 0 && (tiesOn || walking(set.questions[n].id)) ? tiesFor(set, set.questions[n]) : null;
+  return (t && t.given ? `<p class="tienote">Highlighted: the values question ${n + 1} uses.</p>` : "") + mdT(set.vignette, t && t.given ? t : null, true);
+}
+const tieKey = (live) => `<div class="tiekey"><button type="button" class="btn ghost sm" data-ties aria-pressed="${live}">Trace the numbers: ${live ? "on" : "off"}</button>${live
+  ? `<span><mark class="tie tg h0">12</mark> given in the case</span><span><mark class="tie td h2">12</mark> worked out on the way</span><span>Click a number to follow it.</span>` : ""}</div>`;
+function showVig(set) {   // the vignette alone, when the question it follows changes
+  const body = document.querySelector("#vig .body");
+  document.querySelectorAll(".tie-focus").forEach((el) => Ties.focus([el], null));
+  if (body) body.innerHTML = vigHTML(set, answers[key(find().v, set)] || {});
+  if (window.Walk) Walk.refresh();
+}
+
+if (window.Walk) Walk.provide((id) => {
+  const f = find(), Q = (f.set && f.set.questions) || [], n = Q.findIndex((x) => x.id === id);
+  if (n < 0 || nav.exam) return null;
+  const got = (answers[key(f.v, f.set)] || {})[id];
+  return { q: Q[n], module: f.set.module, t: tiesFor(f.set, Q[n]), n: n + 1, got, root: () => $("q-" + id), vig: () => $("vig"), pane: () => $("lpane"), scroller: () => $("rscroll"), render: md,
+    redraw: () => { tieQ = id; const y = window.scrollY; draw(true); window.scrollTo(0, y); } };
+});
+
+// ------------------------------------------------------------------ Markdown (paragraphs, lists, headings, tables) + KaTeX
+function math(tex, display) {
+  if (!window.katex) return esc(display ? `\\[${tex}\\]` : `\\(${tex}\\)`);
+  try { return katex.renderToString(tex, { displayMode: display, throwOnError: false, ...(window.Ties ? Ties.katexOptions : {}) }); } catch { return esc(tex); }
+}
+function inline(s, slots) { return TIE ? Ties.html(inline0(TIE.text(s, TIE_GIVEN), slots)) : inline0(s, slots); }
+function inline0(s, slots) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<em>$2</em>")
+    .replace(/(^|[^\w])_([^_\s][^_]*?)_(?!\w)/g, "$1<em>$2</em>")
+    .replace(/\u0001(\d+)\u0002/g, (_, i) => slots[+i]);
+}
+const NUMERIC = /^[\s(−\-+$€£]*[\d.,]+\s*(%|bp|bps|x|×|years?|yrs?|m|mn|bn|million|billion)?\)?\s*$|^[−\-–]+$|^n\/?a$/i;
+function table(rows, slots) {
+  const split = (l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
+  const head = split(rows[0]), sep = rows[1] && /^\s*\|?[\s:\-|]+\|?\s*$/.test(rows[1]) ? split(rows[1]) : null;
+  const align = head.map((_, i) => { const a = sep && sep[i] || ""; return /^:-+:$/.test(a) ? "c" : /-+:$/.test(a) ? "r" : /^:-/.test(a) ? "" : null; });
+  const body = rows.slice(sep ? 2 : 1).map(split);
+  const cls = (i, txt) => { const a = align[i]; const k = a !== null && a !== undefined ? a : i > 0 && NUMERIC.test(txt.replace(/\u0001\d+\u0002/g, "1")) ? "r" : ""; return k ? ` class="${k}"` : ""; };
+  return `<div class="table-wrap"><table class="table"><thead><tr>${head.map((h, i) => `<th${align[i] ? ` class="${align[i]}"` : i > 0 && body.every((r) => !(r[i] || "").trim() || NUMERIC.test((r[i] || "").replace(/\u0001\d+\u0002/g, "1"))) ? ' class="r"' : ""}>${inline(h, slots)}</th>`).join("")}</tr></thead>
+    <tbody>${body.map((r) => `<tr>${head.map((_, i) => `<td${cls(i, r[i] || "")}>${inline(r[i] || "", slots)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function md(src) {
+  const slots = [];
+  const text = String(src ?? "").replace(/\r\n?/g, "\n").replace(/\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$/g, (m, d, i, dd) => {
+    const tx = d ?? dd ?? i; slots.push(math(TIE ? TIE.tex(tx, TIE_GIVEN) : tx, i === undefined)); return `\u0001${slots.length - 1}\u0002`;
+  });
+  const lines = text.split("\n"), out = [];
+  let para = [];
+  const flush = () => { if (para.length) out.push(`<p>${inline(para.join(" "), slots)}</p>`); para = []; };
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (!l.trim()) { flush(); continue; }
+    if (/^\s*\|/.test(l)) {
+      flush(); const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(lines[i++]);
+      i--; out.push(table(rows, slots)); continue;
+    }
+    const h = l.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { flush(); const lv = Math.min(5, h[1].length + 2); out.push(`<h${lv}>${inline(h[2], slots)}</h${lv}>`); continue; }
+    if (/^\s*([-*+]|\d+[.)])\s+/.test(l)) {
+      flush(); const ordered = /^\s*\d/.test(l), items = [];
+      while (i < lines.length && /^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) {
+        let item = lines[i++].replace(/^\s*([-*+]|\d+[.)])\s+/, "");
+        while (i < lines.length && lines[i].trim() && /^\s{2,}\S/.test(lines[i]) && !/^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) item += " " + lines[i++].trim();
+        items.push(`<li>${inline(item, slots)}</li>`);
+      }
+      i--; out.push(ordered ? `<ol>${items.join("")}</ol>` : `<ul>${items.join("")}</ul>`); continue;
+    }
+    // a lone bold line directly above a table reads as the exhibit caption
+    if (/^\s*\*\*[^*]+\*\*\s*$/.test(l) && lines[i + 1] && /^\s*\|/.test(lines[i + 1])) { flush(); out.push(`<div class="cap">${inline(l.trim().slice(2, -2), slots)}</div>`); continue; }
+    if (/^\s*\u0001\d+\u0002\s*$/.test(l) && /katex-display|\\\[/.test(slots[+l.match(/\d+/)[0]])) { flush(); out.push(inline(l.trim(), slots)); continue; }
+    para.push(l.trim());
+  }
+  flush();
+  return `<div class="md">${out.join("")}</div>`;
+}
+
+// ------------------------------------------------------------------ data
+let D = null, sig = "";
+const natural = (s) => { const m = String(s).match(/(\d+)\s*$/); return m ? +m[1] : 9999; };
+function volumes() { return (D && D.volumes) || []; }
+function modulesOf(v) {
+  const mods = [];
+  for (const s of v.sets) { const m = String(s.module || "Other"); if (!mods.includes(m)) mods.push(m); }
+  return mods.sort((a, b) => natural(a) - natural(b) || a.localeCompare(b));
+}
+const key = (v, s) => `${v.file}/${s.id}`;
+// a case can have several variations (sets that share a family): same skills, different numbers and angle
+const famOf = (s) => s.family || s.id;
+function families(v, mod) {
+  const out = new Map();
+  for (const s of v.sets) {
+    if (mod !== undefined && (s.module || "Other") !== mod) continue;
+    if (!out.has(famOf(s))) out.set(famOf(s), []);
+    out.get(famOf(s)).push(s);
+  }
+  for (const a of out.values()) a.sort((x, y) => (x.variant || 1) - (y.variant || 1));
+  return [...out.values()];
+}
+function progress(v, s) {
+  const a = answers[key(v, s)] || {}, qs = s.questions || [];
+  const done = qs.filter((q) => a[q.id]).length, right = qs.filter((q) => a[q.id] && a[q.id] === q.answer).length;
+  return { done, right, total: qs.length, finished: qs.length > 0 && done === qs.length };
+}
+function find() {
+  const v = volumes().find((x) => x.file === nav.vol) || volumes()[0];
+  if (!v) return {};
+  const mods = modulesOf(v);
+  const mod = mods.includes(nav.mod) ? nav.mod : mods[0];
+  const set = nav.set ? v.sets.find((s) => String(s.id) === String(nav.set)) : null;
+  return { v, mods, mod, set };
+}
+function go(patch, scroll) {
+  nav = { ...nav, ...patch }; saveJSON(NAV, nav);
+  const h = nav.set ? `#set=${encodeURIComponent(nav.vol + "/" + nav.set)}` : "";
+  history.replaceState(null, "", location.pathname + location.search + h);
+  draw(true);
+  if (scroll) window.scrollTo({ top: 0 });
+}
+
+// ------------------------------------------------------------------ drawing
+let drawnKey = "";
+function chip(p) {
+  if (p.finished) return `<span class="chip ${p.right === p.total ? "good" : p.right >= p.total / 2 ? "accent" : "warn"}">Done · ${p.right}/${p.total}</span>`;
+  if (p.done) return `<span class="chip accent">${p.done} of ${p.total} answered</span>`;
+  return `<span class="chip">Not started</span>`;
+}
+function drawPicker({ v, mods, mod }) {
+  inset(false);
+  if (window.Walk) Walk.sync(null);
+  const vols = volumes();
+  const volPills = vols.map((x) => `<button type="button" class="pill" data-vol="${esc(x.file)}" aria-pressed="${x === v}">${esc(x.volume)}<span class="n">${x.sets.length}</span></button>`).join("");
+  const modCards = mods.map((m) => {
+    const sets = v.sets.filter((s) => (s.module || "Other") === m);
+    const done = sets.filter((s) => progress(v, s).finished).length;
+    const title = (sets.find((s) => s.module_title) || {}).module_title || "";
+    return `<button type="button" class="card card-link modcard" data-mod="${esc(m)}" aria-pressed="${m === mod}">
+      <span class="name">${esc(m)}</span>${title ? `<span class="facts">${esc(title)}</span>` : ""}
+      <span class="facts">${plural(sets.length, "set")} · ${done} done</span>
+      <div class="progress thin good"><i style="width:${sets.length ? Math.round(100 * done / sets.length) : 0}%"></i></div></button>`;
+  }).join("");
+  const sets = v.sets.filter((s) => (s.module || "Other") === mod);
+  const setCards = families(v, mod).map((vs, i) => {
+    const s = vs.find((x) => !progress(v, x).finished) || vs[0], p = progress(v, s), done = vs.filter((x) => progress(v, x).finished).length;
+    return `<a class="card card-link setcard" href="#set=${encodeURIComponent(v.file + "/" + s.id)}" data-set="${esc(s.id)}">
+      <span class="eyebrow">Case ${i + 1}${vs.length > 1 ? ` · ${vs.length} variations` : ""}</span><span class="t">${esc(vs[0].family_title || s.title || "Item set " + (i + 1))}</span>
+      ${s.source ? `<span class="src">${esc(s.source)}</span>` : ""}
+      <span class="foot">${vs.length > 1 ? `<span class="chip ${done === vs.length ? "good" : done ? "accent" : ""}">${done} of ${vs.length} variations done</span>` : chip(p)}
+        <span class="go">${done === vs.length ? "Review" : p.done || done ? "Resume" : "Start"} ›</span></span></a>`;
+  }).join("");
+  const xsets = exam ? exam.ids.length : 0, xdone = exam ? exam.ids.filter((k) => byKey.get(k) && byKey.get(k).s.questions.every((q) => (exam.picks[k] || {})[q.id])).length : 0;
+  const nfam = volumes().reduce((n, x) => n + families(x).length, 0);
+  const examBox = `<div class="card exambox"><div><span class="eyebrow">Exam box</span><div><b>Mixed item sets under exam conditions</b></div>
+      <p>Cases drawn from every subject, three minutes a question, and no feedback until you finish. The exam itself is two sessions of 11 item sets each.</p></div>
+    <div class="row">${exam && !exam.done ? `<button type="button" class="btn primary" data-exam="resume">Resume · ${xdone} of ${xsets} sets answered</button><button type="button" class="btn" data-exam="quit">End it</button>`
+      : `${nfam >= 11 ? `<button type="button" class="btn primary" data-exam="11">Full session · 11 sets · 132 min</button>` : ""}<button type="button" class="btn ${nfam >= 11 ? "" : "primary"}" data-exam="5">Short · 5 sets · 60 min</button>`}
+      ${exam && exam.done ? `<button type="button" class="btn" data-exam="resume">Last results</button>` : ""}</div></div>`;
+  $("view").innerHTML = `<div class="picker">${examBox}
+    <div class="step"><span class="eyebrow">Volume</span><div class="pills">${volPills}</div></div>
+    <div class="step"><span class="eyebrow">Module</span><div class="modgrid">${modCards}</div></div>
+    <div class="step"><span class="eyebrow">${esc(mod)} · ${plural(families(v, mod).length, "case")} · ${plural(sets.length, "item set")}</span>
+      <div class="setgrid">${setCards || `<div class="empty-state">No sets in this module yet. New sets appear here automatically.</div>`}</div></div></div>`;
+}
+// ------------------------------------------------------------------ one question at a time, as on the exam
+let qAt = 0, qSet = null, xDrawn = null;   // the question on screen and the set it belongs to (practice); the set last drawn in the exam box
+const flags = new Set();                   // questions flagged for review (this visit only)
+const struck = new Map();                  // question id -> the answers crossed out (this visit only)
+const strikes = (id) => struck.get(id) || new Set();
+const inset = (on) => document.body.classList.toggle("inset", on);
+// the two panes fill what is left of the window, so the page itself does not scroll
+function fitWs() {
+  const ws = $("ws");
+  if (!ws) return;
+  if (matchMedia("(max-width: 960px)").matches) return void ws.style.removeProperty("--ws-h");
+  ws.style.setProperty("--ws-h", Math.max(440, window.innerHeight - (ws.getBoundingClientRect().top + window.scrollY) - 14) + "px");
+}
+const paneTop = () => { const r = $("rscroll"); if (r) r.scrollTop = 0; if (matchMedia("(max-width: 960px)").matches) { const w = document.querySelector(".rpane"); if (w) w.scrollIntoView({ block: "start" }); } };
+// the numbered tabs over the question: state(q) is "ok", "bad", "done" or ""
+function qTabs(Q, at, state, attr) {
+  const cur = Q[at] ? Q[at].id : "";
+  return `<div class="qnav" role="tablist" aria-label="Questions">${Q.map((q, i) => { const st = state(q), fl = flags.has(q.id); return `<button type="button" role="tab" class="qtab ${st}${fl ? " flag" : ""}" ${attr}="${i}"
+      aria-selected="${i === at}" title="Question ${i + 1}${fl ? ", flagged for review" : ""}">${i + 1}${st === "ok" ? " ✓" : st === "bad" ? " ✗" : st === "done" ? " •" : ""}${fl ? " ⚑" : ""}</button>`; }).join("")}
+    <span class="grow"></span><button type="button" class="btn ghost sm" data-flag="${esc(cur)}" aria-pressed="${flags.has(cur)}">⚑ ${flags.has(cur) ? "Flagged" : "Flag for review"}</button></div>`;
+}
+// the answer buttons, each with a control to cross it out while the question is open
+function optRows(q, cls, attrs, canStrike, render) {
+  const x = strikes(q.id);
+  return `<div class="opts" role="group" aria-label="Answer options">${Object.entries(q.options || {}).map(([L, txt]) => `<div class="optrow"><button type="button" class="opt ${cls(L)}${canStrike && x.has(L) ? " struck" : ""}" ${attrs(L)}
+      ><span class="L">${esc(L)}</span><span class="v">${render(txt).replace(/^<div class="md">|<\/div>$/g, "")}</span></button>${canStrike ? `<button type="button" class="strike" data-strike="${esc(q.id)}|${esc(L)}" aria-pressed="${x.has(L)}"
+      title="Cross this answer out (or right-click it)" aria-label="Cross out answer ${esc(L)}">⊘</button>` : ""}</div>`).join("")}</div>`;
+}
+function stepExam(d) {
+  const items = exam.ids.map((k) => byKey.get(k)).filter(Boolean), n = (i) => items[i].s.questions.length;
+  let at = exam.at, qa = (exam.qat || 0) + d;
+  if (qa < 0) { if (!at) return; at--; qa = n(at) - 1; } else if (qa >= n(at)) { if (at >= items.length - 1) return; at++; qa = 0; }
+  exam.at = at; exam.qat = qa; saveJSON(XSTORE, exam); draw(true); paneTop();
+}
+function drawSet({ v, set }) {
+  const a = answers[key(v, set)] || {}, p = progress(v, set);
+  const fams = families(v, set.module || "Other"), idx = fams.findIndex((vs) => vs.includes(set)), vs = fams[idx] || [set];
+  const pick = (f) => f && (f.find((x) => !progress(v, x).finished) || f[0]);
+  const prev = pick(fams[idx - 1]), next = pick(fams[idx + 1]), other = vs.find((x) => x !== set && !progress(v, x).finished);
+  const varBar = vs.length < 2 ? "" : `<div class="varbar"><span class="eyebrow">Variation</span><div class="pills">${vs.map((x, i) =>
+    `<button type="button" class="pill" data-goto="${esc(x.id)}" aria-pressed="${x === set}">${i + 1}${progress(v, x).finished ? " ✓" : ""}</button>`).join("")}</div>
+    ${set.variant_note ? `<span class="vnote">${esc(set.variant_note)}</span>` : ""}</div>`;
+  const lookOpen = document.querySelector(".look:not(.how)") ? document.querySelector(".look:not(.how)").open : p.finished;
+  const look = !(set.look_for || []).length ? "" : `<details class="card look" ${lookOpen ? "open" : ""}><summary><span class="eyebrow">Key details to look for</span><span class="chip tog">Show / hide</span></summary>
+    <div class="body"><ul>${set.look_for.map((x) => `<li>${md(x).replace(/^<div class="md"><p>|<\/p><\/div>$/g, "")}</li>`).join("")}</ul></div></details>`;
+  const howOpen = document.querySelector(".how") ? document.querySelector(".how").open : false;
+  const how = !(set.approach || []).length ? "" : `<details class="card look how" ${howOpen ? "open" : ""}><summary><span class="eyebrow">How to work this case</span><span class="chip tog">Show / hide</span></summary>
+    <div class="body"><ol>${set.approach.map((x) => `<li>${md(x).replace(/^<div class="md"><p>|<\/p><\/div>$/g, "")}</li>`).join("")}</ol></div></details>`;
+  const narrow = matchMedia("(max-width: 960px)").matches;
+  const vigOpen = !narrow || !document.querySelector(".vig") || document.querySelector(".vig").open;
+  const Q = set.questions || [], sk = key(v, set), same = qSet === sk;
+  const old = same ? { l: ($("lpane") || {}).scrollTop || 0, r: ($("rscroll") || {}).scrollTop || 0, q: qAt } : null;
+  if (!same) { qSet = sk; const open = Q.findIndex((x) => !a[x.id]); qAt = open < 0 ? 0 : open; }
+  qAt = Math.max(0, Math.min(qAt, Q.length - 1));
+  const q = Q[qAt] || { id: "", options: {} }, got = a[q.id], answered = !!got;
+  const t = tiesFor(set, q), live = !!((tiesOn || walking(q.id)) && t && t.groups.length), tt = live && answered ? t : null, hint = !answered && live && t.given > 0 && hinted.has(q.id);
+  tieQ = tt || hint ? q.id : null;   // the vignette shows the values of the question on screen
+  const card = `<article class="q" id="q-${esc(q.id)}"${tt || hint ? ' data-t="1"' : ""}><div class="qh"><span class="eyebrow">Question ${qAt + 1} of ${Q.length}</span>
+        <span class="qbtns">${!answered && t && t.given > 0 ? `<button type="button" class="btn ghost sm" data-hint="${esc(q.id)}" aria-pressed="${hint}">Hint: which numbers?</button>` : ""}<button type="button" class="btn ghost sm jump" data-jump>Vignette ↑</button></span></div>
+      <div class="stem" data-seg="ask">${mdT(q.stem, tt || (hint ? t : null), true)}</div>${hint ? `<p class="tienote">Hint: the ${plural(t.given, "value")} this question takes from the case ${t.given === 1 ? "is" : "are"} highlighted in the vignette.</p>` : ""}
+      ${optRows(q, (L) => !answered ? "" : L === q.answer ? "right" : L === got ? "wrong" : "dim", (L) => `data-q="${esc(q.id)}" data-opt="${esc(L)}" ${answered ? "disabled" : ""}`, !answered, (x) => mdT(x, tt))}
+      ${answered ? `<div class="verdict ${got === q.answer ? "good" : "bad"}">${got === q.answer ? "✓ Correct" : `✗ Incorrect: you chose ${esc(got)}, the answer is ${esc(q.answer)}`}</div>
+        ${t && t.groups.length ? tieKey(live) : ""}${(q.steps || []).length ? `<div class="walk"><span class="eyebrow">Walkthrough</span><ol>${q.steps.map((x, i) => `<li data-seg="s${i}">${mdT(x, tt)}</li>`).join("")}</ol></div>` : ""}
+        <div class="expl" data-seg="expl">${mdT(q.explanation, tt)}</div>${q.trap ? `<div class="trap" data-seg="trap">${mdT("**The trap.** " + q.trap + (q.avoid ? "\n\n**How to avoid it.** " + q.avoid : ""), tt)}</div>` : ""}
+        ${q.los ? `<div class="los">LOS: ${esc(q.los)}</div>` : ""}${window.Walk ? Walk.bar(q.id) : ""}` : ""}</article>`;
+  const last = qAt >= Q.length - 1;
+  const onward = !last ? `<button type="button" class="btn ${answered ? "primary" : ""}" data-qat="${qAt + 1}" data-next>Next ›</button>`
+    : p.finished && other ? `<button type="button" class="btn primary" data-goto="${esc(other.id)}">Try a variation ›</button>`
+    : next ? `<button type="button" class="btn ${p.finished ? "primary" : ""}" data-goto="${esc(next.id)}">Next case ›</button>` : `<button type="button" class="btn" data-back>All sets</button>`;
+  inset(true);
+  $("view").innerHTML = `<nav class="crumbs" aria-label="Breadcrumb"><button type="button" class="btn sm" data-back>‹ All sets</button>
+      <span>${esc(v.volume)} · ${esc(set.module || "")} · case ${idx + 1} of ${fams.length}</span><span class="grow"></span>
+      ${prev ? `<button type="button" class="btn ghost sm" data-goto="${esc(prev.id)}">‹ Previous case</button>` : ""}${next ? `<button type="button" class="btn ghost sm" data-goto="${esc(next.id)}">Next case ›</button>` : ""}</nav>
+    <div class="sethead"><div><h2>${esc(set.title || "Item set")}</h2>${set.source ? `<p class="src">${esc(set.source)}</p>` : ""}</div>
+      <div class="score" aria-live="polite"><div><div class="eyebrow">Score</div><b>${p.right}/${p.total}</b></div>
+        <div><div class="progress ${p.finished ? "good" : ""}"><i style="width:${p.total ? Math.round(100 * p.done / p.total) : 0}%"></i></div>
+          <div class="muted" style="font-size:13px;margin-top:4px">${p.done} of ${p.total} answered</div></div>
+        <button type="button" class="btn sm" data-reset ${p.done ? "" : "disabled"}>Reset set</button></div></div>
+    ${varBar}
+    <div class="case one" id="ws">
+      <div class="lpane" id="lpane">${look}${how}<details class="card vig" id="vig" ${vigOpen ? "open" : ""}><summary><span class="eyebrow">Vignette</span><span class="chip tog">Show / hide</span></summary>
+        <div class="body">${vigHTML(set, a)}</div></details></div>
+      <section class="card rpane" aria-label="Question">${qTabs(Q, qAt, (x) => !a[x.id] ? "" : a[x.id] === x.answer ? "ok" : "bad", "data-qat")}
+        <div class="rscroll" id="rscroll">${card}</div>
+        <div class="qbar"><button type="button" class="btn" data-qat="${qAt - 1}" data-prev ${qAt ? "" : "disabled"}>‹ Previous</button><span class="muted">Question ${qAt + 1} of ${Q.length}</span>${onward}</div></section>
+    </div>`;
+  const vig = $("vig");
+  vig.querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 960px)").matches) e.preventDefault(); });
+  fitWs();
+  if (old) { $("lpane").scrollTop = old.l; if (old.q === qAt) $("rscroll").scrollTop = old.r; }
+  if (window.Walk) Walk.sync(answered ? q.id : null);
+}
+// ------------------------------------------------------------------ the exam box: mixed sets, timed, marked at the end
+const XSTORE = "site-cases-exam";
+let exam = loadJSON(XSTORE, null), byKey = new Map(), clock = null;
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function startExam(n) {
+  // one variation of each case, subjects taken in turn so the session is mixed
+  const piles = shuffle(volumes().map((v) => shuffle(families(v)).map((vs) => key(v, shuffle(vs.filter((s) => !progress(v, s).finished)).concat(shuffle(vs.slice()))[0]))));
+  const ids = [];
+  while (ids.length < n && piles.some((p) => p.length)) for (const p of piles) if (p.length && ids.length < n) ids.push(p.pop());
+  exam = { ids: shuffle(ids), start: Date.now(), mins: ids.length * 12, picks: {}, at: 0, done: false };
+  saveJSON(XSTORE, exam); go({ exam: true, set: null }, true);
+}
+function finishExam() {
+  for (const k of exam.ids) if (exam.picks[k]) answers[k] = { ...exam.picks[k] };
+  saveJSON(STORE, answers);
+  exam.done = true; exam.end = Date.now(); saveJSON(XSTORE, exam); draw(true); window.scrollTo({ top: 0 });
+}
+function tick() {
+  const el = $("clock");
+  if (!el || !exam || exam.done) { clearInterval(clock); clock = null; return; }
+  const left = Math.round(exam.mins * 60 - (Date.now() - exam.start) / 1000), a = Math.abs(left);
+  el.textContent = (left < 0 ? "Over by " : "") + `${Math.floor(a / 60)}:${String(a % 60).padStart(2, "0")}`;
+  el.classList.toggle("over", left < 0);
+}
+function drawExam() {
+  if (window.Walk) Walk.sync(null);
+  const items = exam.ids.map((k) => byKey.get(k)).filter(Boolean);
+  if (!items.length) { exam = null; saveJSON(XSTORE, null); nav.exam = false; return draw(true); }
+  if (exam.done) return drawResults(items);
+  exam.at = Math.min(exam.at, items.length - 1);
+  const { v, s } = items[exam.at], k = key(v, s), got = exam.picks[k] || {}, Q = s.questions;
+  exam.qat = Math.max(0, Math.min(exam.qat || 0, Q.length - 1));
+  const q = Q[exam.qat], same = xDrawn === k;
+  const old = same ? { l: ($("lpane") || {}).scrollTop || 0, r: ($("rscroll") || {}).scrollTop || 0, q: xDrawn + "/" + q.id } : null;
+  const was = $("rscroll") ? $("rscroll").dataset.q : "";
+  xDrawn = k;
+  const full = (x) => x.s.questions.every((y) => (exam.picks[key(x.v, x.s)] || {})[y.id]);
+  const first = !exam.at && !exam.qat, end = exam.at >= items.length - 1 && exam.qat >= Q.length - 1;
+  const card = `<article class="q"><div class="qh"><span class="eyebrow">Question ${exam.qat + 1} of ${Q.length}</span>
+      <span class="qbtns"><button type="button" class="btn ghost sm jump" data-jump>Vignette ↑</button></span></div><div class="stem">${md(q.stem)}</div>
+    ${optRows(q, (L) => got[q.id] === L ? "picked" : "", (L) => `data-xq="${esc(q.id)}" data-xopt="${esc(L)}"`, true, md)}</article>`;
+  inset(true);
+  $("view").innerHTML = `<div class="xhead"><div><span class="eyebrow">Exam box · set ${exam.at + 1} of ${items.length}</span>
+      <div class="pills" style="margin-top:6px">${items.map((x, i) => `<button type="button" class="pill" data-xat="${i}" aria-pressed="${i === exam.at}">${i + 1}${full(x) ? " ✓" : ""}</button>`).join("")}</div></div>
+    <div class="row"><span class="clock" id="clock"></span><button type="button" class="btn" data-xback>Leave (keeps your place)</button><button type="button" class="btn primary" data-xdone>Finish and mark</button></div></div>
+    <div class="case one" id="ws">
+      <div class="lpane" id="lpane"><details class="card vig" id="vig" open><summary><span class="eyebrow">Vignette</span><span class="chip tog">Show / hide</span></summary><div class="body">${md(s.vignette)}</div></details></div>
+      <section class="card rpane" aria-label="Question">${qTabs(Q, exam.qat, (x) => got[x.id] ? "done" : "", "data-xqat")}
+        <div class="rscroll" id="rscroll" data-q="${esc(q.id)}">${card}</div>
+        <div class="qbar"><button type="button" class="btn" data-xstep="-1" data-prev ${first ? "disabled" : ""}>‹ Previous</button><span class="muted">Set ${exam.at + 1} of ${items.length} · question ${exam.qat + 1} of ${Q.length}</span>
+          ${end ? `<button type="button" class="btn primary" data-xdone>Finish and mark</button>` : `<button type="button" class="btn primary" data-xstep="1" data-next>Next ›</button>`}</div></section>
+    </div>`;
+  $("vig").querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 960px)").matches) e.preventDefault(); });
+  fitWs();
+  if (old) { $("lpane").scrollTop = old.l; if (was === q.id) $("rscroll").scrollTop = old.r; }
+  if (!clock) clock = setInterval(tick, 1000);
+  tick();
+}
+function drawResults(items) {
+  inset(false);
+  const rows = new Map(), missed = [];
+  let right = 0, total = 0;
+  for (const { v, s } of items) {
+    const got = exam.picks[key(v, s)] || {}, r = rows.get(v.volume) || [0, 0];
+    s.questions.forEach((q, n) => {
+      total++; r[1]++;
+      if (got[q.id] === q.answer) { right++; r[0]++; } else missed.push({ v, s, n, q, got: got[q.id] });
+    });
+    rows.set(v.volume, r);
+  }
+  const mins = Math.round(((exam.end || Date.now()) - exam.start) / 60000);
+  $("view").innerHTML = `<div class="xres"><div class="card" style="padding:var(--sp-4)"><span class="eyebrow">Exam box · results</span>
+      <div class="big">${right} / ${total} <span class="muted" style="font-size:18px;font-weight:600">${total ? Math.round(100 * right / total) : 0}%</span></div>
+      <div class="muted">${plural(items.length, "set")} in ${mins} min (allowed ${exam.mins}). Your answers are now saved on each set, so you can open any of them to study the worked solutions.</div>
+      <div class="row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button type="button" class="btn primary" data-exam="${items.length >= 11 ? 11 : 5}">New session</button><button type="button" class="btn" data-xback>All sets</button></div></div>
+    <div class="card" style="padding:var(--sp-4)"><table><thead><tr><th>Subject</th><th class="r">Right</th><th class="r">Questions</th></tr></thead>
+      <tbody>${[...rows].map(([name, r]) => `<tr><td>${esc(name)}</td><td class="r">${r[0]}</td><td class="r">${r[1]}</td></tr>`).join("")}</tbody></table></div>
+    <div class="card" style="padding:var(--sp-4)"><span class="eyebrow">What to go back to</span>
+      ${missed.length ? `<table><thead><tr><th>Case</th><th>Missed</th><th></th></tr></thead><tbody>${missed.map((m) => `<tr><td>${esc(m.s.title || "")}<div class="muted" style="font-size:13px">${esc(m.s.module || "")}</div></td>
+        <td>Question ${m.n + 1}${m.got ? "" : " (not answered)"}${m.q.trap ? `<div class="muted" style="font-size:14px">${md(m.q.trap).replace(/^<div class="md"><p>|<\/p><\/div>$/g, "")}</div>` : ""}</td>
+        <td><a class="btn sm" href="#set=${encodeURIComponent(m.v.file + "/" + m.s.id)}" data-xopen="${esc(m.v.file)}|${esc(m.s.id)}">Review</a></td></tr>`).join("")}</tbody></table>` : `<p>Nothing missed.</p>`}</div></div>`;
+}
+
+function draw(force) {
+  byKey = new Map(volumes().flatMap((v) => v.sets.map((s) => [key(v, s), { v, s }])));
+  if (nav.exam && exam && volumes().length) {
+    if (!force && drawnKey === "exam") return;
+    $("lede").hidden = true; drawnKey = "exam"; drawExam(); if (window.Site) Site.fill($("view")); return;
+  }
+  const f = find();
+  if (!f.v) {
+    $("view").innerHTML = `<div class="empty-state" style="margin-top:24px">No item sets yet. They appear here as soon as they're written (this page checks every minute).</div>`;
+    drawnKey = ""; return;
+  }
+  nav.vol = f.v.file; nav.mod = f.set ? f.set.module || "Other" : f.mod;
+  saveJSON(NAV, nav);
+  const total = volumes().reduce((n, x) => n + x.sets.length, 0);
+  $("lede").textContent = `${plural(total, "item set")} across ${plural(volumes().length, "volume")}. Read the vignette, answer the four questions, then study the worked explanations. Your answers stay on this device.`;
+  const k = f.set ? "set:" + key(f.v, f.set) + ":" + JSON.stringify(f.set) + JSON.stringify(answers[key(f.v, f.set)] || {}) : "pick:" + sig + JSON.stringify(nav) + JSON.stringify(answers);
+  if (!force && k === drawnKey) return;
+  drawnKey = k;
+  $("lede").hidden = !!f.set;
+  if (f.set) drawSet(f); else drawPicker(f);
+  if (window.Site) Site.fill($("view"));
+}
+
+// ------------------------------------------------------------------ events
+$("view").addEventListener("click", (e) => {
+  const t = e.target;
+  const keep = () => { const y = window.scrollY; draw(true); window.scrollTo(0, y); };
+  const fl = t.closest("[data-flag]"); if (fl) { const id = fl.dataset.flag; if (flags.has(id)) flags.delete(id); else flags.add(id); return keep(); }
+  const sk = t.closest("[data-strike]"); if (sk) { const [id, L] = sk.dataset.strike.split("|"), x = new Set(strikes(id)); if (x.has(L)) x.delete(L); else x.add(L); struck.set(id, x); return keep(); }
+  const ex = t.closest("[data-exam]");
+  if (ex) {
+    const what = ex.dataset.exam;
+    if (what === "resume") return go({ exam: true, set: null }, true);
+    if (what === "quit") { if (confirm("End this session without marking it?")) { exam = null; saveJSON(XSTORE, null); draw(true); } return; }
+    if (exam && !exam.done && !confirm("Start a new session? The one in progress is dropped.")) return;
+    return startExam(+what);
+  }
+  if (nav.exam && exam) {
+    const xo = t.closest("[data-xopt]");
+    if (xo) {
+      const k = exam.ids[exam.at];
+      exam.picks[k] = { ...(exam.picks[k] || {}), [xo.dataset.xq]: xo.dataset.xopt }; saveJSON(XSTORE, exam);
+      const y = window.scrollY; draw(true); window.scrollTo(0, y); return;
+    }
+    const xq = t.closest("[data-xqat]"); if (xq) { exam.qat = +xq.dataset.xqat; saveJSON(XSTORE, exam); draw(true); paneTop(); return; }
+    const xs = t.closest("[data-xstep]"); if (xs) { if (!xs.disabled) stepExam(+xs.dataset.xstep); return; }
+    const xa = t.closest("[data-xat]"); if (xa) { exam.at = +xa.dataset.xat; exam.qat = 0; saveJSON(XSTORE, exam); draw(true); window.scrollTo({ top: 0 }); return; }
+    if (t.closest("[data-xdone]")) {
+      const open = exam.ids.reduce((n, k) => n + (byKey.get(k) ? byKey.get(k).s.questions.filter((q) => !(exam.picks[k] || {})[q.id]).length : 0), 0);
+      if (!open || confirm(`${open} question${open === 1 ? " is" : "s are"} not answered. Finish and mark anyway?`)) finishExam();
+      return;
+    }
+    if (t.closest("[data-xback]")) return go({ exam: false, set: null }, true);
+    const xr = t.closest("[data-xopen]"); if (xr) { e.preventDefault(); const [vol, set] = xr.dataset.xopen.split("|"); return go({ exam: false, vol, set }, true); }
+    if (t.closest("[data-jump]")) { const v = $("vig"); v.open = true; v.scrollIntoView({ behavior: "smooth", block: "start" }); }
+    return;
+  }
+  const vol = t.closest("[data-vol]"); if (vol) return go({ vol: vol.dataset.vol, mod: null, set: null });
+  const mod = t.closest("[data-mod]"); if (mod) return go({ mod: mod.dataset.mod, set: null });
+  const st = t.closest("[data-set]"); if (st) { e.preventDefault(); return go({ set: st.dataset.set }, true); }
+  const gt = t.closest("[data-goto]"); if (gt) return go({ set: gt.dataset.goto }, true);
+  if (t.closest("[data-back]")) return go({ set: null }, true);
+  if (t.closest("[data-jump]")) { const v = $("vig"); v.open = true; v.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  const qa = t.closest("[data-qat]"); if (qa) { if (!qa.disabled) { qAt = +qa.dataset.qat; draw(true); paneTop(); } return; }
+  const f = find();
+  if (t.closest("[data-reset]") && f.set) {
+    if (!confirm("Clear your answers for this set?")) return;
+    delete answers[key(f.v, f.set)]; saveJSON(STORE, answers); f.set.questions.forEach((q) => { hinted.delete(q.id); flags.delete(q.id); struck.delete(q.id); }); tieQ = null; qSet = null; draw(true); return;
+  }
+  if (window.Ties && f.set) {
+    const redraw = () => { const y = window.scrollY; draw(true); window.scrollTo(0, y); };
+    if (t.closest("[data-ties]")) { tiesOn = !tiesOn; try { localStorage.setItem(TIEPREF, tiesOn ? "on" : "off"); } catch {} return redraw(); }
+    const hb = t.closest("[data-hint]");
+    if (hb) {
+      const id = hb.dataset.hint;
+      if (hinted.has(id)) { hinted.delete(id); if (tieQ === id) tieQ = null; return redraw(); }
+      hinted.add(id); tieQ = id; redraw();
+      if (matchMedia("(max-width: 960px)").matches) { const v = $("vig"); v.open = true; v.scrollIntoView({ behavior: "smooth", block: "start" }); }
+      return;
+    }
+    const card = t.closest('article.q[data-t="1"]'), mark = t.closest(".tie"), inVig = t.closest("#vig");
+    if (card && card.id.slice(2) !== tieQ) { tieQ = card.id.slice(2); showVig(f.set); }   // the vignette follows the question in hand
+    if (mark && (card || inVig)) {
+      const id = Ties.idOf(mark), home = card || (tieQ && $("q-" + tieQ));
+      if (id !== null && home) { const was = mark.classList.contains("on"); document.querySelectorAll(".tie-focus").forEach((el) => Ties.focus([el], null)); if (!was) Ties.focus([home, $("vig")], id); }
+      return;
+    }
+    if (!t.closest("[data-opt]")) document.querySelectorAll(".tie-focus").forEach((el) => Ties.focus([el], null));
+  }
+  const o = t.closest("[data-opt]");
+  if (o && f.set && !o.disabled) {
+    const k = key(f.v, f.set);
+    answers[k] = { ...(answers[k] || {}), [o.dataset.q]: o.dataset.opt };
+    saveJSON(STORE, answers); tieQ = o.dataset.q;
+    const y = window.scrollY; draw(true); window.scrollTo(0, y);
+    if (window.Walk) Walk.after(o.dataset.q);
+  }
+});
+// with a mouse, the vignette's highlights follow the answered question the pointer is over
+$("view").addEventListener("pointerover", (e) => {
+  if (e.pointerType !== "mouse" || !window.Ties || !tiesOn) return;
+  const card = e.target.closest('article.q[data-t="1"]'), f = card && find();
+  if (card && f.set && card.id.slice(2) !== tieQ && !document.querySelector(".tie-focus")) { tieQ = card.id.slice(2); showVig(f.set); }
+});
+// as on the exam: right-click an answer to cross it out; the arrow keys move between questions
+$("view").addEventListener("contextmenu", (e) => { const o = e.target.closest(".optrow"), b = o && o.querySelector("[data-strike]"); if (b) { e.preventDefault(); b.click(); } });
+document.addEventListener("keydown", (e) => {
+  if (e.altKey || e.ctrlKey || e.metaKey || (e.key !== "ArrowRight" && e.key !== "ArrowLeft") || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
+  const b = document.querySelector(e.key === "ArrowRight" ? ".qbar [data-next]" : ".qbar [data-prev]");
+  if (b && !b.disabled) { e.preventDefault(); b.click(); }
+});
+window.addEventListener("resize", fitWs);
+window.addEventListener("storage", (e) => { if (e.key === STORE) { answers = loadJSON(STORE, {}); draw(true); } });
+function fromHash() {
+  const m = location.hash.match(/set=([^&]+)/);
+  if (!m) return;
+  const [vol, ...rest] = decodeURIComponent(m[1]).split("/");
+  nav = { ...nav, vol, set: rest.join("/") };
+}
+
+// ------------------------------------------------------------------ data, refreshed every 60 s
+async function load() {
+  try {
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 10000);
+    const r = await fetch("casedata", { cache: "no-store", signal: ctl.signal });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    D = { volumes: Array.isArray(d.volumes) ? d.volumes : [] };
+    sig = JSON.stringify(D.volumes.map((v) => [v.file, v.sets.map((s) => [s.id, s.module, s.title])]));
+    $("offline").style.display = "none";
+    $("livedot").className = "dot on";
+    $("updated").textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    draw(false);
+  } catch {
+    $("offline").style.display = "block";
+    $("livedot").className = "dot off";
+    $("updated").textContent = "Offline";
+    if (!D) $("view").innerHTML = `<div class="empty-state" style="margin-top:24px">The item sets couldn't be loaded.</div>`;
+  }
+}
+function start() { fromHash(); load();  }
+window.addEventListener("hashchange", () => { fromHash(); if (!location.hash) nav.set = null; draw(true); });
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+</script>
+</body>
+</html>

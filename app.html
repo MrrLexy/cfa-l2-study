@@ -1,0 +1,1957 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CFA Level II Study · Study Map</title>
+<link rel="stylesheet" href="static/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-180.png">
+<link rel="icon" href="static/icon-192.png">
+<meta name="theme-color" content="#16181f">
+<script src="static/lock-config.js"></script>
+<script src="static/lock.js"></script>
+<script src="static/profile.js"></script>
+<script>StudyProfile.guard();</script>
+<link rel="stylesheet" href="static/katex/katex.min.css">
+<link rel="stylesheet" href="static/path.css">
+<script defer src="static/katex/katex.min.js"></script>
+<script defer src="static/katex/contrib/auto-render.min.js"></script>
+<style>
+  /* colours come from static/site.css; only the diagram's edge colour and the pop-up shadow are page-specific */
+  :root { --page-max: 1720px; --edge: #b9b5ab; --header-bg: var(--bar-bg); --stick: 64px;
+          --pop-shadow: 0 14px 36px rgba(29, 29, 27, .18), 0 2px 6px rgba(29, 29, 27, .08); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --edge: #57544e; --pop-shadow: 0 14px 40px rgba(0, 0, 0, .6); } }
+  :root[data-theme="dark"] { --edge: #57544e; --pop-shadow: 0 14px 40px rgba(0, 0, 0, .6); }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }  /* chips and buttons set their own display; hidden must still win */
+  html { overflow-x: hidden; }  /* on the root only: on body too it would make body the scroller */
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; }
+  a { color: var(--accent); }
+  button { font: inherit; }
+  /* top bar */
+  .top { position: sticky; top: 0; z-index: 20; background: var(--header-bg); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+         border-bottom: 1px solid var(--line); }
+  .top-in { max-width: var(--page-max); margin: 0 auto; padding: 10px clamp(16px, 2.2vw, 40px); display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+  .top h1 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); margin: 0; white-space: nowrap; }
+  .top h1 a { color: inherit; text-decoration: none; }
+  .navbtn { display: none; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px;
+            padding: 5px 12px; min-height: 34px; font-size: 14px; cursor: pointer; }
+  .seg { display: inline-flex; background: var(--sunk); border-radius: 999px; padding: 3px; gap: 2px; flex: none; }
+  .seg a { display: inline-flex; align-items: center; min-height: 30px; padding: 3px 14px; border-radius: 999px; font-size: 14px; font-weight: 600;
+           color: var(--muted); text-decoration: none; }
+  .seg a:hover { color: var(--ink); }
+  .seg a[aria-current="page"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .14); }
+  .whereami { font-size: 13px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .whereami:empty { display: none; }
+  .search { position: relative; flex: 1 1 240px; max-width: 520px; min-width: 0; }
+  .search input { width: 100%; font-size: 16px; padding: 8px 14px 8px 36px; border-radius: 999px; border: 1px solid var(--line-strong);
+                  background: var(--card); color: var(--ink); outline: none; -webkit-appearance: none; appearance: none; }
+  .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .search::before { content: "⌕"; position: absolute; left: 13px; top: 50%; transform: translateY(-52%); color: var(--muted); font-size: 18px; pointer-events: none; }
+  .results { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+             box-shadow: 0 10px 30px rgba(0,0,0,.18); max-height: 60vh; overflow-y: auto; display: none; padding: 6px; z-index: 30; }
+  .results.show { display: block; }
+  .results a { display: flex; gap: 10px; align-items: baseline; padding: 7px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; font-size: 14px; }
+  .results a:hover, .results a.sel { background: var(--accent-soft); }
+  .results .rt { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); flex: 0 0 62px; }
+  .results .rl { flex: 1; min-width: 0; }
+  .results .rm { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .results .empty { padding: 10px; color: var(--muted); font-size: 14px; }
+  .toplinks { display: flex; gap: 14px; align-items: center; margin-left: auto; font-size: 14px; }
+  .toplinks a { text-decoration: none; white-space: nowrap; }
+  .live { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .live i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--good); margin-right: 5px; vertical-align: 1px; }
+  .live.stale i { background: var(--bad); }
+  .top-prog { height: 3px; }
+  .top-prog i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .4s; }
+  /* layout */
+  .layout { max-width: var(--page-max); margin: 0 auto; padding: 18px clamp(16px, 2.2vw, 40px) 56px; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 22px; align-items: start; }
+  nav#nav { position: sticky; top: calc(var(--stick) + 8px); max-height: calc(100vh - var(--stick) - 16px); overflow-y: auto; font-size: 14px; padding-right: 4px; }
+  nav .home { display: block; padding: 6px 10px; border-radius: 8px; text-decoration: none; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
+  nav details { border-radius: 10px; margin-bottom: 2px; }
+  nav summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 9px; padding: 6px 10px; border-radius: 8px; font-weight: 600; }
+  nav summary::-webkit-details-marker { display: none; }
+  nav summary::after { content: "›"; margin-left: auto; color: var(--muted); transition: transform .2s; }
+  nav details[open] summary::after { transform: rotate(90deg); }
+  nav summary:hover, nav .home:hover, nav .mods a:hover { background: var(--card); }
+  .vn { flex: 0 0 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: var(--accent-soft); color: var(--accent); }
+  nav .cnt { font-size: 11px; color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+  nav .mods { padding: 2px 0 8px 20px; display: grid; gap: 1px; }
+  nav .mods a { display: flex; gap: 8px; align-items: baseline; padding: 4px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+  nav .mods a.diagram { color: var(--accent); font-weight: 600; font-size: 13px; }
+  nav .mods a .mn { color: var(--muted); font-variant-numeric: tabular-nums; flex: 0 0 14px; font-size: 12px; }
+  nav .mods a .mt { flex: 1; min-width: 0; }
+  nav .mods a .b { font-size: 10px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  nav .mods a .ok { font-size: 12px; color: var(--good); font-weight: 700; }
+  nav .mods a .nr { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; align-self: center; opacity: .7; }
+  nav .mods a.off .mt { color: var(--muted); }
+  nav a.cur, nav .home.cur { background: var(--accent-soft) !important; color: var(--accent); font-weight: 600; }
+  nav .toc-prog { padding: 2px 10px 10px; font-size: 12px; color: var(--muted); }
+  nav .toc-prog .progress { margin-top: 5px; }
+  nav .sep { height: 1px; background: var(--line); margin: 8px 10px; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    nav#nav { display: none; position: static; max-height: none; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 8px; }
+    body.navopen nav#nav { display: block; }
+    .navbtn { display: inline-flex; }
+    .toplinks .live { display: none; }
+  }
+  @media (max-width: 560px) {
+    .search { order: 5; flex-basis: 100%; max-width: none; }
+    .seg { margin-left: auto; }
+    .whereami { display: none; }
+  }
+  @media (max-width: 400px) { .navbtn .nb-l { display: none; } .seg a { padding: 3px 11px; } }
+  /* content */
+  #content { min-width: 0; }
+  .crumbs { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .crumbs a { color: var(--muted); }
+  h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.2; margin: 0 0 8px; }
+  h3 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 30px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h3 .count { background: var(--card); border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 0 8px; font-size: 12px; letter-spacing: 0; }
+  .lede { font-size: 17px; max-width: 760px; margin: 8px 0 0; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+  .badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .badge b { color: var(--ink); }
+  .badge.good { background: var(--good-soft); border-color: transparent; color: var(--good); }
+  .badge.good b { color: var(--good); }
+  .badge.warn { background: var(--warn-soft); border-color: transparent; color: var(--warn); }
+  .badge.warn b { color: var(--warn); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; min-width: 0; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .vcard { text-decoration: none; color: var(--ink); display: block; transition: border-color .2s, transform .2s; }
+  .vcard:hover { border-color: var(--accent); }
+  .vcard .vh { display: flex; gap: 10px; align-items: center; font-weight: 700; font-size: 17px; }
+  .vcard p { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+  .meter { height: 6px; background: var(--bg); border-radius: 999px; overflow: hidden; margin-top: 10px; }
+  .meter > i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .6s; }
+  .empty-note { border: 1.5px dashed var(--line-strong); border-radius: 12px; padding: 14px 16px; color: var(--muted); font-size: 15px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .pager a { font-size: 14px; text-decoration: none; border: 1px solid var(--line); background: var(--card); padding: 6px 12px; border-radius: 999px; max-width: 48%;
+             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* concepts */
+  .concepts { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .concept h4 { margin: 0 0 4px; font-size: 16px; }
+  .concept p { margin: 0; font-size: 15px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; align-items: center; }
+  .chips .lbl { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+  .chip { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); text-decoration: none; max-width: 100%;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  a.chip:hover { outline: 1.5px solid var(--accent); }
+  .chip.l1 { background: var(--bg); color: var(--muted); }
+  .chip.out { background: var(--pc-soft); color: var(--pc); }
+  .chip.plain { background: var(--bg); color: var(--ink); }
+  .flash { animation: flash 2.2s ease-out; }
+  @keyframes flash { 0%, 30% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 3px transparent; } }
+  /* connects */
+  .connects { display: grid; gap: 8px; }
+  .connect { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 15px; }
+  @media (max-width: 560px) { .connect { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+  /* formulas */
+  .fcards { display: grid; gap: 12px; }
+  .fcard { border-left: 4px solid var(--accent); }
+  .fcard .fh { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .fcard .fh h4 { margin: 0; font-size: 16px; }
+  .fid { font-size: 11px; color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+  .ftex { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+  .spoken { font-size: 13px; color: var(--muted); font-style: italic; margin: 0 0 6px; }
+  .where { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 3px 18px; margin: 4px 0 8px; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+  .where b { color: var(--ink); font-weight: 400; margin-right: 6px; }
+  .where li { min-width: 0; overflow-wrap: anywhere; }
+  .fline { margin: 6px 0 0; font-size: 15px; }
+  .fline > b:first-child { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-right: 6px; }
+  .pitfall { margin-top: 10px; background: var(--warn-soft); border-radius: 10px; padding: 8px 12px; font-size: 15px; }
+  .pitfall > b:first-child { color: var(--warn); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; margin-right: 6px; }
+  .example { margin-top: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: 15px; }
+  .example > b:first-child, .example > summary b { color: var(--accent); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; margin-right: 6px; }
+  .example > summary { cursor: pointer; list-style: none; min-height: 28px; display: flex; align-items: center; }
+  .example > summary::-webkit-details-marker { display: none; }
+  .example > summary::after { content: "Show"; margin-left: auto; font-size: 13px; color: var(--accent); }
+  .example[open] > summary::after { content: "Hide"; }
+  .example p { margin: 4px 0; }
+  .example .res { font-weight: 600; margin-top: 4px; }
+  .std { border-left: 4px solid var(--pc); }
+  .std .fid { font-size: 12px; color: var(--pc); font-weight: 700; font-family: inherit; }
+  /* study guide Q&A */
+  .qa { padding: 0; overflow: hidden; }
+  .qa summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; gap: 12px; align-items: flex-start; }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa .ans { flex: 0 0 auto; font-weight: 700; color: var(--good); background: var(--good-soft); border-radius: 8px; padding: 1px 8px; font-size: 14px; }
+  .qa .qt { flex: 1; min-width: 0; font-weight: 600; }
+  .qa .qo { display: grid; gap: 3px; margin-top: 8px; font-weight: 400; }
+  .qa .qo > span { display: block; }
+  .qa .qo b { font-weight: 600; margin-right: 2px; }
+  .qa .ansline { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+  .qa-chk { font-size: 12.5px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+  .qa-chk.ok { color: var(--good, var(--accent)); border-color: currentColor; }
+  .qa-walk { margin: 4px 0 10px; }
+  .qa-walk ol { margin: 6px 0 0 22px; padding: 0; display: grid; gap: 4px; }
+  .qa .body { padding: 0 16px 14px; font-size: 15px; }
+  .qa .corr { margin-top: 10px; border-left: 3px solid var(--warn); padding: 4px 12px; background: var(--warn-soft); border-radius: 0 8px 8px 0; }
+  .qa .corr b { color: var(--warn); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; }
+  .qa .corr ul { margin: 4px 0; padding-left: 18px; }
+  .qa .by { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .qa .by .mac { color: var(--accent); font-weight: 600; } .qa .by .pc { color: var(--pc); font-weight: 600; }
+  .stack { display: grid; gap: 8px; }
+  .miss { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .miss li { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 10px; padding: 8px 12px; font-size: 15px; }
+  details.more summary { cursor: pointer; font-size: 14px; color: var(--muted); margin-top: 10px; }
+  details.more ul { font-size: 14px; margin: 6px 0; padding-left: 20px; }
+  /* diagram */
+  .dgwrap { position: relative; margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+  .dgbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .dgscroll { overflow: auto; -webkit-overflow-scrolling: touch; border-radius: 14px; cursor: grab; }
+  .dgscroll.fit { cursor: default; } .dgscroll.fit .dg { margin: 0 auto; height: auto; }
+  /* the master map: the ten topics and how much each builds on the others */
+  .mlwrap { display: grid; grid-template-columns: minmax(0, 780px) minmax(300px, 1fr); gap: 16px 28px; align-items: start; margin-top: 12px; }
+  @media (max-width: 1100px) { .mlwrap { grid-template-columns: minmax(0, 1fr); } }
+  .mlmap { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 6px; }
+  .ml { display: block; width: 100%; height: auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .ml .e { fill: none; stroke: var(--edge); stroke-linecap: round; opacity: .55; transition: opacity .2s, stroke .2s; }
+  .ml .e.weak { opacity: .13; }
+  .ml .e.on { stroke: var(--accent); opacity: .95; }
+  .ml .n { cursor: pointer; transition: opacity .2s; }
+  .ml .n circle { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+  .ml .n .a { fill: var(--accent); font-size: 15px; font-weight: 800; text-anchor: middle; dominant-baseline: central; letter-spacing: .02em; }
+  .ml .n .l { fill: var(--ink); font-size: 14.5px; font-weight: 600; }
+  .ml .n .c { fill: var(--muted); font-size: 12px; }
+  .ml .n:hover circle, .ml .n:focus circle, .ml .n.sel circle { fill: var(--accent); }
+  .ml .n:hover .a, .ml .n:focus .a, .ml .n.sel .a { fill: var(--card); }
+  .ml .n:focus { outline: none; }
+  .ml.focus .e:not(.on) { opacity: .08; } .ml.focus .n:not(.on) { opacity: .35; }
+  @media (max-width: 620px) { .ml .n .l { font-size: 25px; } .ml .n .a { font-size: 22px; } .ml .n .c { display: none; } .mlmap { padding: 2px; } }
+  .mlpanel { min-width: 0; }
+  .mlpanel h4 { margin: 0 0 4px; font-size: 18px; }
+  .mlpanel .sub { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+  .mlrow { display: grid; grid-template-columns: minmax(0, 215px) minmax(0, 1fr) 30px; gap: 10px; align-items: center; font-size: 14px; padding: 3px 0; }
+  .mlrow .bar { height: 8px; border-radius: 99px; background: var(--track); overflow: hidden; } .mlrow .bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+  .mlrow .k { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mlrow button { all: unset; cursor: pointer; color: var(--ink); font-weight: 600; } .mlrow button:hover { color: var(--accent); }
+  .mllinks { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
+  .mllinks a { text-decoration: none; } .mllinks .k { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mlpanel .how { font-size: 14px; color: var(--muted); margin: 4px 0 0; }
+  .dgscroll.drag { cursor: grabbing; }
+  .dg { display: block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .dg .edge { fill: none; stroke: var(--edge); stroke-width: 1.4; transition: opacity .2s; }
+  .dg .edge.on { stroke: var(--accent); stroke-width: 2; }
+  .dg .arr { fill: var(--edge); } .dg .arr-on { fill: var(--accent); }
+  .dg .node, .dg .mh { cursor: pointer; transition: opacity .2s; }
+  .dg .node rect { fill: var(--card); stroke: var(--line-strong); stroke-width: 1.2; }
+  .dg .node text { fill: var(--ink); font-size: 12px; }
+  .dg .node:hover rect, .dg .node.on rect, .dg .node:focus rect { stroke: var(--accent); stroke-width: 2; }
+  .dg .node.src rect { fill: var(--accent-soft); }
+  .dg .tag rect { fill: var(--pc-soft); stroke: none; }
+  .dg .tag text { fill: var(--pc); font-size: 10px; font-weight: 700; }
+  .dg .mh rect { fill: var(--accent-soft); stroke: none; }
+  .dg .mh .k { fill: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+  .dg .mh .t { fill: var(--ink); font-size: 12.5px; font-weight: 600; }
+  .dg .mh:hover rect { fill: var(--accent); } .dg .mh:hover text { fill: var(--card); }
+  .dg .none { fill: var(--muted); font-size: 12px; font-style: italic; }
+  .dg .lane { fill: var(--bg); opacity: .55; }
+  .dg.focus .edge:not(.on) { opacity: .1; }
+  .dg.focus .node:not(.on) { opacity: .35; }
+  .dglegend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .dglegend .sw { display: inline-block; width: 22px; height: 0; border-top: 2px solid var(--accent); vertical-align: middle; margin-right: 6px; }
+  .dglegend .tg { display: inline-block; font-size: 10px; font-weight: 700; color: var(--pc); background: var(--pc-soft); border-radius: 4px; padding: 0 5px; margin-right: 6px; }
+  .modlist { display: grid; gap: 8px; }
+  .modrow { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; text-decoration: none; color: var(--ink); }
+  .modrow:hover { border-color: var(--accent); }
+  .modrow .t { font-weight: 600; }
+  .modrow .s { font-size: 13px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .modrow .badges { margin: 0; justify-content: flex-end; }
+  @media (max-width: 640px) { .modrow { grid-template-columns: 34px minmax(0, 1fr); } .modrow .badges { grid-column: 2; justify-content: flex-start; } }
+  .offline { color: var(--bad); font-size: 14px; }
+  .toguide { margin-top: 10px; }
+  /* maths */
+  .katex { font-size: 1.1em; }
+  .katex-display { margin: .5em 0; padding: .45em .6em; background: var(--bg); border-radius: 8px; overflow-x: auto; overflow-y: hidden; }
+  .num { font-family: KaTeX_Main, "Times New Roman", serif; font-size: 1.08em; font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; }
+  .tex-raw { font-family: var(--mono); font-size: 13px; background: var(--sunk); border-radius: 6px; padding: 1px 5px; overflow-wrap: anywhere; }
+  .tex-raw[data-display] { display: block; white-space: pre-wrap; padding: 6px 10px; margin: .5em 0; }
+
+  /* ================================================================ the Guide */
+  .guide { max-width: 820px; }
+  .anchor, .sec { scroll-margin-top: calc(var(--stick) + 14px); }
+  .guide .chip { padding: 4px 10px; font-size: 13px; }
+  .g-where { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 2px 0 8px; }
+  .g-read { border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); border-radius: 999px; padding: 4px 12px; min-height: 32px;
+            font-size: 13px; font-weight: 600; cursor: pointer; }
+  .g-acts { display: inline-flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: flex-end; }
+  .g-los { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+  .g-read.on { background: var(--good-soft); border-color: transparent; color: var(--good); }
+  .g-bar { margin-bottom: 14px; }
+  .g-secnav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 16px -16px 0; padding: 2px 16px 6px; -webkit-overflow-scrolling: touch; }
+  .g-secnav::-webkit-scrollbar { display: none; }
+  .g-secnav a { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line);
+                background: var(--card); color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 600; }
+  .g-secnav a:hover { border-color: var(--accent); }
+  .g-secnav a .n { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .g-secnav a.narr { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+  @media (min-width: 861px) { .g-secnav { flex-wrap: wrap; overflow: visible; margin: 16px 0 0; padding: 0; } }
+  .g-prose { font-size: 17px; line-height: 1.6; }
+  .rich p { margin: 0 0 .7em; } .rich p:last-child { margin-bottom: 0; }
+  .rich ul, .rich ol { margin: .2em 0 .7em; padding-left: 1.3em; } .rich li { margin: .2em 0; }
+  .rich .rh { font-weight: 700; margin: .9em 0 .3em; }
+  .rich code { font-family: var(--mono); font-size: .9em; background: var(--sunk); border-radius: 4px; padding: 0 4px; }
+  .narr-sec { border-left: 3px solid var(--accent-soft); padding-left: 16px; margin-left: -19px; }
+  .g-byline { font-size: 13px; color: var(--muted); margin: -4px 0 12px; }
+  .g-pending { display: flex; gap: 10px; align-items: baseline; margin-top: 16px; padding: 10px 14px; border-radius: 12px; background: var(--sunk); color: var(--muted); font-size: 14px; }
+  .g-pending .dot { background: var(--accent); flex: none; }
+  .g-walk h4 { font-size: 19px; line-height: 1.3; margin: 26px 0 8px; letter-spacing: -.005em; }
+  .g-walk > div:first-child h4 { margin-top: 4px; }
+  .g-walk-toc { margin: 0 0 6px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+  .g-think { margin: 0; padding: 0; list-style: none; counter-reset: think; display: grid; gap: 8px; }
+  .g-think > li { counter-increment: think; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 16px; }
+  .g-think > li::before { content: counter(think); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft);
+                          color: var(--accent); font-size: 12px; font-weight: 700; }
+  .g-ex { display: grid; gap: 12px; }
+  .g-ex .lbl { display: block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .g-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; counter-reset: step; }
+  .g-steps > li { counter-increment: step; display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 10px 12px;
+                  border-radius: 10px; background: var(--sunk); animation: step-in .25s ease-out; }
+  .g-steps > li::before { content: "Step " counter(step); font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+  .g-steps > li[hidden] { display: none; }
+  @keyframes step-in { from { opacity: 0; transform: translateY(4px); } }
+  .g-ex-a { padding: 10px 12px; border-radius: 10px; background: var(--good-soft); }
+  .g-ex-a .lbl { color: var(--good); }
+  .g-ex-ctrl { display: flex; flex-wrap: wrap; gap: 8px; }
+  .g-concepts { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .g-concepts .concept h4 { display: flex; gap: 10px; align-items: baseline; }
+  .g-concepts .cn { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent);
+                    font-size: 12px; font-weight: 700; }
+  .g-fit { display: grid; gap: 14px; }
+  .g-fit .row { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+  .g-fit .row > .lbl { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  .g-fit .row .chips { margin-top: 0; }
+  .g-fit .connect { grid-template-columns: minmax(0, 200px) minmax(0, 1fr); }
+  @media (max-width: 560px) { .g-fit .connect { grid-template-columns: minmax(0, 1fr); } }
+  .connect > * { min-width: 0; overflow-wrap: anywhere; }
+  @media (max-width: 560px) { .g-fit .row { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+  .g-subh { font-size: 14px; font-weight: 700; margin: 18px 0 8px; color: var(--ink); }
+  .miss li.pit { border-left-color: var(--bad); }
+  .miss li.narr { border-left-color: var(--accent); }
+  .g-qa .qn { flex: none; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 1px 7px; margin-top: 2px; }
+  .g-qa .reveal { flex: none; font-size: 13px; font-weight: 600; color: var(--accent); margin-top: 1px; }
+  .g-qa[open] .reveal { color: var(--muted); }
+  .g-qa .ansline { margin: 2px 0 10px; }
+  .g-check { display: grid; gap: 12px; border-left: 4px solid var(--good); }
+  .g-check h4 { margin: 0; font-size: 17px; }
+  .g-check p { margin: 2px 0 0; }
+  .g-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .g-pager { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 28px; }
+  .g-pager a { display: grid; gap: 2px; padding: 12px 16px; text-decoration: none; color: var(--ink); }
+  .g-pager a:hover { border-color: var(--accent); }
+  .g-pager .eyebrow { color: var(--accent); }
+  .g-pager .next { grid-column: 2; text-align: right; }
+  .g-pager .t { font-weight: 600; font-size: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .g-pager .v { font-size: 12px; color: var(--muted); }
+  @media (max-width: 520px) { .g-pager { grid-template-columns: minmax(0, 1fr); } .g-pager .next { grid-column: 1; } }
+  #g-banner:not(:empty) { position: sticky; top: calc(var(--stick) + 8px); z-index: 6; }  /* stays in view while you read further down */
+  .g-banner { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 0 0 12px; padding: 8px 12px;
+              border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 14px; font-weight: 600; box-shadow: var(--pop-shadow); }
+  /* guide home */
+  .g-start { display: flex; align-items: center; justify-content: space-between; gap: 12px 18px; flex-wrap: wrap; margin-top: 18px; }
+  .g-start .k { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .g-start .t { font-size: 18px; font-weight: 700; }
+  .g-stats { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--muted); margin-top: 10px; }
+  .g-vol { margin-top: 28px; }
+  .g-volh { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 10px; }
+  .g-volh h3 { margin: 0; font-size: 19px; letter-spacing: -.005em; text-transform: none; color: var(--ink); }
+  .g-volh .vmeta { font-size: 13px; color: var(--muted); }
+  .g-volh .vprac { margin-left: auto; font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .g-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .g-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 14px; text-decoration: none; color: var(--ink); }
+  .g-row:hover { border-color: var(--accent); }
+  .g-row .t { font-weight: 600; }
+  .g-row .s { font-size: 13px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .g-row .flags { display: flex; gap: 6px; align-items: center; }
+  .g-row .ok { color: var(--good); font-weight: 700; }
+  .g-row.cur { border-color: var(--accent); }
+  /* glossary */
+  .gl-letters { position: sticky; top: var(--stick); z-index: 5; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin: 12px -16px 0;
+                padding: 8px 16px; background: var(--bg); }
+  .gl-letters::-webkit-scrollbar { display: none; }
+  .gl-letters a { flex: none; min-width: 34px; min-height: 34px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--line);
+                  background: var(--card); color: var(--ink); text-decoration: none; font-weight: 600; font-size: 14px; }
+  .gl-letters a:hover { border-color: var(--accent); }
+  .gl-group { content-visibility: auto; contain-intrinsic-size: auto 1400px; }
+  .gl-group h3 { font-size: 20px; color: var(--ink); letter-spacing: 0; margin: 22px 0 4px; }
+  .gl-entry { padding: 10px 2px; border-bottom: 1px solid var(--line); border-radius: 6px; }
+  .gl-entry.anchor, .gl-group.anchor { scroll-margin-top: calc(var(--stick) + 62px); }  /* clear the sticky letter bar too */
+  .gl-entry dt { font-weight: 700; }
+  .gl-entry dd { margin: 2px 0 0; font-size: 15px; }
+  .gl-entry .aka { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .gl-entry .chips { margin-top: 6px; }
+  /* inline links that open a pop-up */
+  a.xref { color: inherit; text-decoration: underline dotted var(--accent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; border-radius: 3px; cursor: pointer; }
+  a.xref:hover, a.xref[aria-expanded="true"] { color: var(--accent); background: var(--accent-soft); text-decoration-style: solid; }
+  a.chip[aria-expanded="true"] { outline: 1.5px solid var(--accent); }
+  /* the pop-up */
+  .pop { position: absolute; z-index: 60; width: 380px; max-width: calc(100vw - 24px); max-height: min(460px, 72vh); overflow-y: auto; background: var(--card); color: var(--ink);
+         border: 1px solid var(--line-strong); border-radius: 14px; box-shadow: var(--pop-shadow); font-size: 15px; line-height: 1.5; -webkit-overflow-scrolling: touch; }
+  .pop[hidden] { display: none; }
+  .pop:focus { outline: none; }
+  .pop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .pop-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 4px; padding: 6px 6px 6px 14px; background: var(--card); border-bottom: 1px solid var(--line); }
+  .pop-kind { flex: 1; min-width: 0; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pop-x, .pop-back { flex: none; min-width: 38px; min-height: 38px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; font-size: 17px; }
+  .pop-back { order: -1; margin-left: -8px; padding: 0 8px; font-size: 14px; font-weight: 600; color: var(--accent); }
+  .pop-x:hover, .pop-back:hover { background: var(--sunk); color: var(--ink); }
+  .pop-body { padding: 10px 14px 14px; }
+  .pop-body h4 { font-size: 17px; line-height: 1.3; margin: 0 0 6px; }
+  .pop-body p { margin: 0 0 8px; }
+  .pop-body .sub { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 12px 0 4px; }
+  .pop-body .chips { margin-top: 4px; }
+  .pop-body .pitfall { font-size: 14px; }
+  .pop-body .where { grid-template-columns: minmax(0, 1fr); }
+  .pop-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pop.sheet { position: fixed; left: 8px; right: 8px; top: auto !important; bottom: max(8px, env(safe-area-inset-bottom)); width: auto !important; max-width: none;
+               max-height: 62vh; border-radius: 16px; animation: sheet-up .18s ease-out; }
+  @keyframes sheet-up { from { opacity: 0; transform: translateY(16px); } }
+  /* wide screens: a wider frame, reading text kept to a comfortable line, collections of cards in columns */
+  @media (min-width: 1500px) { .layout { grid-template-columns: 300px minmax(0, 1fr); gap: 34px; } }
+  @media (min-width: 1400px) {
+    .lede { max-width: 900px; }
+    .fcards { grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); align-items: start; }
+    .modlist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .guide { max-width: 1280px; }
+    .guide > h2, .guide .g-prose, .guide .g-think, .guide .g-ex, .guide .g-fit, .guide .g-check, .guide .g-pending { max-width: 920px; }
+    .guide .g-concepts, .guide .miss, .guide .stack { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+    .guide details.more .miss { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+<header class="site-bar"><div class="site-bar-in">
+  <a class="site-brand" href="app.html#path">CFA Level II Study</a>
+  <div class="site-nav" role="navigation" aria-label="Pages"><a href="app.html" aria-label="Study Map"><span class="nav-long">Study Map</span><span class="nav-short">Map</span></a><a href="lesson.html">Lessons</a><a href="cases.html" aria-label="Case studies"><span class="nav-long">Case studies</span><span class="nav-short">Cases</span></a><a href="rapid.html" aria-label="Rapid fire"><span class="nav-long">Rapid fire</span><span class="nav-short">Rapid</span></a><a href="notecards.html" aria-label="Note cards"><span class="nav-long">Note cards</span><span class="nav-short">Cards</span></a></div>
+  <div id="userbar"></div>
+</div></header>
+<header class="top" id="top"><div class="top-in">
+  <button class="navbtn" id="navbtn" aria-expanded="false" aria-controls="nav" aria-label="Contents"><span aria-hidden="true">☰</span><span class="nb-l">Contents</span></button>
+  <h1><a href="#path">Study Map</a></h1>
+  <div class="seg" role="group" aria-label="View"><a id="sw-path" href="#path">Path</a><a id="sw-los" href="#los">LOS</a><a id="sw-guide" href="#guide">Guide</a><a id="sw-map" href="#map">Map</a></div>
+  <span class="whereami" id="whereami"></span>
+  <div class="search"><input id="q" type="search" placeholder="Search concepts, formulas, terms" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search concepts, formulas and glossary terms">
+    <div class="results" id="results"></div></div>
+  <div class="toplinks"><span class="live" id="live"><i></i>Loading…</span></div>
+</div><div class="top-prog" aria-hidden="true"><i id="topprog"></i></div></header>
+<div class="layout">
+  <nav id="nav" aria-label="Contents"></nav>
+  <main id="content"><p class="muted">Loading the curriculum…</p></main>
+</div>
+<div id="pop" class="pop" role="dialog" aria-labelledby="pop-title" tabindex="-1" hidden>
+  <div class="pop-head"><span class="pop-kind" id="pop-kind"></span><button type="button" class="pop-back" id="pop-back" hidden>‹ Back</button>
+    <button type="button" class="pop-x" id="pop-x" aria-label="Close">✕</button></div>
+  <div class="pop-body" id="pop-body"></div>
+</div>
+<script src="static/ties.js"></script>
+<script src="static/walk.js"></script>
+<script src="static/learn.js"></script>
+<script src="static/data/study-path.js"></script>
+<script src="static/data/los-cards.js"></script>
+<script src="static/data/guide-narratives.js"></script>
+<script src="static/data/glossary.js"></script>
+<script src="static/data/mapdata.js"></script>
+<script src="static/data/casedata.js"></script>
+<script src="static/standalone.js"></script>
+<script src="static/path.js"></script>
+<script src="static/los.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// <mathvars> Plain-text variables (x1i, b0, R2, σ2, e_t, x^2) as proper subscripts/superscripts. Only ever applied OUTSIDE \( \) and \[ \].
+const MV_I = 'font-family:KaTeX_Math,Georgia,serif;font-style:italic;font-size:1.08em';
+const MV_S = 'font-family:KaTeX_Main,Georgia,serif;font-size:.78em;line-height:0;font-style:normal';
+const mvScript = (s) => s.replace(/[-−]/g, "−").replace(/[A-Za-z]/g, '<i style="font-family:KaTeX_Math,serif">$&</i>');
+const mvVar = (base, sub, sup) => `<span class="mv" style="white-space:nowrap"><span style="${MV_I}">${base}</span>` +
+  (sub ? `<sub style="${MV_S}">${mvScript(sub)}</sub>` : "") + (sup ? `<sup style="${MV_S}">${mvScript(sup)}</sup>` : "") + "</span>";
+const MV_END = "(?![\\w\\u0370-\\u03FF]|\\.\\w)";  // not followed by more of a word, a decimal or a file extension
+const MV_RULES = [
+  // x^2, σ^2, (1+r)^n, e^(rT), 10^{-3}
+  [/([\w)\]Ͱ-Ͽ])\^(\{[^{}]{1,12}\}|\([^()]{1,12}\)|[−-]?\w{1,4})/g, (m, b, e, ph) => b + ph(`<sup style="${MV_S}">${mvScript(e.replace(/^[{(]|[})]$/g, ""))}</sup>`)],
+  // x_t, e_{t-1}, ε_it, y_t-1  (a single letter, then _)
+  [/(^|[^\w.])([A-Za-zͰ-Ͽ])_(\{[^{}]{1,10}\}|[A-Za-z0-9]{1,3}(?:[−-]\d)?)/g, (m, p, b, s, ph) => p + ph(mvVar(b, s.replace(/^\{|\}$/g, "")))],
+  // regression variables: X1, x1i, X2i, y1, Y3t
+  [new RegExp("(^|[^\\w.])([xXyY])(\\d{1,2})([it](?:[−-]\\d)?)?" + MV_END, "g"), (m, p, b, d, s, ph) => p + ph(mvVar(b, d + (s || "")))],
+  // xt, yi, Yt, xt-1 (not Xi/Yi, which are names)
+  [new RegExp("(^|[^\\w.])([xy][it]|[XY]t)([−-]\\d)?" + MV_END, "g"), (m, p, v, s, ph) => p + ph(mvVar(v[0], v.slice(1) + (s || "")))],
+  // coefficients b0, b1 … and β0, α1, γ2, λ1
+  [new RegExp("(^|[^\\w.])([bβαγδλθφ])(\\d{1,2}|j)" + MV_END, "g"), (m, p, b, d, ph) => p + ph(mvVar(b, d))],
+  // error terms: εt, εi, εit, εt-1 always; et/ei/eit only when clearly a variable (et-1, eit, "et =")
+  [new RegExp("(^|[^\\w.])(ε)(it|t|i)([−-]\\d)?" + MV_END, "g"), (m, p, b, s, l, ph) => p + ph(mvVar(b, s + (l || "")))],
+  [new RegExp("(^|[^\\w.])e(t|i)([−-]\\d)" + MV_END + "|(^|[^\\w.])e(it)" + MV_END + "|(^|[^\\w.])e(t)(?=\\s*=)", "g"),
+    (m, p1, s1, l1, p2, s2, p3, s3, ph) => (p1 ?? p2 ?? p3 ?? "") + ph(mvVar("e", (s1 || s2 || s3) + (l1 || "")))],
+  // R2 → R², σ2 → σ²
+  [new RegExp("(^|[^\\w.])(R|σ)2" + MV_END, "g"), (m, p, b, ph) => p + ph(mvVar(b, "", "2"))],
+];
+// Escaped plain text in, HTML out: variables first (kept aside as placeholders), then numbers in the textbook font.
+function fmtPlain(t) {
+  const keep = [], ph = (h) => String.fromCharCode(0xE100 + keep.push(h) - 1);
+  for (const [re, fn] of MV_RULES) t = t.replace(re, (...a) => fn(...a.slice(0, fn.length - 1), ph));
+  t = t.replace(/(^|[^\w.])([$€£]?\d+(?:[.,]\d+)*(?:\s?%)?)(?![\w])/g, '$1<span class="num">$2</span>');
+  return t.replace(/[-]/g, (c) => keep[c.charCodeAt(0) - 0xE100]);
+}
+// </mathvars>
+// Escape text; outside formulas, set variables and numbers in the textbook font. Formulas (\( \) and \[ \]) are typeset by KaTeX afterwards.
+function fmt(s) {
+  return String(s ?? "").split(/(\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/).map((part, i) => i % 2 ? esc(part) : fmtPlain(esc(part))).join("");
+}
+// Bare LaTeX (formula data) is rendered straight from data-tex; prose with \( \) / \[ \] by auto-render.
+// data-strict: maths that may not parse; if KaTeX can't parse it, show the source quietly instead of red error text.
+// data-bare: TeX found loose in the prose; if it won't parse either, it goes back to being plain text.
+// `plain` is the formula as written, kept when value marks were added to it, so a formula the marks break still shows as before
+const tex = (latex, display, strict, bare, plain) => `<span class="tex" data-tex="${esc(latex)}"${plain ? ` data-plain="${esc(plain)}"` : ""}${display ? " data-display" : ""}${strict ? " data-strict" : ""}${bare ? " data-bare" : ""}></span>`;
+function typeset(el) {
+  if (!window.renderMathInElement || !window.katex) return void setTimeout(() => typeset(el), 200);  // KaTeX still loading
+  el.querySelectorAll(".tex[data-tex]").forEach((t) => {
+    const strict = t.hasAttribute("data-strict");
+    const opts = { displayMode: t.hasAttribute("data-display"), throwOnError: strict, strict: "ignore", trust: (c) => c.command === "\\htmlClass" }, plain = t.dataset.plain;
+    const raw = (src) => { t.textContent = src; t.classList.add(t.hasAttribute("data-bare") ? "tex-bare" : "tex-raw"); };
+    try { katex.render(t.dataset.tex, t, opts); if (plain && t.querySelector(".katex-error")) throw 0; }
+    catch { if (!plain) raw(t.dataset.tex); else { window.__tieFallbacks = (window.__tieFallbacks || 0) + 1; try { katex.render(plain, t, opts); } catch { raw(plain); } } }
+    t.removeAttribute("data-tex"); t.removeAttribute("data-plain");
+  });
+  renderMathInElement(el, { throwOnError: false, delimiters: [
+    { left: "\\[", right: "\\]", display: true }, { left: "\\(", right: "\\)", display: false }] });
+}
+const plural = (n, w, ws) => `${n} ${n === 1 ? w : (ws || w + "s")}`;
+const norm = (s) => String(s ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const clip = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
+const str = (x) => (typeof x === "string" ? x.trim() : "");
+const arr = (x) => (Array.isArray(x) ? x : typeof x === "string" && x.trim() ? [x] : []);
+const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Per-viewer memory (last module, modules read). Private browsing or blocked storage just means nothing is remembered.
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("guide." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("guide." + k, JSON.stringify(v)); } catch { /* not remembered */ } },
+};
+async function fetchJSON(url) {  // a missing file comes back as a web page (200, text/html), so check the type
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok || !/json/i.test(r.headers.get("content-type") || "")) throw new Error(`${url}: not JSON`);
+  return r.json();
+}
+const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
+
+// ------------------------------------------------------------------ the curriculum, in book order
+const VOLUMES = [
+  ["quant", "Quantitative Methods", "Quant", "QM", ["quantitative", "quant methods"], ["Basics of Multiple Regression and Underlying Assumptions",
+    "Evaluating Regression Model Fit and Interpreting Model Results", "Model Misspecification", "Extensions of Multiple Regression", "Time-Series Analysis",
+    "Machine Learning", "Big Data Projects", "Appendices A-E"]],
+  ["economics", "Economics", "Economics", "EC", ["econ"], ["Currency Exchange Rates: Understanding Equilibrium Value", "Economic Growth"]],
+  ["fsa", "Financial Statement Analysis", "FSA", "FSA", ["financial statements", "financial reporting"], ["Intercorporate Investments",
+    "Employee Compensation: Post-Employment and Share-Based", "Multinational Operations", "Analysis of Financial Institutions",
+    "Evaluating Quality of Financial Reports", "Integration of Financial Statement Analysis Techniques"]],
+  ["corporate", "Corporate Issuers", "Corporate Issuers", "CI", ["corporate", "corporate finance"], ["Analysis of Dividends and Share Repurchases",
+    "Environmental, Social, and Governance (ESG) Considerations in Investment Analysis", "Cost of Capital: Advanced Topics", "Corporate Restructuring"]],
+  ["equity", "Equity Valuation", "Equity", "EQ", ["equity investments"], ["Equity Valuation: Applications and Processes", "Discounted Dividend Valuation",
+    "Free Cash Flow Valuation", "Market-Based Valuation: Price and Enterprise Value Multiples", "Residual Income Valuation", "Private Company Valuation"]],
+  ["fixed_income", "Fixed Income", "Fixed Income", "FI", ["fixed income"], ["The Term Structure and Interest Rate Dynamics",
+    "The Arbitrage-Free Valuation Framework", "Valuation and Analysis of Bonds with Embedded Options", "Credit Analysis Models", "Credit Default Swaps"]],
+  ["derivatives", "Derivatives", "Derivatives", "DER", [], ["Pricing and Valuation of Forward Commitments", "Valuation of Contingent Claims"]],
+  ["alternatives", "Alternative Investments", "Alternatives", "ALT", ["alternative", "alts"], ["Introduction to Commodities and Commodity Derivatives",
+    "Overview of Types of Real Estate Investment", "Investments in Real Estate through Publicly Traded Securities", "Hedge Fund Strategies"]],
+  ["portfolio", "Portfolio Management", "Portfolio Management", "PM", ["portfolio"], ["Economics and Investment Markets",
+    "Analysis of Active Portfolio Management", "Exchange-Traded Funds: Mechanics and Applications", "Using Multifactor Models",
+    "Measuring and Managing Market Risk", "Backtesting and Simulation"]],
+  ["ethics", "Ethical and Professional Standards", "Ethics", "ETH", ["ethics and professional standards", "ethical standards"], [
+    "Code of Ethics and Standards of Professional Conduct", "Guidance for Standards I–VII", "Application of the Code and Standards: Level II"]],
+].map(([id, name, short, abbr, aliases, titles], vi) => ({ id, name, short, abbr, titles, vi, keys: [] ,
+  aliases: [id, name, short, abbr, ...aliases].map(norm) }));
+const VOL_BY_ALIAS = new Map(VOLUMES.flatMap((v) => v.aliases.map((a) => [a, v])));
+const VOL_BY_ID = new Map(VOLUMES.map((v) => [v.id, v]));
+
+// "Fixed Income 2", "Fixed Income, Learning Module 2: …", "Ethics 3" -> canonical "Fixed Income 2"
+function modKeyOf(raw) {
+  const m = String(raw || "").match(/^(.+?)[,\s]+(?:(?:learning\s+)?module\s+)?(\d+)\b/i);
+  const v = m && VOL_BY_ALIAS.get(norm(m[1]));
+  return v ? { vol: v, n: +m[2], key: `${v.name} ${+m[2]}` } : null;
+}
+
+// ------------------------------------------------------------------ data model
+let DATA = null, DATAKEY = "", MODS = new Map(), CIDX = new Map(), SEARCH = [], UNMATCHED = [], ORDER = [];
+
+function ensureMod(raw) {
+  const k = modKeyOf(raw);
+  if (!k) return null;
+  if (!MODS.has(k.key)) {
+    MODS.set(k.key, newMod(k.vol, k.n, ""));
+    k.vol.keys.push(k.key);
+    k.vol.keys.sort((a, b) => MODS.get(a).n - MODS.get(b).n);
+  }
+  return MODS.get(k.key);
+}
+const newMod = (vol, n, title) => ({ key: `${vol.name} ${n}`, vol, n, title, summary: "", concepts: [], connects: [], formulas: [], standards: [],
+  guide: [], memory: {}, mapped: false, frefs: [], sigParts: [] });
+const refsOf = (bo, m) => (Array.isArray(bo) ? bo : bo ? [bo] : []).map((raw) => ({ raw: String(raw), ...resolve(String(raw), m) }));
+
+function build(d) {
+  MODS = new Map(); CIDX = new Map(); UNMATCHED = [];
+  for (const v of VOLUMES) {
+    v.keys = v.titles.map((t, i) => { const m = newMod(v, i + 1, t); MODS.set(m.key, m); return m.key; });
+  }
+  const each = (obj, fn) => Object.entries(obj && typeof obj === "object" ? obj : {}).forEach(([k, val]) => {
+    const mod = ensureMod(k) || ensureMod(val && val.source);
+    if (mod) { fn(mod, val); mod.sigParts.push(val); } else UNMATCHED.push(k);
+  });
+  each(d.concepts, (m, v) => {
+    m.mapped = true; m.summary = v.summary || "";
+    m.concepts = (Array.isArray(v.concepts) ? v.concepts : []).filter((c) => c && c.name).map((c) => ({ ...c, refs: [], usedBy: [] }));
+    m.connects = (Array.isArray(v.connects_to) ? v.connects_to : []).filter((c) => c && typeof c === "object");
+    const t = String(v.source || "").split(/Learning Module \d+:\s*/)[1];
+    if (t && !m.title) m.title = t;
+  });
+  each(d.formulas, (m, v) => { m.formulas = (Array.isArray(v.formulas) ? v.formulas : []).filter(Boolean); m.standards = (Array.isArray(v.standards) ? v.standards : []).filter(Boolean); });
+  each(d.guide, (m, v) => { m.guide = (Array.isArray(v) ? v : []).filter((g) => g && g.question); });
+  each(d.memory, (m, v) => { m.memory = v && typeof v === "object" ? v : {}; });
+  for (const m of MODS.values()) m.concepts.forEach((c, i) => {
+    const k = norm(c.name);
+    if (!CIDX.has(k)) CIDX.set(k, []);
+    CIDX.get(k).push({ mod: m, i });
+  });
+  // Resolve every "builds on" reference, and record the reverse link ("leads to") on the prerequisite.
+  for (const m of MODS.values()) m.concepts.forEach((c, i) => {
+    c.refs = refsOf(c.builds_on, m);
+    for (const r of c.refs) if (r.kind === "concept" && !(r.mod === m && r.i === i)) r.mod.concepts[r.i].usedBy.push({ mod: m, i });
+  });
+  for (const m of [...MODS.values()]) m.frefs = m.formulas.map((f) => refsOf(f.builds_on, m));
+  ORDER = VOLUMES.flatMap((v) => v.keys);
+  for (const m of MODS.values()) { m.sig = JSON.stringify(m.sigParts); delete m.sigParts; }
+  // Search index (the link targets depend on the view, so each entry says where it points: at = guide anchor, mx = map anchor)
+  SEARCH = [];
+  for (const m of MODS.values()) {
+    m.concepts.forEach((c, i) => SEARCH.push({ type: "concept", label: c.name, extra: c.what || "", mod: m, at: "c" + i, mx: { c: i } }));
+    m.formulas.forEach((f, i) => f.name && SEARCH.push({ type: "formula", label: f.name, extra: f.use || "", mod: m, at: "f" + i, mx: { f: i } }));
+    m.standards.forEach((s, i) => s.name && SEARCH.push({ type: "standard", label: `${s.id ? s.id + " " : ""}${s.name}`, extra: s.summary || "", mod: m, at: "s" + i, mx: { s: i } }));
+    SEARCH.push({ type: "module", label: `${m.vol.short} ${m.n}: ${m.title}`, extra: "", mod: m });
+  }
+  for (const s of SEARCH) { s.n = norm(s.label); s.x = norm(s.extra); }
+}
+
+function findConcept(name, mod, within) {
+  const k = norm(name);
+  if (!k) return null;
+  const rank = (h) => (h.mod === mod ? 0 : h.mod.vol === mod.vol ? 1 : 2);
+  let hits = (CIDX.get(k) || []).filter((h) => !within || h.mod === within);
+  if (!hits.length && k.length >= 6) {  // loose match: one name contains the other ("Heteroskedasticity" ~ "Heteroskedasticity and its tests")
+    const pool = within ? within.concepts.map((c, i) => ({ mod: within, i })) : [...CIDX.values()].flat();
+    hits = pool.filter((h) => { const n = norm(h.mod.concepts[h.i].name); return n.length >= 6 && (n.includes(k) || k.includes(n)); });
+  }
+  return hits.sort((a, b) => rank(a) - rank(b))[0] || null;
+}
+
+// A "builds on" string -> {kind: concept | module | level1 | text, mod, i}
+function resolve(raw, from) {
+  let s = raw.trim(), m;
+  if (/^level\s*(i|1)\b/i.test(s)) return { kind: "level1", label: s.replace(/^level\s*(i|1)\b\s*:?\s*/i, "") || "Level I" };
+  let target = null, rest = s;
+  if ((m = s.match(/^module\s+(\d+)\s*:\s*(.*)$/i))) { target = MODS.get(`${from.vol.name} ${m[1]}`) || null; rest = m[2]; }
+  else {
+    s = s.replace(/^module\s*:\s*/i, ""); rest = s;
+    m = s.match(/^(.+?)[,\s]+(?:(?:learning\s+)?module\s+)?(\d+)\s*(?::\s*(.*))?$/i);
+    const k = m && modKeyOf(`${m[1]} ${m[2]}`);
+    if (k) { target = ensureModQuiet(k); rest = m[3] || ""; }
+  }
+  if (target) {
+    const hit = rest ? findConcept(rest, from, target) : null;
+    return hit ? { kind: "concept", mod: hit.mod, i: hit.i } : { kind: "module", mod: target, label: rest };
+  }
+  const hit = findConcept(rest, from);
+  return hit ? { kind: "concept", mod: hit.mod, i: hit.i } : { kind: "text", label: rest };
+}
+const ensureModQuiet = (k) => MODS.get(k.key) || ensureMod(k.key);
+
+function href(m, extra) {
+  const p = new URLSearchParams({ m: m.key, ...(extra || {}) });
+  return "#" + p.toString();
+}
+const vhref = (v) => "#v=" + v.id;
+const ghref = (m, at) => "#" + new URLSearchParams({ g: m.key, ...(at ? { at } : {}) }).toString();
+const counts = (m) => ({ c: m.concepts.length, f: m.formulas.length + m.standards.length, q: m.guide.length,
+  mis: (m.memory.misconceptions || []).length });
+
+// ------------------------------------------------------------------ what you've read (this device only)
+const readSet = () => new Set(arr(store.get("read", [])).filter((k) => typeof k === "string"));
+const isRead = (key) => readSet().has(key);
+function setRead(key, on) {
+  const s = readSet();
+  on ? s.add(key) : s.delete(key);
+  store.set("read", [...s]);
+}
+const lastKey = () => { const k = store.get("last", ""); return typeof k === "string" && MODS.has(k) ? k : ""; };
+
+
+let NARR = {}, NARR_SIG = "", NARR_AT = 0;
+async function loadNarratives() {
+  NARR_AT = Date.now();
+  try {
+    const d = await fetchJSON("static/guide-narratives.json");
+    const out = {};
+    for (const [k, v] of Object.entries(d && typeof d.modules === "object" && d.modules ? d.modules : {})) {
+      const mk = modKeyOf(k);
+      if (mk && v && typeof v === "object" && narrHas(v)) out[mk.key] = v;
+    }
+    const sig = JSON.stringify(out), changed = sig !== NARR_SIG;
+    NARR = out; NARR_SIG = sig;
+    return changed;
+  } catch { return false; }  // not written yet
+}
+const narrHas = (n) => !!(str(n.big_picture) || arr(n.walkthrough).length || arr(n.how_to_think).length || n.worked_example || str(n.connections) || arr(n.pitfalls).length);
+const narrOf = (m) => (m && NARR[m.key]) || null;
+
+// ------------------------------------------------------------------ glossary (static/glossary.json, built by build_glossary.py)
+let TERMS = [], TERM_BY_ID = new Map(), TERM_BY_NORM = new Map();
+function setGlossary(d) {
+  TERMS = (Array.isArray(d && d.terms) ? d.terms : []).filter((t) => t && t.id && t.term && typeof t.def === "string");
+  TERM_BY_ID = new Map(TERMS.map((t) => [t.id, t]));
+  TERM_BY_NORM = new Map();
+  for (const t of TERMS) for (const n of [t.term, ...arr(t.aka), t.term.replace(/\s*\([^)]*\)\s*/g, " ")]) if (norm(n) && !TERM_BY_NORM.has(norm(n))) TERM_BY_NORM.set(norm(n), t);
+}
+const termFor = (name) => TERM_BY_NORM.get(norm(name)) || TERM_BY_NORM.get(norm(String(name).replace(/\s*\([^)]*\)\s*/g, " "))) || null;
+// concepts in the guide that share a term's name
+function conceptsNamed(t) {
+  const seen = new Set(), out = [];
+  for (const n of [t.term, ...arr(t.aka), t.term.replace(/\s*\([^)]*\)\s*/g, " ")])
+    for (const h of CIDX.get(norm(n)) || []) if (!seen.has(h.mod.key + h.i)) { seen.add(h.mod.key + h.i); out.push(h); }
+  return out;
+}
+
+// ------------------------------------------------------------------ links in running text: glossary terms, concept names, "Fixed Income Module 2"
+// Phrases are matched word by word (case-insensitive, plurals folded; abbreviations like CAPM or VaR case-sensitive), longest first,
+// and each target is linked once per page ("first mention"), so a paragraph never turns into a wall of underlines.
+const WORD_RE = /[A-Za-z0-9À-ɏͰ-Ͽ]+(?:['’][A-Za-z]+)?/g;
+const tokKey = (w) => { let k = w.toLowerCase().replace(/’/g, "'"); if (k.length > 3 && k.endsWith("s") && !k.endsWith("ss") && !k.endsWith("'s")) k = k.slice(0, -1); return k; };
+let LINK = new Map();
+function phraseKeys(phrase) {
+  const p = String(phrase || "").normalize("NFKC"), toks = p.match(WORD_RE) || [];
+  const letters = (p.match(/[A-Za-z]/g) || []).length;
+  const cs = toks.length === 1 && (toks[0].match(/[A-Z]/g) || []).length >= 2;  // CAPM, VaR, CVaR
+  if (!toks.length || letters < 3 || (!cs && toks.length === 1 && letters < 5)) return null;
+  return { keys: toks.map(cs ? (w) => w : tokKey), cs };
+}
+function buildLinks() {
+  LINK = new Map();
+  const byKey = new Map();
+  const add = (phrase, target) => {
+    const pk = phraseKeys(phrase);
+    if (!pk) return;
+    const id = (pk.cs ? "1 " : "0 ") + pk.keys.join(" ");
+    let e = byKey.get(id);
+    if (!e) {
+      e = { keys: pk.keys, cs: pk.cs, n: pk.keys.length, targets: [] };
+      byKey.set(id, e);
+      if (!LINK.has(pk.keys[0])) LINK.set(pk.keys[0], []);
+      LINK.get(pk.keys[0]).push(e);
+    }
+    if (!e.targets.some((x) => JSON.stringify(x) === JSON.stringify(target))) e.targets.push(target);
+  };
+  for (const t of TERMS) if (!t.nolink) for (const n of new Set([t.term, ...arr(t.aka), t.term.replace(/\s*\([^)]*\)\s*/g, " ").trim()])) add(n, { t: t.id });
+  for (const m of MODS.values()) m.concepts.forEach((c, i) => {
+    const names = new Set([c.name, c.name.replace(/\s*\([^)]*\)\s*/g, " ").trim()]);
+    const ab = c.name.match(/\(([A-Z][A-Za-z0-9/&-]{1,10})\)/);
+    if (ab && (ab[1].match(/[A-Z]/g) || []).length >= 2) names.add(ab[1]);
+    for (const n of names) { const gt = termFor(n); if (!(gt && gt.nolink)) add(n, { con: [m.key, i] }); }
+  });
+  for (const list of LINK.values()) list.sort((a, b) => b.n - a.n);
+  // glossary terms are searchable too
+  SEARCH = SEARCH.filter((s) => s.type !== "term");
+  for (const t of TERMS) SEARCH.push({ type: "term", label: t.term, extra: `${arr(t.aka).join(" ")} ${t.def.slice(0, 160)}`, id: t.id,
+    n: norm(t.term), x: norm(`${arr(t.aka).join(" ")} ${t.def.slice(0, 160)}`) });
+}
+const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const SP = "[\\s\\u00a0\\u202f]+";
+const MODREF_RE = new RegExp(`\\b(${[...new Set(VOLUMES.flatMap((v) => [v.name, v.short]).concat(["Quant", "FSA"]))].sort((a, b) => b.length - a.length)
+  .map((n) => reEsc(n).replace(/ /g, SP)).join("|")}),?${SP}(?:(?:Learning${SP})?Module${SP}|LM${SP})?(\\d{1,2})(?![\\d.,]\\d|\\s*%)\\b`, "gi");
+const targetId = (x) => (x.t ? "t:" + x.t : x.con ? `con:${x.con[0]}|${x.con[1]}` : "mod:" + x.mod);
+function targetLink(x, text) {
+  const key = targetId(x);
+  const h = x.t ? "#glossary&t=" + encodeURIComponent(x.t) : x.con ? ghref(MODS.get(x.con[0]), "c" + x.con[1]) : ghref(MODS.get(x.mod));
+  return `<a class="xref" href="${esc(h)}" data-pop="${esc(key)}" aria-haspopup="dialog">${fmtPlain(esc(text))}</a>`;
+}
+function pickTarget(e, ctx) {
+  const term = e.targets.find((x) => x.t);
+  if (term) return term;
+  const rank = (x) => { const m = MODS.get(x.con[0]); return !m ? 9 : m === ctx.mod ? 0 : ctx.mod && m.vol === ctx.mod.vol ? 1 : 2; };
+  return e.targets.filter((x) => x.con).sort((a, b) => rank(a) - rank(b) || ORDER.indexOf(a.con[0]) - ORDER.indexOf(b.con[0]))[0] || null;
+}
+// Raw text (maths already swapped for placeholders) in; the same text with each new link swapped for a placeholder out.
+function linkify(raw, ctx, ph) {
+  if (!ctx) return raw;
+  raw = raw.replace(MODREF_RE, (m0, name, num) => {
+    const v = VOL_BY_ALIAS.get(norm(name)), mod = v && MODS.get(`${v.name} ${+num}`);
+    if (!mod || ctx.seen.has("mod:" + mod.key)) return m0;
+    ctx.seen.add("mod:" + mod.key);
+    return ph(targetLink({ mod: mod.key }, m0));
+  });
+  if (!LINK.size) return raw;
+  const words = [...raw.matchAll(WORD_RE)];
+  let out = "", last = 0;
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i][0];
+    let hit = null;
+    for (const e of [...(LINK.get(w) || []), ...(LINK.get(tokKey(w)) || [])]) {
+      if (hit && hit.n >= e.n) continue;
+      if (i + e.n > words.length) continue;
+      let ok = true;
+      for (let j = 0; j < e.n && ok; j++) {
+        const wj = words[i + j][0];
+        ok = (e.cs ? wj : tokKey(wj)) === e.keys[j];
+        if (ok && j) ok = /^[\s\-‐‑]{1,3}$/.test(raw.slice(words[i + j - 1].index + words[i + j - 1][0].length, words[i + j].index));
+      }
+      if (ok) hit = e;
+    }
+    if (!hit) continue;
+    const start = words[i].index, endW = words[i + hit.n - 1], end = endW.index + endW[0].length;
+    const glued = /[A-Za-z][\-‐‑]$/.test(raw.slice(Math.max(0, start - 2), start)) || /^[\-‐‑][A-Za-z]/.test(raw.slice(end, end + 2));
+    const target = !glued && pickTarget(hit, ctx);
+    if (target && !ctx.seen.has(targetId(target))) {
+      ctx.seen.add(targetId(target));
+      out += raw.slice(last, start) + ph(targetLink(target, raw.slice(start, end)));
+      last = end;
+    }
+    i += hit.n - 1;
+  }
+  return out + raw.slice(last);
+}
+const linkCtx = (m, extra) => ({ seen: new Set([...(m ? ["mod:" + m.key] : []), ...(extra || [])]), mod: m || null });
+const PUA = /[-]/g;
+// fmt() plus links: \( \) and \[ \] stay for KaTeX; plain parts get links, then the textbook font.
+function fmtL(s, ctx) {
+  if (!ctx) return fmt(s);
+  return String(s ?? "").split(/(\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/).map((part, i) => {
+    if (i % 2) return esc(part);
+    const keep = [], ph = (h) => String.fromCharCode(0xF000 + keep.push(h) - 1);
+    return fmtPlain(esc(linkify(part, ctx, ph))).replace(PUA, (c) => keep[c.charCodeAt(0) - 0xF000]);
+  }).join("");
+}
+
+
+// LaTeX whose backslashes were eaten by JSON (\t, \f, \b), $…$ and \begin{…} maths, Markdown bold and lists, blank-line paragraphs.
+// rich() repairs what it safely can, renders maths with KaTeX (the source, quietly, if it still won't parse) and the rest as text.
+const MATH_RE = /\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|(\\begin\{(equation\*?|align\*?|alignat\*?|aligned|alignedat|gather\*?|gathered|split|cases|array|matrix|pmatrix|bmatrix|vmatrix)\}[\s\S]*?\\end\{\5\})|\$(?=[^\s$])([^$\n]{0,300}?[^\s$\\])\$/g;
+function repairTeX(s) {
+  return String(s ?? "").replace(/\r\n/g, "\n").replace(/\\n(?![a-z])/g, "\n")  // a written-out "\n" is a line break (TeX commands after \n are lower case)
+    .replace(/\x08/g, "\\b").replace(/\x0c/g, "\\f").replace(/\t(?=[a-zA-Z])/g, "\\t").replace(/\r(?=[a-zA-Z])/g, "\\r").replace(/\r/g, "")
+    .replace(/\n(?=(?:eq|abla|eg|ot|neq|leq|geq)(?![a-zA-Z]))/g, "\\n")
+    .replace(/\\\\(?=[\[\]()a-zA-Z])/g, "\\");
+}
+// Bare TeX in the prose (\frac{a}{b} with no \( \)): a run of commands with their {arguments} becomes inline maths.
+const BRACE = String.raw`\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}`;
+const TEX_ATOM = String.raw`\\[a-zA-Z]+\*?(?:\s*${BRACE})*(?:\s*[_^](?:${BRACE}|[A-Za-z0-9]))*`;
+const BARE_RE = new RegExp(`${TEX_ATOM}(?:[ \\t]*[=+\\-*/,]?[ \\t]*${TEX_ATOM})*`, "g");
+const texFix = (latex) => latex.trim().replace(/[\u2010\u2011]/g, "-").replace(/[\u00a0\u202f]/g, " ");
+function rich(s, ctx, inline) {
+  const keep = [], display = new Set();
+  // value marks (static/ties.js) for the question being drawn: the Path sets window.__TIE round its calls
+  const TIE = window.__TIE || null, GIVEN = !!window.__TIE_GIVEN;
+  const tied = (latex, disp, strict, bare) => { const w = TIE ? TIE.tex(latex, GIVEN) : latex; return tex(w, disp, strict, bare, w === latex ? null : latex); };
+  const ph = (h, disp) => { const c = String.fromCharCode(0xF000 + keep.push(h) - 1); if (disp) display.add(c); return c; };
+  let t = repairTeX(s).replace(MATH_RE, (m0, dd, br, pa, env, envName, dol) => {
+    if (dol !== undefined && !/[\\_^{}=]/.test(dol) && !/^[A-Za-z]$/.test(dol)) return m0;  // "$5 and $10" is money
+    const latex = texFix(dd ?? br ?? pa ?? env ?? dol), disp = !inline && (dd !== undefined || br !== undefined || env !== undefined);
+    return ph(tied(latex, disp, true), disp);
+  });
+  if (display.size) t = t.replace(new RegExp(`([${[...display].join("")}])[ \\t]*[.,;:](?=\\s|$)`, "g"), "$1");  // no lone "." under a displayed formula
+  t = t.replace(/\\(?:begin|end)\{[a-zA-Z*]+\}|\\(?:tag|label)\{[^}]*\}|\\nonumber\b/g, " ")  // environment markers left without a partner
+    .replace(BARE_RE, (m0) => {
+      const core = m0.replace(/^(?:\s*\\(?:[bB]igg?[lr]?|left|right|middle|quad|qquad|displaystyle|nonumber|notag)(?![a-zA-Z]))+|(?:\s*\\(?:[bB]igg?[lr]?|left|right|middle|quad|qquad|nonumber|notag)(?![a-zA-Z]))+\s*$/g, "");
+      return core.trim() ? ph(tied(texFix(core), false, true, true)) : " ";  // sizing commands whose bracket went missing are dropped
+    })
+    .replace(/\t/g, " ");
+  if (TIE) t = TIE.text(t, GIVEN, (cls, num) => ph(`<mark class="${cls} num">${esc(num)}</mark>`));
+  t = esc(linkify(t, ctx, ph));
+  t = fmtPlain(t)
+    .replace(/\*\*(?=\S)([^*\n]+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*(?=[^\s*])([^*\n]+?)\*(?![*\w])/g, "$1<em>$2</em>")
+    .replace(/`([^`\n]+)`/g, "<code>$1</code>");
+  const restore = (x) => x.replace(PUA, (c) => keep[c.charCodeAt(0) - 0xF000]);
+  if (inline) return restore(t.replace(/\s*\n\s*/g, " "));
+  const out = [];
+  let para = [], list = null;
+  const flushP = () => { if (para.length) out.push(`<p>${para.join("<br>")}</p>`); para = []; };
+  const flushL = () => { if (list) out.push(`<ul>${list.map((li) => `<li>${li}</li>`).join("")}</ul>`); list = null; };
+  for (const line of t.split("\n")) {
+    const L = line.trim();
+    let m;
+    if (!L) { flushP(); flushL(); }
+    else if ((m = L.match(/^#{1,6}\s+(.+)$/))) { flushP(); flushL(); out.push(`<p class="rh">${m[1]}</p>`); }
+    else if ((m = L.match(/^(?:[-*•]|\d{1,2}[.)])\s+(.+)$/))) { flushP(); (list ||= []).push(m[1]); }
+    else if (!L.replace(PUA, (c) => (display.has(c) ? "" : c)).replace(/[\s.,;:]/g, "")) { flushP(); flushL(); out.push(L); }  // a formula on its own line
+    else { flushL(); para.push(L); }
+  }
+  flushP(); flushL();
+  return restore(out.join(""));
+}
+// </rich>
+
+// ------------------------------------------------------------------ navigation
+const openVols = new Set();
+let MODE = "guide";
+// #g=<module> (guide), #guide, #glossary, #map, #v=<volume>, #m=<module> (map). #module=… or ?module=… with looser names
+
+function route() {
+  const raw = location.hash.slice(1);
+  const r = new URLSearchParams(raw);
+  const q = new URLSearchParams(location.search);
+  const loose = r.get("module") ?? (!raw ? q.get("module") : null);
+  if (loose !== null) { const k = modKeyOf(loose); r.delete("module"); if (k) r.set("g", k.key); else r.set("guide", ""); }
+  for (const p of ["g", "m"]) if (r.get(p) && !MODS.has(r.get(p))) { const k = modKeyOf(r.get(p)); r.delete(p); if (k && MODS.has(k.key)) r.set(p, k.key); }
+  return r;
+}
+function viewOf(r) {
+  if (r.has("los")) return r.get("lm") ? "lmod" : "lhome";
+  if (r.has("path")) return r.get("pm") ? "pmod" : "phome";
+  if (r.get("g") && MODS.has(r.get("g"))) return "gmod";
+  if (r.has("glossary")) return "gloss";
+  if (r.get("m") && MODS.has(r.get("m"))) return "mmod";
+  if (r.get("v") && VOL_BY_ID.has(r.get("v"))) return "mvol";
+  if (r.has("map")) return "mhome";
+  return location.hash.length > 1 || location.search.includes("module") ? "ghome" : "phome";  // the study path is where a fresh visit starts
+}
+
+function drawNav() {
+  const nav = $("nav"), y = nav.scrollTop;
+  MODE === "guide" ? drawGuideNav() : MODE === "path" ? PathView.nav() : drawMapNav();
+  nav.scrollTop = y;
+  nav.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => d.open ? openVols.add(d.dataset.v) : openVols.delete(d.dataset.v)));
+}
+function drawMapNav() {
+  const r = route(), curMod = r.get("m"), curVol = r.get("v") || (curMod && MODS.get(curMod) && MODS.get(curMod).vol.id);
+  if (curVol) openVols.add(curVol);
+  $("nav").innerHTML = `<a class="home ${!curMod && !r.get("v") ? "cur" : ""}" href="#map">Overview</a>` + VOLUMES.map((v) => {
+    const mapped = v.keys.filter((k) => MODS.get(k).mapped).length;
+    return `<details data-v="${v.id}" ${openVols.has(v.id) ? "open" : ""}><summary><span class="vn">${v.vi + 1}</span>${esc(v.short)}
+        <span class="cnt">${mapped}/${v.keys.length}</span></summary>
+      <div class="mods"><a class="diagram ${r.get("v") === v.id ? "cur" : ""}" href="${vhref(v)}">◇ Volume diagram</a>
+      ${v.keys.map((k) => { const m = MODS.get(k), n = counts(m);
+        const b = [n.f ? `ƒ${n.f}` : "", n.q ? `Q${n.q}` : ""].filter(Boolean).join(" ");
+        return `<a href="${href(m)}" class="${k === curMod ? "cur" : ""} ${m.mapped ? "" : "off"}" title="${esc(m.title)}"><span class="mn">${m.n}</span>
+          <span class="mt">${esc(m.title || m.key)}</span>${b ? `<span class="b">${b}</span>` : ""}</a>`; }).join("")}</div></details>`;
+  }).join("");
+}
+function drawGuideNav() {
+  const r = route(), view = viewOf(r), cur = view === "gmod" ? r.get("g") : "", read = readSet();
+  const curVol = cur ? MODS.get(cur).vol.id : r.get("vol");
+  if (curVol) openVols.add(curVol);
+  const done = ORDER.filter((k) => read.has(k)).length;
+  $("nav").innerHTML = `<a class="home ${view === "ghome" ? "cur" : ""}" href="#guide">Guide: start here</a>
+    <div class="toc-prog">${done} of ${ORDER.length} modules read<div class="progress thin"><i style="width:${Math.round(100 * done / (ORDER.length || 1))}%"></i></div></div>` +
+    VOLUMES.map((v) => `<details data-v="${v.id}" ${openVols.has(v.id) ? "open" : ""}><summary><span class="vn">${v.vi + 1}</span>${esc(v.short)}
+        <span class="cnt">${v.keys.filter((k) => read.has(k)).length}/${v.keys.length}</span></summary>
+      <div class="mods">${v.keys.map((k) => { const m = MODS.get(k);
+        return `<a href="${ghref(m)}" class="${k === cur ? "cur" : ""}" ${k === cur ? 'aria-current="page"' : ""} title="${esc(m.title)}"><span class="mn">${m.n}</span>
+          <span class="mt">${esc(m.title || m.key)}</span>${narrOf(m) ? `<span class="nr" title="Walkthrough ready"></span>` : ""}${read.has(k) ? `<span class="ok" aria-label="read">✓</span>` : ""}</a>`; }).join("")}</div></details>`).join("") +
+    `<div class="sep"></div><a class="home ${view === "gloss" ? "cur" : ""}" href="#glossary">Glossary A–Z</a>`;
+}
+$("navbtn").onclick = () => { const o = document.body.classList.toggle("navopen"); $("navbtn").setAttribute("aria-expanded", o); };
+$("nav").addEventListener("click", (e) => { if (e.target.closest("a")) { document.body.classList.remove("navopen"); $("navbtn").setAttribute("aria-expanded", "false"); } });
+
+// The Guide/Map switch keeps your place: Fixed Income 2 in the guide <-> Fixed Income 2 on the map.
+function drawSwitch(view, key) {
+  const g = $("sw-guide"), mp = $("sw-map"), pa = $("sw-path");
+  g.href = view === "mmod" ? ghref(MODS.get(key)) : view === "mvol" ? `#guide&vol=${key}` : "#guide";
+  mp.href = view === "gmod" ? href(MODS.get(key)) : "#map";
+  g.toggleAttribute("aria-current", MODE === "guide"); mp.toggleAttribute("aria-current", MODE === "map");
+  pa.toggleAttribute("aria-current", false);
+  const lo = $("sw-los"), isLos = view === "lhome" || view === "lmod";
+  lo.toggleAttribute("aria-current", false);
+  lo.href = view === "pmod" && key ? `#los&lm=${encodeURIComponent(key)}` : "#los";
+  if (isLos) lo.setAttribute("aria-current", "page");
+  else if (MODE === "guide") g.setAttribute("aria-current", "page"); else if (MODE === "path") pa.setAttribute("aria-current", "page"); else mp.setAttribute("aria-current", "page");
+  if (view === "lmod") pa.href = `#path&pm=${encodeURIComponent(key)}`; else pa.href = "#path";
+  if (MODE === "path") { g.href = (view === "pmod" || view === "lmod") && MODS.get(key) ? ghref(MODS.get(key)) : "#guide"; mp.href = "#map"; g.removeAttribute("aria-current"); mp.removeAttribute("aria-current"); }
+  const m = view === "gmod" && MODS.get(key), pos = m ? ORDER.indexOf(m.key) : -1;
+  $("whereami").textContent = m ? `${m.vol.short} ${m.n} · ${pos + 1} of ${ORDER.length}` : "";
+  $("topprog").style.width = m ? `${Math.round(100 * (pos + 1) / ORDER.length)}%` : "0";
+  if (view === "pmod" && window.PathView && PathView.ready()) { const ks = PathView.keys(), i = ks.indexOf(key); $("whereami").textContent = i >= 0 ? `Section ${i + 1} of ${ks.length}` : ""; $("topprog").style.width = i >= 0 ? `${Math.round(100 * (i + 1) / ks.length)}%` : "0"; }
+}
+
+// ------------------------------------------------------------------ map views
+function totals(keys) {
+  const t = { mods: keys.length, mapped: 0, c: 0, f: 0, q: 0, mis: 0 };
+  for (const k of keys) { const m = MODS.get(k), n = counts(m); t.mapped += m.mapped ? 1 : 0; t.c += n.c; t.f += n.f; t.q += n.q; t.mis += n.mis; }
+  return t;
+}
+function badgeRow(t, withMods) {
+  return `<div class="badges">
+    ${withMods ? `<span class="badge ${t.mapped === t.mods ? "good" : ""}"><b>${t.mapped}</b>/${t.mods} modules mapped</span>` : ""}
+    <span class="badge"><b>${t.c}</b> concepts</span>
+    <span class="badge ${t.f ? "good" : ""}"><b>${t.f}</b> formulas</span>
+    <span class="badge ${t.q ? "good" : ""}"><b>${t.q}</b> Q&amp;As</span>
+    <span class="badge ${t.mis ? "warn" : ""}"><b>${t.mis}</b> misconceptions</span></div>`;
+}
+
+// ------------------------------------------------------------------ the master map: how the ten topics build on each other
+let ML = null;
+function topicLinks() {
+  const dir = new Map(), mods = new Map(), notes = new Map(), pair = new Map();  // dir, mods: "prerequisite>the one that builds on it"
+  const bump = (map, k, by = 1) => map.set(k, (map.get(k) || 0) + by);
+  for (const m of MODS.values()) {
+    m.concepts.forEach((c) => c.refs.forEach((r) => {
+      if ((r.kind !== "concept" && r.kind !== "module") || r.mod.vol === m.vol) return;
+      bump(dir, r.mod.vol.id + ">" + m.vol.id); bump(mods, r.mod.key + ">" + m.key);
+    }));
+    m.connects.forEach((c) => { const k = modKeyOf(c.module), t = k && MODS.get(k.key);
+      if (!t || t.vol === m.vol) return;
+      const key = [m.vol.id, t.vol.id].sort().join("|");
+      if (!notes.has(key)) notes.set(key, []);
+      notes.get(key).push({ a: m, b: t, how: c.how });
+    });
+  }
+  for (const [k, n] of dir) bump(pair, k.split(">").sort().join("|"), n);  // a pair's weight: concept links both ways, plus the module-level connections
+  for (const [key, list] of notes) bump(pair, key, list.length);
+  return { dir, mods, notes, pair };
+}
+function masterMap() {
+  const L = ML = topicLinks();
+  const W = 860, H = 620, cx = 430, cy = 310, R = 222;
+  const maxC = Math.max(1, ...VOLUMES.map((v) => totals(v.keys).c)), maxW = Math.max(1, ...L.pair.values());
+  const P = new Map(VOLUMES.map((v, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / VOLUMES.length;
+    return [v.id, { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), a, r: 26 + 16 * Math.sqrt(totals(v.keys).c / maxC) }]; }));
+  const f = (x) => x.toFixed(1);
+  const strong = new Set([...L.pair].sort((a, b) => b[1] - a[1]).slice(0, 15).map((x) => x[0]));  // the rest stay faint until a topic is picked
+  const edges = [...L.pair].sort((a, b) => a[1] - b[1]).map(([key, w]) => { const [a, b] = key.split("|"), A = P.get(a), B = P.get(b);
+    const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, qx = mx + (cx - mx) * 0.45, qy = my + (cy - my) * 0.45;
+    return `<path class="e${strong.has(key) ? "" : " weak"}" data-a="${a}" data-b="${b}" stroke-width="${f(1 + 9 * w / maxW)}" d="M${f(A.x)},${f(A.y)} Q${f(qx)},${f(qy)} ${f(B.x)},${f(B.y)}"><title>${esc(VOL_BY_ID.get(a).short)} and ${esc(VOL_BY_ID.get(b).short)}: ${plural(w, "link")}</title></path>`; }).join("");
+  const nodes = VOLUMES.map((v) => { const p = P.get(v.id), t = totals(v.keys), cos = Math.cos(p.a), sin = Math.sin(p.a);
+    const lx = p.x + cos * (p.r + 10), ly = p.y + sin * (p.r + 10) + (sin < -0.5 ? -18 : sin > 0.5 ? 14 : 0);
+    const anchor = Math.abs(cos) < 0.3 ? "middle" : cos > 0 ? "start" : "end";
+    const words = v.short.length > 12 && v.short.includes(" ") ? [v.short.slice(0, v.short.lastIndexOf(" ")), v.short.slice(v.short.lastIndexOf(" ") + 1)] : [v.short];  // long names on two lines
+    return `<g class="n" data-v="${v.id}" tabindex="0" role="button" aria-label="${esc(v.name)}"><circle cx="${f(p.x)}" cy="${f(p.y)}" r="${f(p.r)}"/>
+      <text class="a" x="${f(p.x)}" y="${f(p.y)}">${esc(v.abbr)}</text>
+      <text class="l" x="${f(lx)}" y="${f(ly)}" text-anchor="${anchor}">${words.map((w, i) => `<tspan x="${f(lx)}" dy="${i ? "1.15em" : 0}">${esc(w)}</tspan>`).join("")}</text>
+      <text class="c" x="${f(lx)}" y="${f(ly + 15 + (words.length - 1) * 17)}" text-anchor="${anchor}">${plural(t.mods, "module")} · ${plural(t.c, "concept")}</text></g>`; }).join("");
+  return `<div class="mlwrap"><div class="mlmap"><svg class="ml" id="ml" viewBox="0 0 ${W} ${H}" role="img" aria-label="How the ten topics connect">${edges}${nodes}</svg></div>
+      <div class="mlpanel card" id="mlpanel">${masterPanel(null)}</div></div>
+    <p class="muted" style="font-size:13px;margin-top:8px">A line joins two topics when concepts in one build on concepts in the other; the thicker the line, the more links. The fifteen strongest are drawn in full and the rest faintly. Hover over a topic, or tap it, to see what it builds on and what it leads into.</p>`;
+}
+function masterPanel(id) {
+  const L = ML, vol = (x) => VOL_BY_ID.get(x);
+  const row = (label, n, max) => `<div class="mlrow"><span>${label}</span><span class="bar"><i style="width:${Math.max(4, Math.round(100 * n / max))}%"></i></span><span class="k">${n}</span></div>`;
+  const pick = (x) => `<button type="button" data-v="${x}">${esc(vol(x).short)}</button>`;
+  if (!id) {
+    const top = [...L.pair].sort((a, b) => b[1] - a[1]).slice(0, 8), max = top.length ? top[0][1] : 1;
+    return `<h4>How the topics fit together</h4><p class="how">The ten topics are one body of knowledge: ${plural(L.pair.size, "pair")} of them share concepts. Pick a topic on the map, or one below.</p>
+      <div class="sub">Strongest links</div>${top.map(([key, w]) => { const [a, b] = key.split("|"); return row(`${pick(a)} · ${pick(b)}`, w, max); }).join("")}`;
+  }
+  const v = vol(id);
+  const on = [...L.dir].filter(([k]) => k.endsWith(">" + id)).map(([k, n]) => [k.split(">")[0], n]).sort((a, b) => b[1] - a[1]);
+  const into = [...L.dir].filter(([k]) => k.startsWith(id + ">")).map(([k, n]) => [k.split(">")[1], n]).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...on.map((x) => x[1]), ...into.map((x) => x[1]));
+  const ml = [...L.mods].filter(([k]) => k.split(">").some((x) => MODS.get(x).vol.id === id)).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const notes = [...L.notes].filter(([k]) => k.split("|").includes(id)).flatMap(([, list]) => list).slice(0, 3);
+  return `<h4>${esc(v.name)}</h4><a class="btn sm" href="${vhref(v)}">Open this topic's diagram →</a>
+    <div class="sub">Builds on</div>${on.length ? on.map(([o, n]) => row(pick(o), n, max)).join("") : `<p class="how">Nothing from another topic at this level.</p>`}
+    <div class="sub">Leads into</div>${into.length ? into.map(([o, n]) => row(pick(o), n, max)).join("") : `<p class="how">No other topic builds on it directly.</p>`}
+    ${ml.length ? `<div class="sub">Module to module</div><ul class="mllinks">${ml.map(([k, n]) => { const [a, b] = k.split(">").map((x) => MODS.get(x));
+      return `<li><a href="${href(a)}" title="${esc(a.title)}">${esc(a.vol.abbr)} ${a.n}</a> → <a href="${href(b)}" title="${esc(b.title)}">${esc(b.vol.abbr)} ${b.n}: ${esc(clip(b.title || b.key, 36))}</a> <span class="k">${plural(n, "link")}</span></li>`; }).join("")}</ul>` : ""}
+    ${notes.length ? `<div class="sub">For example</div>${notes.map((x) => `<p class="how"><b>${esc(x.a.vol.abbr)} ${x.a.n} and ${esc(x.b.vol.abbr)} ${x.b.n}.</b> ${fmt(x.how)}</p>`).join("")}` : ""}`;
+}
+function wireMaster() {
+  const svg = $("ml"), panel = $("mlpanel");
+  if (!svg) return;
+  let pinned = null;
+  const show = (id) => {
+    svg.classList.toggle("focus", !!id);
+    const on = new Set(id ? [id] : []);
+    svg.querySelectorAll(".e").forEach((e) => { const hit = !!id && (e.dataset.a === id || e.dataset.b === id); e.classList.toggle("on", hit); if (hit) { on.add(e.dataset.a); on.add(e.dataset.b); } });
+    svg.querySelectorAll(".n").forEach((n) => { n.classList.toggle("on", on.has(n.dataset.v)); n.classList.toggle("sel", n.dataset.v === id); });
+    panel.innerHTML = masterPanel(id);
+    typeset(panel);
+  };
+  const pick = (id) => { pinned = pinned === id ? null : id; show(pinned); };
+  svg.addEventListener("mouseover", (e) => { const n = e.target.closest(".n"); if (n && !pinned) show(n.dataset.v); });
+  svg.addEventListener("mouseleave", () => { if (!pinned) show(null); });
+  svg.addEventListener("click", (e) => { const n = e.target.closest(".n"); pick(n ? n.dataset.v : null); });
+  svg.addEventListener("keydown", (e) => { const n = e.target.closest(".n"); if (n && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(n.dataset.v); } });
+  panel.addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) { pinned = b.dataset.v; show(pinned); } });
+}
+
+function viewHome() {
+  const all = totals([...MODS.keys()]);
+  return `<h2>The whole Level II curriculum</h2>
+    <p class="lede">Ten volumes in book order. Open a volume to see how its ideas build on each other, or a module for its concepts, formulas, worked questions and answers, and the common mistakes. For a readable walkthrough, switch to the <a href="#guide">Guide</a>.</p>
+    ${badgeRow(all, true)}
+    <h3>The master map</h3>
+    ${all.c ? masterMap() : `<div class="empty-note">The master map appears once the concept map has been built.</div>`}
+    <h3>Volumes</h3>
+    <div class="grid">${VOLUMES.map((v) => { const t = totals(v.keys);
+      return `<a class="card vcard" href="${vhref(v)}"><div class="vh"><span class="vn">${v.vi + 1}</span>${esc(v.name)}</div>
+        <p>${plural(t.mods, "module")} · ${plural(t.c, "concept")} · ${plural(t.f, "formula")} · ${plural(t.q, "Q&amp;A", "Q&amp;As")}</p>
+        <div class="meter" title="${t.mapped} of ${t.mods} modules mapped"><i style="width:${Math.round(100 * t.mapped / (t.mods || 1))}%"></i></div></a>`; }).join("")}</div>
+    ${UNMATCHED.length ? `<p class="muted" style="font-size:13px;margin-top:18px">Not placed (unknown module names): ${esc(UNMATCHED.join(", "))}</p>` : ""}`;
+}
+
+function viewVolume(v) {
+  const t = totals(v.keys);
+  return `<div class="crumbs"><a href="#map">Overview</a> › Volume ${v.vi + 1}</div>
+    <h2>${esc(v.name)}</h2>${badgeRow(t, true)}
+    <h3>How the ideas connect</h3>
+    ${t.c ? diagram(v) : `<div class="empty-note">The concept map for ${esc(v.short)} hasn't been built yet. It will appear here on its own once it has.</div>`}
+    <h3>Modules <span class="count">${t.mods}</span></h3>
+    <div class="modlist">${v.keys.map((k) => { const m = MODS.get(k), n = counts(m);
+      return `<a class="card modrow" href="${href(m)}"><span class="vn">${m.n}</span>
+        <span><div class="t">${esc(m.title || m.key)}</div>${m.summary ? `<div class="s">${fmt(m.summary)}</div>` : `<div class="s">Not mapped yet</div>`}</span>
+        <span class="badges">${n.c ? `<span class="badge"><b>${n.c}</b> concepts</span>` : ""}${n.f ? `<span class="badge good"><b>${n.f}</b> ƒ</span>` : ""}
+          ${n.q ? `<span class="badge good"><b>${n.q}</b> Q&amp;A</span>` : ""}${n.mis ? `<span class="badge warn"><b>${n.mis}</b> ⚠</span>` : ""}</span></a>`; }).join("")}</div>`;
+}
+
+function refChip(r) {
+  if (r.kind === "concept") {
+    const c = r.mod.concepts[r.i];
+    return `<a class="chip" href="${href(r.mod, { c: r.i })}" title="${esc(r.mod.key)}: ${esc(c.name)}">${esc(c.name)}${r.mod.vol !== curVolume() ? ` · ${esc(r.mod.vol.abbr)} ${r.mod.n}` : ""}</a>`;
+  }
+  if (r.kind === "module") return `<a class="chip ${r.mod.vol !== curVolume() ? "out" : ""}" href="${href(r.mod)}" title="${esc(r.raw)}">${esc(r.mod.vol.short)} ${r.mod.n}${r.label ? ": " + esc(clip(r.label, 40)) : ""}</a>`;
+  if (r.kind === "level1") return `<span class="chip l1" title="Level I">Level I: ${esc(r.label)}</span>`;
+  return `<span class="chip plain">${esc(r.label || r.raw)}</span>`;
+}
+let CURVOL = null, CURMOD = null;
+const curVolume = () => CURVOL;
+
+function formulaCard(f, i, m = CURMOD) {
+  const ex = f.example;
+  const exHtml = !ex ? "" : typeof ex === "string" ? `<div class="example"><b>Example</b>${fmt(ex)}</div>`
+    : `<div class="example"><b>Example</b>${ex.setup ? fmt(ex.setup) : ""}${ex.latex ? `<div class="ftex">${tex(ex.latex, true)}</div>` : ""}
+       ${ex.result ? `<div class="res">${fmt(ex.result)}</div>` : ""}</div>`;
+  const bo = m.frefs[i] || [];
+  return `<div class="card fcard" id="f${i}"><div class="fh"><h4>${fmt(f.name)}</h4>${f.id ? `<span class="fid">${esc(f.id)}</span>` : ""}</div>
+    ${f.latex ? `<div class="ftex">${tex(f.latex, true)}</div>` : ""}
+    ${f.spoken ? `<p class="spoken">Say it: “${esc(f.spoken)}”</p>` : ""}
+    ${(f.variables || []).length ? `<ul class="where">${f.variables.map((v) => `<li><b>${tex(v.latex || "")}</b>${fmt(v.meaning)}</li>`).join("")}</ul>` : ""}
+    ${f.use ? `<p class="fline"><b>Use</b>${fmt(f.use)}</p>` : ""}
+    ${bo.length ? `<div class="chips"><span class="lbl">Builds on</span>${bo.map(refChip).join("")}</div>` : ""}
+    ${f.pitfall ? `<div class="pitfall"><b>Pitfall</b>${fmt(f.pitfall)}</div>` : ""}
+    ${exHtml}</div>`;
+}
+function standardCard(s, i) {
+  const ex = s.example;
+  const exText = !ex ? "" : typeof ex === "string" ? fmt(ex) : [ex.setup, ex.result].filter(Boolean).map(fmt).join("<br>");
+  return `<div class="card fcard std" id="s${i}"><div class="fh">${s.id ? `<span class="fid">${esc(s.id)}</span>` : ""}<h4>${fmt(s.name)}</h4></div>
+    ${s.summary ? `<p class="fline">${fmt(s.summary)}</p>` : ""}
+    ${s.spoken ? `<p class="spoken" style="margin-top:6px">Say it: “${esc(s.spoken)}”</p>` : ""}
+    ${s.pitfall ? `<div class="pitfall"><b>Pitfall</b>${fmt(s.pitfall)}</div>` : ""}
+    ${exText ? `<div class="example"><b>Example</b>${exText}</div>` : ""}</div>`;
+}
+
+function viewModule(m) {
+  const v = m.vol, idx = v.keys.indexOf(m.key), prev = MODS.get(v.keys[idx - 1]), next = MODS.get(v.keys[idx + 1]);
+  const n = counts(m), mem = m.memory || {};
+  const list = (a) => (Array.isArray(a) ? a : []).filter(Boolean);
+  const concepts = m.concepts.map((c, i) => `<div class="card concept" id="c${i}"><h4>${fmt(c.name)}</h4><p>${fmt(c.what)}</p>
+      ${c.refs.length ? `<div class="chips"><span class="lbl">Builds on</span>${c.refs.map(refChip).join("")}</div>` : ""}
+      ${c.usedBy.length ? `<div class="chips"><span class="lbl">Leads to</span>${c.usedBy.map((u) => refChip({ kind: "concept", mod: u.mod, i: u.i })).join("")}</div>` : ""}</div>`).join("");
+  const connects = m.connects.map((c) => { const k = modKeyOf(c.module); const t = k && MODS.get(k.key);
+    return `<div class="connect">${t ? `<a class="chip ${t.vol !== v ? "out" : ""}" href="${href(t)}" title="${esc(t.title)}">${esc(t.vol.short)} ${t.n}${t.title ? ": " + esc(clip(t.title, 28)) : ""}</a>`
+      : `<span class="chip plain">${esc(c.module)}</span>`}<span>${fmt(c.how)}</span></div>`; }).join("");
+  const guide = m.guide.map((g, i) => `<details class="card qa" id="g${i}"><summary>${g.answer ? `<span class="ans">${esc(g.answer)}</span>` : ""}<span class="qt">${fmt(g.question)}${qaOpts(g)}</span></summary>
+      <div class="body">${qaTag(g) ? `<div class="ansline">${qaTag(g)}</div>` : ""}${qaSteps(g)}${g.checked === undefined ? fmt(g.display || g.explanation) : `<div class="rich">${rich(g.display || g.explanation)}</div>`}
+      ${list(g.corrected).length ? `<div class="corr"><b>Corrected on the way</b><ul>${list(g.corrected).map((c) => `<li>${fmt(c)}</li>`).join("")}</ul></div>` : ""}
+      </div></details>`).join("");
+  const miss = list(mem.misconceptions), asked = list(mem.questions), expl = list(mem.explanations);
+  const hasFormulas = m.formulas.length || m.standards.length;
+  const isEthics = v.id === "ethics";
+  return `<div class="crumbs"><a href="#map">Overview</a> › <a href="${vhref(v)}">${esc(v.name)}</a> › Module ${m.n}</div>
+    <h2>${esc(m.title || m.key)}</h2>
+    <div class="badges"><span class="badge"><b>${n.c}</b> concepts</span><span class="badge ${n.f ? "good" : ""}"><b>${n.f}</b> ${isEthics ? "standards" : "formulas"}</span>
+      <span class="badge ${n.q ? "good" : ""}"><b>${n.q}</b> Q&amp;As</span><span class="badge ${n.mis ? "warn" : ""}"><b>${n.mis}</b> misconceptions</span>
+      </div>
+    <div class="toguide"><a class="btn sm" href="${ghref(m)}">Read this module in the Guide →</a></div>
+    ${m.summary ? `<p class="lede">${fmt(m.summary)}</p>` : `<div class="empty-note" style="margin-top:12px">This module hasn't been mapped yet — its concepts will appear here once the concept map reaches it.</div>`}
+    ${m.concepts.length ? `<h3>Concepts <span class="count">${n.c}</span></h3><div class="concepts">${concepts}</div>` : ""}
+    <h3>${isEthics ? "Standards" : "Formulas"} <span class="count">${n.f}</span></h3>
+    ${hasFormulas ? `<div class="fcards">${m.formulas.map((f, i) => formulaCard(f, i, m)).join("")}${m.standards.map(standardCard).join("")}</div>`
+      : `<div class="empty-note">No ${isEthics ? "standards" : "formula"} cards for this module yet. They're being written and will show up here automatically.</div>`}
+    ${connects ? `<h3>Connects to</h3><div class="card connects">${connects}</div>` : ""}
+    <h3>Questions &amp; answers <span class="count">${n.q}</span></h3>
+    ${guide ? `<div class="stack">${guide}</div>` : `<div class="empty-note">No questions and answers for this module.</div>`}
+    <h3>Common misconceptions <span class="count">${n.mis}</span></h3>
+    ${miss.length ? `<ul class="miss">${miss.map((x) => `<li>${fmt(x)}</li>`).join("")}</ul>` : `<div class="empty-note">None recorded for this module.</div>`}
+    
+    
+    <div class="pager">${prev ? `<a href="${href(prev)}">← ${prev.n}. ${esc(prev.title)}</a>` : "<span></span>"}
+      ${next ? `<a href="${href(next)}">${next.n}. ${esc(next.title)} →</a>` : ""}</div>`;
+}
+
+// ------------------------------------------------------------------ the dependency diagram
+const DG = { W: 218, GAP: 72, NH: 30, VG: 9, HH: 50, PAD: 18, TOP: 16, ROWGAP: 34, LEFT: 34, per: 0, fit: false };
+// How many module columns fit side by side in the content area: the modules wrap into rows, so the page never scrolls sideways.
+function dgFit(n) {
+  const avail = Math.max(300, ($("content") ? $("content").clientWidth : 900) - 2);
+  return { avail, per: Math.max(1, Math.min(n, Math.floor((avail - DG.PAD * 2 - DG.LEFT + DG.GAP) / (DG.W + DG.GAP)))) };
+}
+function diagram(v) {
+  const mods = v.keys.map((k) => MODS.get(k));
+  const { avail, per } = dgFit(mods.length);
+  DG.per = per;
+  // use the width there is: wider boxes first (longer names fit), then wider gaps for the arrows
+  const CW = Math.max(DG.W, Math.min(300, Math.floor((avail - DG.PAD * 2 - DG.LEFT - (per - 1) * DG.GAP) / per)));
+  const GAP = per > 1 ? Math.max(DG.GAP, Math.min(110, Math.floor((avail - DG.PAD * 2 - DG.LEFT - per * CW) / (per - 1)))) : 0;
+  const rows = [];
+  for (let i = 0; i < mods.length; i += per) rows.push(mods.slice(i, i + per));
+  const rowH = rows.map((r) => DG.HH + DG.TOP + Math.max(1, ...r.map((m) => m.concepts.length)) * (DG.NH + DG.VG));
+  const rowY = rowH.map((_, r) => DG.PAD + rowH.slice(0, r).reduce((a, b) => a + b + DG.ROWGAP, 0));
+  const W = DG.PAD * 2 + DG.LEFT + per * CW + (per - 1) * GAP;
+  const H = rowY[rows.length - 1] + rowH[rows.length - 1] + DG.PAD;
+  const at = new Map(mods.map((m, i) => [m.key, { r: Math.floor(i / per), c: i % per }]));
+  const colX = (c) => DG.PAD + DG.LEFT + c * (CW + GAP);
+  const nodeY = (r, i) => rowY[r] + DG.HH + DG.TOP + i * (DG.NH + DG.VG);
+  const col = at;
+  const box = (id) => { const [k, i] = id.split("::"); const p = at.get(k);
+    return i === "h" ? { x: colX(p.c), y: rowY[p.r], h: DG.HH } : { x: colX(p.c), y: nodeY(p.r, +i), h: DG.NH }; };
+  // edges inside the volume: prerequisite -> concept that builds on it
+  const edges = new Map();
+  mods.forEach((m) => m.concepts.forEach((c, i) => c.refs.forEach((r) => {
+    if ((r.kind !== "concept" && r.kind !== "module") || r.mod.vol !== v || !col.has(r.mod.key)) return;
+    const from = r.kind === "concept" ? `${r.mod.key}::${r.i}` : `${r.mod.key}::h`, to = `${m.key}::${i}`;
+    if (from !== to) edges.set(from + ">" + to, [from, to]);
+  })));
+  const path = (a, b) => {
+    const A = box(a), B = box(b);
+    let sx, sy = A.y + A.h / 2, ex, ey = B.y + B.h / 2, c1, c2;
+    if (A.x < B.x) { sx = A.x + CW; ex = B.x - 2; const d = Math.max(28, (ex - sx) / 2); c1 = sx + d; c2 = ex - d; }
+    else if (A.x > B.x) { sx = A.x; ex = B.x + CW + 2; const d = Math.max(28, (sx - ex) / 2); c1 = sx - d; c2 = ex + d; }
+    else { sx = A.x; ex = B.x - 2; const d = 22 + Math.min(40, Math.abs(ey - sy) * 0.12); c1 = sx - d; c2 = ex - d; }  // same column (also one row above another): loop round the left
+    return `M${sx},${sy} C${c1},${sy} ${c2},${ey} ${ex},${ey}`;
+  };
+  const edgeSvg = [...edges.values()].map(([a, b]) => `<path class="edge" data-a="${esc(a)}" data-b="${esc(b)}" d="${path(a, b)}" marker-end="url(#arr)"/>`).join("");
+  const lanes = [];
+  const cols = mods.map((m) => {
+    const p = at.get(m.key), x = colX(p.c), top = rowY[p.r], title = m.title || m.key;
+    const head = `<g class="mh" data-mod="${esc(m.key)}"><title>${esc(m.key)}: ${esc(title)}</title>
+      <rect x="${x}" y="${top}" width="${CW}" height="${DG.HH}" rx="10"/>
+      <text class="k" x="${x + 12}" y="${top + 19}">MODULE ${m.n}</text><text class="t" x="${x + 12}" y="${top + 38}">${esc(clip(title, Math.floor((CW - 22) / 6.4)))}</text></g>`;
+    const lane = `<rect class="lane" x="${x - 8}" y="${top + DG.HH + 6}" width="${CW + 16}" height="${rowH[p.r] - DG.HH - 6}" rx="12"/>`;
+    const nodes = m.concepts.length ? m.concepts.map((c, i) => {
+      const y = nodeY(p.r, i), id = `${m.key}::${i}`;
+      const outs = [...new Map(c.refs.filter((r) => (r.kind === "concept" || r.kind === "module") && r.mod.vol !== v)
+        .map((r) => [r.mod.key, `${r.mod.vol.abbr} ${r.mod.n}`])).values()];
+      const tagText = outs.length ? outs[0] + (outs.length > 1 ? ` +${outs.length - 1}` : "") : "";
+      const tagW = tagText ? tagText.length * 6.2 + 10 : 0;
+      const maxChars = Math.floor((CW - 20 - (tagW ? tagW + 6 : 0)) / 6.3);
+      const tip = `${c.name} — ${c.what || ""}${c.refs.length ? `\nBuilds on: ${c.refs.map((r) => r.raw).join("; ")}` : ""}`;
+      return `<g class="node" data-id="${esc(id)}" tabindex="0" role="link" aria-label="${esc(c.name)}"><title>${esc(tip)}</title>
+        <rect x="${x}" y="${y}" width="${CW}" height="${DG.NH}" rx="8"/>
+        <text x="${x + 10}" y="${y + 19.5}">${esc(clip(c.name, maxChars))}</text>
+        ${tagText ? `<g class="tag"><title>Builds on another volume: ${esc(outs.join(", "))}</title><rect x="${x + CW - tagW - 6}" y="${y + 7}" width="${tagW}" height="16" rx="4"/>
+          <text x="${x + CW - tagW - 1}" y="${y + 19}">${esc(tagText)}</text></g>` : ""}</g>`;
+    }).join("") : `<text class="none" x="${x + 12}" y="${nodeY(p.r, 0) + 19}">Not mapped yet</text>`;
+    lanes.push(lane);
+    return head + nodes;
+  }).join("");
+  return `<div class="dgbar"><span>${plural(mods.length, "module")} in ${plural(rows.length, "row")} · ${plural(edges.size, "link")} inside this volume</span>
+      <button type="button" class="btn sm" id="dgfit" aria-pressed="false">Fit the whole diagram on screen</button></div>
+    <div class="dgwrap"><div class="dgscroll" id="dgscroll"><svg class="dg" id="dg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(v.name)} concept dependency diagram">
+      <defs><marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arr" d="M0,0 L8,4 L0,8 z"/></marker>
+        <marker id="arr-on" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arr-on" d="M0,0 L8,4 L0,8 z"/></marker></defs>
+      ${lanes.join("")}<g id="dgedges">${edgeSvg}</g>${cols}</svg></div></div>
+    <div class="dglegend"><span><span class="sw"></span>arrow: prerequisite → the concept that builds on it</span><span><span class="tg">FSA 1</span>also builds on another volume</span>
+      <span>Hover or tap-and-hold a concept to trace its links · click to open its module</span></div>`;
+}
+function wireDiagram() {
+  const svg = $("dg"), sc = $("dgscroll");
+  if (!svg) return;
+  const edges = [...svg.querySelectorAll(".edge")];
+  const focus = (id) => {
+    svg.classList.toggle("focus", !!id);
+    const on = new Set(id ? [id] : []);
+    for (const e of edges) {
+      const hit = id && (e.dataset.a === id || e.dataset.b === id);
+      e.classList.toggle("on", !!hit);
+      e.setAttribute("marker-end", hit ? "url(#arr-on)" : "url(#arr)");
+      if (hit) { on.add(e.dataset.a); on.add(e.dataset.b); }
+    }
+    svg.querySelectorAll(".node").forEach((n) => { n.classList.toggle("on", on.has(n.dataset.id)); n.classList.toggle("src", !!id && n.dataset.id !== id && on.has(n.dataset.id)); });
+    // highlighted links go on top of the nodes; the rest stay underneath
+    const under = svg.querySelector("#dgedges");
+    for (const e of edges) (e.classList.contains("on") ? svg : under).appendChild(e);
+  };
+  svg.addEventListener("mouseover", (e) => { const n = e.target.closest(".node"); focus(n ? n.dataset.id : null); });
+  svg.addEventListener("mouseleave", () => focus(null));
+  svg.addEventListener("focusin", (e) => { const n = e.target.closest(".node"); if (n) focus(n.dataset.id); });
+  const open = (el) => {
+    if (!el) return;
+    if (el.classList.contains("mh")) location.hash = href(MODS.get(el.dataset.mod));
+    else { const [k, i] = el.dataset.id.split("::"); location.hash = href(MODS.get(k), { c: i }); }
+  };
+  svg.addEventListener("click", (e) => { if (!PAN.moved) open(e.target.closest(".node, .mh")); });
+  svg.addEventListener("keydown", (e) => { if (e.key === "Enter") open(e.target.closest(".node")); });
+  sc.addEventListener("mousedown", (e) => { PAN.drag = { sc, x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop }; PAN.moved = false; });
+  // "Fit on screen": shrink the whole diagram to the height of the window, to see its shape at a glance
+  const fitBtn = $("dgfit"), W = +svg.getAttribute("width"), H = +svg.getAttribute("height");
+  const applyFit = () => {
+    const room = Math.max(260, window.innerHeight - ($("top").offsetHeight || 64) - 96);
+    const on = DG.fit && H > room;
+    sc.classList.toggle("fit", on);
+    svg.style.width = on ? Math.round(room * W / H) + "px" : "";
+    svg.style.height = on ? "auto" : "";
+    if (fitBtn) { fitBtn.setAttribute("aria-pressed", String(DG.fit)); fitBtn.textContent = DG.fit ? "Show at full size" : "Fit the whole diagram on screen"; fitBtn.hidden = !DG.fit && H <= room; }
+    if (on) sc.scrollIntoView({ block: "nearest" });
+  };
+  if (fitBtn) fitBtn.onclick = () => { DG.fit = !DG.fit; applyFit(); };
+  applyFit();
+}
+// Drag to pan the diagram with a mouse (touch scrolls natively). One set of window listeners for the page's lifetime.
+const PAN = { drag: null, moved: false };
+window.addEventListener("mousemove", (e) => {
+  const d = PAN.drag; if (!d) return;
+  const dx = e.clientX - d.x, dy = e.clientY - d.y;
+  if (Math.abs(dx) + Math.abs(dy) > 4) { PAN.moved = true; d.sc.classList.add("drag"); }
+  d.sc.scrollLeft = d.l - dx; d.sc.scrollTop = d.t - dy;
+});
+window.addEventListener("mouseup", () => { if (PAN.drag) PAN.drag.sc.classList.remove("drag"); PAN.drag = null; setTimeout(() => (PAN.moved = false), 0); });
+
+// ================================================================== the Guide: every module as a walkthrough, in book order
+let HUB = null;  
+const topicKey = (v) => (HUB && HUB.names && !(v.id in HUB.names) ? Object.keys(HUB.names).find((k) => HUB.names[k] === v.name) : null) || v.id;
+const practiceHref = (v) => { const ks = window.PathView && PathView.ready() ? PathView.keys() : [], k = ks.find((x) => x.replace(/ \d+$/, "") === v.name); return k ? "#path&pm=" + encodeURIComponent(k) : "#path"; };
+function accuracyText(v) {
+  if (!HUB) return "";
+  const key = topicKey(v), st = HUB.stats && HUB.stats.by_topic && HUB.stats.by_topic[key], bank = HUB.bank_usable && HUB.bank_usable[key];
+  const pool = bank ? ` Practice draws on ${bank} ${esc(v.short)} questions: new ones first, then the ones you missed.` : "";
+  if (!Array.isArray(st) || !st[1]) return `You haven't practiced ${esc(v.short)} yet.${pool}`;
+  return `So far you've answered ${plural(st[1], "question")} in ${esc(v.short)}, ${st[0]} right (${Math.round(100 * st[0] / st[1])}%).${pool}`;
+}
+function fillHub() {
+  document.querySelectorAll("[data-hub-acc]").forEach((el) => { const v = VOL_BY_ID.get(el.dataset.hubAcc); if (v) el.innerHTML = accuracyText(v); });
+  document.querySelectorAll("[data-hub-chip]").forEach((el) => {
+    const v = VOL_BY_ID.get(el.dataset.hubChip), st = v && HUB && HUB.stats && HUB.stats.by_topic && HUB.stats.by_topic[topicKey(v)];
+    el.hidden = !(Array.isArray(st) && st[1]);
+    if (!el.hidden) { const p = Math.round(100 * st[0] / st[1]); el.className = `chip ${p >= 70 ? "good" : p >= 50 ? "warn" : "bad"}`; el.textContent = `${p}% of ${st[1]} practiced`; }
+  });
+}
+async function loadHub() {
+  
+}
+
+// chips that open a pop-up (the href is where "open" goes, and what a new tab gets)
+function gchip(r, here) {
+  if (r.kind === "concept") {
+    const c = r.mod.concepts[r.i];
+    return `<a class="chip" href="${esc(ghref(r.mod, "c" + r.i))}" data-pop="${esc(`con:${r.mod.key}|${r.i}`)}" aria-haspopup="dialog">${esc(c.name)}${r.mod !== here ? ` · ${esc(r.mod.vol.abbr)} ${r.mod.n}` : ""}</a>`;
+  }
+  if (r.kind === "module") return modChip(r.mod, here, r.label);
+  if (r.kind === "level1") return `<span class="chip l1" title="Level I">Level I: ${esc(r.label)}</span>`;
+  return `<span class="chip plain">${esc(r.label || r.raw)}</span>`;
+}
+const modChip = (t, here, label) => `<a class="chip ${here && t.vol !== here.vol ? "out" : ""}" href="${esc(ghref(t))}" data-pop="${esc("mod:" + t.key)}" aria-haspopup="dialog">${esc(t.vol.short)} ${t.n}${
+  label ? ": " + esc(clip(label, 40)) : t.title ? ": " + esc(clip(t.title, 34)) : ""}</a>`;
+const missText = (x) => { const s = String(x || "").trim(), m = s.match(/^thinks?\s+(?:that\s+)?(.+)$/i); return m ? `Thinking ${m[1]}` : s.charAt(0).toUpperCase() + s.slice(1); };
+
+// Everything a module leans on and feeds, from the concept map: prerequisite modules, Level I topics, modules that build on it.
+function fitOf(m) {
+  const before = new Set(), after = new Set(), level1 = new Map();
+  const take = (r) => { if ((r.kind === "concept" || r.kind === "module") && r.mod !== m) before.add(r.mod.key); else if (r.kind === "level1") level1.set(norm(r.label), r.label); };
+  m.concepts.forEach((c) => { c.refs.forEach(take); c.usedBy.forEach((u) => u.mod !== m && after.add(u.mod.key)); });
+  m.frefs.forEach((rs) => rs.forEach(take));
+  const book = (s) => [...s].map((k) => MODS.get(k)).filter(Boolean).sort((a, b) => ORDER.indexOf(a.key) - ORDER.indexOf(b.key));
+  return { before: book(before), after: book(after), level1: [...level1.values()] };
+}
+
+function gFormulaCard(f, i, m) {
+  const ex = f.example;
+  const exHtml = !ex ? "" : typeof ex === "string" ? `<p>${fmt(ex)}</p>` : `${ex.setup ? `<p>${fmt(ex.setup)}</p>` : ""}${ex.latex ? `<div class="ftex">${tex(ex.latex, true)}</div>` : ""}${ex.result ? `<div class="res">${fmt(ex.result)}</div>` : ""}`;
+  const bo = m.frefs[i] || [];
+  return `<div class="card fcard anchor" id="gf${i}"><div class="fh"><h4>${fmt(f.name)}</h4></div>
+    ${f.latex ? `<div class="ftex">${tex(f.latex, true)}</div>` : ""}
+    ${arr(f.variables).length ? `<ul class="where">${arr(f.variables).map((v) => `<li><b>${tex((v && v.latex) || "")}</b>${fmt(v && v.meaning)}</li>`).join("")}</ul>` : ""}
+    ${f.use ? `<p class="fline"><b>Use</b>${fmt(f.use)}</p>` : ""}
+    ${f.pitfall ? `<div class="pitfall"><b>Pitfall</b>${fmt(f.pitfall)}</div>` : ""}
+    ${exHtml ? `<details class="example"><summary><b>Worked example</b></summary>${exHtml}</details>` : ""}
+    ${bo.length ? `<div class="chips"><span class="lbl">Builds on</span>${bo.map((r) => gchip(r, m)).join("")}</div>` : ""}</div>`;
+}
+function gStandardCard(s, i) {
+  const ex = s.example, exText = !ex ? "" : typeof ex === "string" ? fmt(ex) : [ex.setup, ex.result].filter(Boolean).map(fmt).join("<br>");
+  return `<div class="card fcard std anchor" id="gs${i}"><div class="fh">${s.id ? `<span class="fid">${esc(s.id)}</span>` : ""}<h4>${fmt(s.name)}</h4></div>
+    ${s.summary ? `<p class="fline">${fmt(s.summary)}</p>` : ""}
+    ${s.pitfall ? `<div class="pitfall"><b>Pitfall</b>${fmt(s.pitfall)}</div>` : ""}
+    ${exText ? `<details class="example"><summary><b>Example</b></summary><p>${exText}</p></details>` : ""}</div>`;
+}
+
+// a question's options, and whether its answer has been read against the notes (both come with the data when it has them)
+const qaOpts = (g) => (g && g.options ? `<span class="qo">${["A", "B", "C"].filter((l) => g.options[l]).map((l) => `<span><b>${l}.</b> ${rich(g.options[l], null, true)}</span>`).join("")}</span>` : "");
+const qaTag = (g) => (g.checked === true ? `<span class="qa-chk ok">✓ Checked against the notes</span>` : g.checked === false ? `<span class="qa-chk">Not checked against the notes yet</span>` : "");
+const qaSteps = (g) => (arr(g.steps).length ? `<div class="qa-walk"><b>Walkthrough</b><ol>${arr(g.steps).map((x) => `<li>${rich(x, null, true)}</li>`).join("")}</ol></div>` : "");
+function qaBody(g, m) {
+  const corr = arr(g.corrected).filter((c) => typeof c === "string" && c.trim() && !/^I (cannot|can't|am unable)/i.test(c.trim()));
+  const ctx = linkCtx(m);
+  return `${g.answer || qaTag(g) ? `<div class="ansline">${g.answer ? `<span class="ans">Answer: ${esc(g.answer)}</span>` : ""}${qaTag(g)}</div>` : ""}${qaSteps(g)}
+    <div class="rich">${rich(g.display || g.explanation, ctx)}</div>
+    ${corr.length ? `<div class="corr"><b>Corrected on the way</b><ul>${corr.map((c) => `<li>${rich(c, null, true)}</li>`).join("")}</ul></div>` : ""}
+    `;
+}
+
+
+// normItems: a list of tips, pitfalls or steps -> clean items. One string holding several lines is split (steps: by paragraph, or by line
+// with formula lines kept under their sentence); indented items continue the one before; "Step 2:" / "1." prefixes go (the page numbers them).
+function normItems(x, steps) {
+  let items = arr(x).map((s) => (typeof s === "string" ? s : s && typeof s === "object" ? s.text || s.step || s.body || "" : "")).filter((s) => s.trim());
+  let byLine = false;
+  if (items.length === 1 && items[0].trim().includes("\n")) {
+    const one = items[0].trim(), paras = steps && /\n\s*\n/.test(one);
+    items = paras ? one.split(/\n\s*\n/) : one.split("\n");
+    byLine = !paras;
+  }
+  const out = [];
+  for (const s of items) {
+    const prev = out[out.length - 1];
+    const cont = prev !== undefined && s.trim() && (/^[ \t]+\S/.test(s) ||
+      (steps && byLine && (/:\s*$/.test(prev) || (/^[A-Za-z\\][\w{}\\^₀-₉]*\s*=/.test(s.trim()) && !/[.!?]\s*$/.test(prev)))));
+    if (cont) out[out.length - 1] = prev + "\n" + s.trim(); else if (s.trim()) out.push(s.trim());
+  }
+  return out.map((s) => s.replace(steps ? /^(?:step\s*\d+\s*[:.)\-–]?|\d{1,2}[.)])\s*/i : /^(?:\d{1,2}[.)]|[-*•])\s+/, "").trim()).filter(Boolean);
+}
+function narrExample(n, ctx) {
+  const ex = n.worked_example;
+  if (typeof ex === "string") return str(ex) ? `<div class="card g-ex"><div class="rich">${rich(ex, ctx)}</div></div>` : "";
+  if (!ex || typeof ex !== "object") return "";
+  const steps = normItems(ex.thinking, true);
+  const problem = str(ex.problem), answer = str(ex.answer);
+  if (!problem && !steps.length && !answer) return "";
+  return `<div class="card g-ex" data-ex>
+    ${problem ? `<div><span class="lbl">Problem</span><div class="rich">${rich(problem, ctx)}</div></div>` : ""}
+    ${steps.length ? `<ol class="g-steps" aria-live="polite">${steps.map((s) => `<li hidden><div class="rich">${rich(s, ctx)}</div></li>`).join("")}</ol>` : ""}
+    ${answer ? `<div class="g-ex-a" hidden><span class="lbl">Answer</span><div class="rich">${rich(answer, ctx)}</div></div>` : ""}
+    <div class="g-ex-ctrl"><button type="button" class="btn sm primary" data-ex="next"></button><button type="button" class="btn sm ghost" data-ex="all">Show all</button>
+      <button type="button" class="btn sm ghost" data-ex="reset" hidden>Start over</button></div></div>`;
+}
+function exUpdate(card) {
+  const steps = [...card.querySelectorAll(".g-steps > li")], ans = card.querySelector(".g-ex-a");
+  const nextStep = steps.findIndex((li) => li.hidden), done = nextStep < 0 && (!ans || !ans.hidden);
+  const next = card.querySelector('[data-ex="next"]'), all = card.querySelector('[data-ex="all"]'), reset = card.querySelector('[data-ex="reset"]');
+  next.hidden = all.hidden = done; reset.hidden = !done;
+  all.hidden = done || steps.length < 2;
+  next.textContent = nextStep >= 0 ? (nextStep === 0 ? `Show the first step (of ${steps.length})` : `Show step ${nextStep + 1} of ${steps.length}`) : "Show the answer";
+}
+function narrByline(n) {
+  return `<p class="g-byline">✓ Checked against the curriculum notes. The curriculum is still the final word.</p>`;
+}
+
+function viewGuideModule(m) {
+  const v = m.vol, pos = ORDER.indexOf(m.key), prev = MODS.get(ORDER[pos - 1]), next = MODS.get(ORDER[pos + 1]);
+  const n = counts(m), mem = m.memory || {}, isEthics = v.id === "ethics", nar = narrOf(m), ctx = linkCtx(m), read = isRead(m.key);
+  const secs = [];  // [id, label, count, narrative?] for the section chips
+  const sec = (id, label, count, narr) => { secs.push([id, label, count, narr]); return `id="sec-${id}"`; };
+  const walk = nar ? arr(nar.walkthrough).map((w) => (typeof w === "string" ? { body: w } : w && typeof w === "object" ? w : null)).filter((w) => w && (str(w.heading) || str(w.body))) : [];
+  const think = nar ? normItems(nar.how_to_think) : [];
+  const exHtml = nar ? narrExample(nar, ctx) : "";
+  const narPits = nar ? normItems(nar.pitfalls) : [];
+  const fit = fitOf(m);
+  const miss = arr(mem.misconceptions).filter((x) => typeof x === "string" && x.trim() && x.length <= 300 && !x.includes("\\") && !x.includes("**") &&
+    !/(please (provide|supply|paste)|\bI (cannot|can.t|need|.m unable)|not (provided|supplied)|^(the|this|that|your|mac.s|the peer.s|the candidate.s) (answer|explanation|formula|response|candidate|peer|example|common mistake|learning)|learning.module|must (explicitly )?(name|cite|state))/i.test(x.trim()));  
+  const pits = [...m.formulas.map((f, i) => f.pitfall && [`f:${m.key}|${i}`, "f" + i, f.name, f.pitfall]),
+                ...m.standards.map((s, i) => s.pitfall && [`s:${m.key}|${i}`, "s" + i, `${s.id ? s.id + " " : ""}${s.name}`, s.pitfall])].filter(Boolean);
+  const pitItem = ([key, at, name, text]) => `<li class="pit"><a class="xref" href="${esc(ghref(m, at))}" data-pop="${esc(key)}" aria-haspopup="dialog">${fmt(name)}</a>: ${fmt(text)}</li>`;
+  const asked = arr(mem.questions).filter((x) => typeof x === "string"), expl = arr(mem.explanations).filter((x) => typeof x === "string");
+  const lede = m.summary ? `<p class="lede">${fmtL(m.summary, ctx)}</p>` : "";  // first, so its terms get the first links
+
+  const body = `
+    ${nar && str(nar.big_picture) ? `<section class="sec narr-sec" ${sec("big", "Big picture", 0, true)}><h3>Big picture</h3>${narrByline(nar)}
+      <div class="rich g-prose">${rich(nar.big_picture, ctx)}</div></section>` : ""}
+    ${!nar ? `<div class="g-pending"><span class="dot"></span><span>This module's walkthrough isn't in this copy. Here is what the study map has.</span></div>` : ""}
+    ${walk.length ? `<section class="sec narr-sec g-walk" ${sec("walk", "Walkthrough", walk.length, true)}><h3>Walkthrough</h3>${!str(nar.big_picture) ? narrByline(nar) : ""}
+      ${walk.map((w, i) => `<div class="anchor" id="gw${i}">${str(w.heading) ? `<h4>${rich(w.heading, null, true)}</h4>` : ""}<div class="rich g-prose">${rich(str(w.body), ctx)}</div></div>`).join("")}</section>` : ""}
+    ${think.length ? `<section class="sec narr-sec" ${sec("think", "How to think", 0, true)}><h3>How to think about questions on this</h3>
+      <ol class="g-think">${think.map((x) => `<li><div class="rich">${rich(x, ctx)}</div></li>`).join("")}</ol></section>` : ""}
+    ${exHtml ? `<section class="sec narr-sec" ${sec("example", "Worked example", 0, true)}><h3>Worked example · one step at a time</h3>${exHtml}</section>` : ""}
+
+    <section class="sec" ${sec("concepts", "Concepts", n.c)}><h3>Key concepts <span class="count">${n.c}</span></h3>
+      ${m.concepts.length ? `<ol class="g-concepts">${m.concepts.map((c, i) => `<li class="card concept anchor" id="gc${i}"><h4><span class="cn">${i + 1}</span><span>${fmt(c.name)}</span></h4>
+        <p>${fmtL(c.what, ctx)}</p>
+        ${c.refs.length ? `<div class="chips"><span class="lbl">Builds on</span>${c.refs.map((r) => gchip(r, m)).join("")}</div>` : ""}
+        ${c.usedBy.length ? `<div class="chips"><span class="lbl">Leads to</span>${c.usedBy.map((u) => gchip({ kind: "concept", mod: u.mod, i: u.i }, m)).join("")}</div>` : ""}</li>`).join("")}</ol>`
+      : `<div class="empty-note">This module hasn't been mapped yet. Its concepts will appear here once the concept map reaches it.</div>`}</section>
+
+    <section class="sec" ${sec("formulas", isEthics ? "Standards" : "Formulas", n.f)}><h3>${isEthics ? "The Standards" : "Key formulas"} <span class="count">${n.f}</span></h3>
+      ${n.f ? `<div class="fcards">${m.formulas.map((f, i) => gFormulaCard(f, i, m)).join("")}${m.standards.map(gStandardCard).join("")}</div>`
+        : `<div class="empty-note">No ${isEthics ? "standards" : "formula"} cards for this module yet.</div>`}</section>
+
+    <section class="sec" ${sec("fit", "How it fits", 0)}><h3>How it fits</h3>
+      ${nar && str(nar.connections) ? `<div class="rich g-prose narr-sec" style="margin-bottom:14px">${rich(nar.connections, ctx)}</div>` : ""}
+      <div class="card g-fit">
+        <div class="row"><span class="lbl">Builds on</span><div class="chips">${fit.before.map((t) => modChip(t, m)).join("") || `<span class="muted small">Nothing earlier in Level II.</span>`}
+          ${fit.level1.slice(0, 6).map((l) => `<span class="chip l1" title="Level I">Level I: ${esc(clip(l, 40))}</span>`).join("")}</div></div>
+        <div class="row"><span class="lbl">Leads to</span><div class="chips">${fit.after.map((t) => modChip(t, m)).join("") || `<span class="muted small">No later module builds on it directly.</span>`}</div></div>
+        ${m.connects.length ? `<div class="row"><span class="lbl">Connects to</span><div class="connects">${m.connects.map((c) => { const k = modKeyOf(c.module), t = k && MODS.get(k.key);
+          return `<div class="connect">${t ? modChip(t, m) : `<span class="chip plain">${esc(c.module)}</span>`}<span>${fmtL(c.how, ctx)}</span></div>`; }).join("")}</div></div>` : ""}
+      </div></section>
+
+    <section class="sec" ${sec("mistakes", "Mistakes", narPits.length + miss.length + pits.length)}><h3>Mistakes to avoid <span class="count">${narPits.length + miss.length + pits.length}</span></h3>
+      ${narPits.length ? `<ul class="miss">${narPits.map((x) => `<li class="narr"><div class="rich">${rich(x, ctx)}</div></li>`).join("")}</ul>` : ""}
+      ${miss.length ? `${narPits.length ? `<div class="g-subh">Common misconceptions</div>` : ""}<ul class="miss">${miss.map((x) => `<li>${fmtL(missText(x), ctx)}</li>`).join("")}</ul>` : ""}
+      ${pits.length ? `<div class="g-subh">Formula pitfalls</div><ul class="miss">${pits.slice(0, 5).map(pitItem).join("")}</ul>
+        ${pits.length > 5 ? `<details class="more"><summary>${pits.length - 5} more pitfalls</summary><ul class="miss" style="padding:0;margin-top:6px">${pits.slice(5).map(pitItem).join("")}</ul></details>` : ""}` : ""}
+      ${!narPits.length && !miss.length && !pits.length ? `<div class="empty-note">Nothing recorded for this module yet.</div>` : ""}</section>
+
+    <section class="sec" ${sec("qa", "Q&amp;A", n.q)}><h3>Questions &amp; answers <span class="count">${n.q}</span></h3>
+      ${m.guide.length ? `<p class="muted small" style="margin:-4px 0 10px">Try each one yourself, then open it to see the answer. Each answer says whether it has been checked against the notes; treat the curriculum as the final word on the ones that have not. The questions of the case studies are on the Case studies page, with their cases.</p>
+        <div class="stack">${m.guide.map((g, i) => `<details class="card qa g-qa anchor" id="gq${i}"><summary><span class="qn">Q${i + 1}</span><span class="qt">${rich(g.question, null, true)}${qaOpts(g)}</span><span class="reveal">Answer</span></summary>
+          <div class="body" data-fill="${esc(m.key)}|${i}"></div></details>`).join("")}</div>`
+        : `<div class="empty-note">No questions and answers for this module.</div>`}
+      
+      </section>
+
+    <section class="sec" ${sec("check", "Check yourself", 0)}><h3>Check yourself</h3>
+      <div class="card g-check"><div><h4>Practice ${esc(v.name)}</h4><p class="muted" data-hub-acc="${v.id}">${accuracyText(v)}</p></div>
+        <div class="g-actions"><a class="btn primary" href="${esc(practiceHref(v))}">Practice ${esc(v.short)} questions</a>
+          <a class="btn" href="${esc((window.Site && Site.links && Site.links.cases) || "../cases/")}">Case studies</a>
+          <a class="btn ghost" href="${esc(href(m))}">See it on the map</a></div></div></section>
+
+    <nav class="g-pager" aria-label="Previous and next module">
+      ${prev ? `<a class="card prev" href="${esc(ghref(prev))}"><span class="eyebrow">← Previous</span><span class="t">${esc(prev.title || prev.key)}</span><span class="v">${esc(prev.vol.short)} ${prev.n}</span></a>` : ""}
+      ${next ? `<a class="card next" href="${esc(ghref(next))}"><span class="eyebrow">Next →</span><span class="t">${esc(next.title || next.key)}</span><span class="v">${esc(next.vol.short)} ${next.n}${next.vol !== v ? " · new volume" : ""}</span></a>` : ""}
+    </nav>`;
+
+  return `<div class="guide">
+    <div class="crumbs"><a href="#guide">Guide</a> › <a href="#guide&amp;vol=${v.id}">${esc(v.name)}</a> › Module ${m.n}</div>
+    <div class="g-where"><span>Module ${m.n} of ${v.keys.length} in ${esc(v.short)} · ${pos + 1} of ${ORDER.length} in the book</span>
+      <span class="g-acts"><a class="g-los" href="lesson.html?m=${encodeURIComponent(m.key)}">Guided lesson</a>${window.LosView && LosView.has(m.key) ? `<a class="g-los" href="#los&amp;lm=${encodeURIComponent(m.key)}">Outcomes and note cards</a>` : ""}<button type="button" class="g-read ${read ? "on" : ""}" id="g-read" aria-pressed="${read}">${read ? "✓ Read" : "Mark as read"}</button></span></div>
+    <div class="progress thin g-bar" title="Where this module sits in the book"><i style="width:${Math.round(100 * (pos + 1) / ORDER.length)}%"></i></div>
+    <div id="g-banner"></div>
+    <h2>${esc(m.title || m.key)}</h2>
+    ${lede}
+    <nav class="g-secnav" aria-label="Sections of this module">${secs.map(([id, label, c, narr]) => `<a href="${esc(ghref(m, id))}" data-jump="${id}" class="${narr ? "narr" : ""}">${label}${c ? ` <span class="n">${c}</span>` : ""}</a>`).join("")}</nav>
+    ${body}</div>`;
+}
+
+function viewGuideHome() {
+  const read = readSet(), last = lastKey(), done = ORDER.filter((k) => read.has(k)).length;
+  const lm = last && MODS.get(last), first = MODS.get(ORDER[0]);
+  const nextUnread = ORDER.map((k) => MODS.get(k)).find((m, i) => !read.has(m.key) && (!lm || i >= ORDER.indexOf(lm.key)));
+  const written = ORDER.filter((k) => NARR[k]).length;
+  return `<div class="guide">
+    <h2>Study guide</h2>
+    <p class="lede">The whole Level II curriculum as a walkthrough, in book order. Each module starts with the big picture and walks through the ideas,
+      then the key concepts, formulas, the mistakes to avoid and worked questions, and ends with practice. Tap an underlined term or a module chip
+      to preview it without leaving the page.</p>
+    <div class="card g-start">
+      <div><div class="k">${lm ? "Continue where you left off" : "Start at the beginning"}</div><div class="t">${esc((lm || first).vol.short)} ${(lm || first).n} · ${esc((lm || first).title)}</div></div>
+      <div class="g-actions"><a class="btn primary" href="${esc(ghref(lm || first))}">${lm ? "Continue reading" : "Start reading"}</a>
+        ${nextUnread && lm && nextUnread !== lm ? `<a class="btn" href="${esc(ghref(nextUnread))}">Next unread: ${esc(nextUnread.vol.short)} ${nextUnread.n}</a>` : ""}</div>
+    </div>
+    <div class="g-stats"><span>${done} of ${ORDER.length} modules read</span><span>${written ? `Walkthroughs ready for ${written} of ${ORDER.length} modules` : "Walkthroughs appear here as each one is finished"}</span>
+      <a href="#glossary">Glossary A–Z</a></div>
+    ${VOLUMES.map((v) => `<section class="g-vol anchor" id="gvol-${v.id}"><div class="g-volh"><span class="vn">${v.vi + 1}</span><h3>${esc(v.name)}</h3>
+        <span class="vmeta">${v.keys.filter((k) => read.has(k)).length}/${v.keys.length} read</span><span class="chip" data-hub-chip="${v.id}" hidden></span>
+        <a class="vprac" href="${esc(practiceHref(v))}">Practice →</a></div>
+      <ol class="g-rows">${v.keys.map((k) => { const m = MODS.get(k);
+        return `<li><a class="card g-row ${k === last ? "cur" : ""}" href="${esc(ghref(m))}"><span class="vn">${m.n}</span>
+          <span><span class="t">${esc(m.title || m.key)}</span>${m.summary ? `<span class="s">${fmt(m.summary)}</span>` : `<span class="s">Not mapped yet</span>`}</span>
+          <span class="flags">${NARR[k] ? `<span class="chip" title="Walkthrough ready">✎ walkthrough</span>` : ""}${read.has(k) ? `<span class="ok" aria-label="read">✓</span>` : ""}</span></a></li>`; }).join("")}</ol></section>`).join("")}
+  </div>`;
+}
+
+function viewGlossary() {
+  if (!TERMS.length) return `<div class="guide"><div class="crumbs"><a href="#guide">Guide</a> › Glossary</div><h2>Glossary</h2>
+    <p class="muted">${GLOSS_FAILED ? "The glossary isn't available." : "Loading the glossary…"}</p></div>`;
+  const groups = new Map();
+  for (const t of TERMS) { const L = /[a-z]/i.test(t.term[0]) ? t.term[0].toUpperCase() : "#"; if (!groups.has(L)) groups.set(L, []); groups.get(L).push(t); }
+  const entry = (t) => {
+    const see = t.see && TERM_BY_ID.get(t.see), cons = conceptsNamed(t).slice(0, 4);
+    const def = see ? `See <a class="xref" href="#glossary&amp;t=${esc(see.id)}" data-pop="${esc("t:" + see.id)}" aria-haspopup="dialog">${esc(see.term)}</a>.` : fmt(t.def);
+    return `<div class="gl-entry anchor" id="t-${esc(t.id)}"><dt>${esc(t.term)}</dt><dd>${def}
+      ${arr(t.aka).length ? `<div class="aka">Also: ${arr(t.aka).map(esc).join(" · ")}</div>` : ""}
+      ${cons.length ? `<div class="chips">${cons.map((h) => gchip({ kind: "concept", mod: h.mod, i: h.i }, null)).join("")}</div>` : ""}</dd></div>`;
+  };
+  return `<div class="guide"><div class="crumbs"><a href="#guide">Guide</a> › Glossary</div>
+    <h2>Glossary</h2><p class="lede">${TERMS.length} terms from the Level II curriculum. Where a term is also a concept in the guide, its chip takes you there.</p>
+    <nav class="gl-letters" aria-label="Letters">${[...groups.keys()].map((L) => `<a href="#glossary&amp;l=${L}" data-jump="gl-${L}">${L}</a>`).join("")}</nav>
+    ${[...groups].map(([L, ts]) => `<section class="gl-group anchor" id="gl-${L}"><h3>${L}</h3><dl>${ts.map(entry).join("")}</dl></section>`).join("")}</div>`;
+}
+
+// ------------------------------------------------------------------ pop-ups: preview a module, concept, formula or term without leaving the page
+// Hover (mouse) previews; a tap, click or Enter pins it. Tap outside, ✕ or Escape closes it. Links inside open the next preview in the
+// same pop-up (‹ Back returns); the buttons at the bottom go there. On phones it is a sheet at the bottom of the screen.
+const POP = { open: false, pinned: false, trigger: null, stack: [], hoverT: 0, closeT: 0, y: null };  // y: where it was tapped (a link can wrap over two lines)
+const popEl = $("pop");
+function popModule(key) {
+  const m = MODS.get(key);
+  if (!m) return null;
+  const n = counts(m), isEthics = m.vol.id === "ethics";
+  return { kind: `${m.vol.name} · Module ${m.n}`, html: `<h4 id="pop-title">${esc(m.title || m.key)}</h4>
+    ${m.summary ? `<p>${fmtL(m.summary, linkCtx(m))}</p>` : `<p class="muted">Not mapped yet.</p>`}
+    <p class="muted small">${[plural(n.c, "concept"), n.f ? plural(n.f, isEthics ? "standard" : "formula") : "", n.q ? plural(n.q, "worked question") : "", narrOf(m) ? "Walkthrough ready" : ""].filter(Boolean).join(" · ")}</p>
+    ${m.concepts.length ? `<div class="sub">Key concepts</div><div class="chips">${m.concepts.slice(0, 8).map((c, i) => gchip({ kind: "concept", mod: m, i }, m)).join("")}</div>` : ""}
+    <div class="pop-actions"><a class="btn sm primary" href="${esc(ghref(m))}">Read it in the guide →</a><a class="btn sm" href="${esc(href(m))}">On the map</a></div>` };
+}
+function popConcept(key, i) {
+  const m = MODS.get(key), c = m && m.concepts[+i];
+  if (!c) return null;
+  const t = termFor(c.name);
+  return { kind: `Concept · ${m.vol.short} ${m.n}`, html: `<h4 id="pop-title">${fmt(c.name)}</h4>
+    ${c.what ? `<p>${fmtL(c.what, linkCtx(m, [`con:${key}|${i}`]))}</p>` : ""}
+    ${t ? `<div class="sub">Glossary</div><p>${fmt(t.def)}</p>` : ""}
+    ${c.refs.length ? `<div class="sub">Builds on</div><div class="chips">${c.refs.map((r) => gchip(r, m)).join("")}</div>` : ""}
+    ${c.usedBy.length ? `<div class="sub">Leads to</div><div class="chips">${c.usedBy.map((u) => gchip({ kind: "concept", mod: u.mod, i: u.i }, m)).join("")}</div>` : ""}
+    <div class="pop-actions"><a class="btn sm primary" href="${esc(ghref(m, "c" + i))}">Go to this concept →</a>${modChip(m, null)}</div>` };
+}
+function popFormula(key, i) {
+  const m = MODS.get(key), f = m && m.formulas[+i];
+  if (!f) return null;
+  return { kind: `Formula · ${m.vol.short} ${m.n}`, html: `<h4 id="pop-title">${fmt(f.name)}</h4>
+    ${f.latex ? `<div class="ftex">${tex(f.latex, true)}</div>` : ""}
+    ${arr(f.variables).length ? `<ul class="where">${arr(f.variables).map((v) => `<li><b>${tex((v && v.latex) || "")}</b>${fmt(v && v.meaning)}</li>`).join("")}</ul>` : ""}
+    ${f.use ? `<p class="fline"><b>Use</b>${fmt(f.use)}</p>` : ""}
+    ${f.pitfall ? `<div class="pitfall"><b>Pitfall</b>${fmt(f.pitfall)}</div>` : ""}
+    <div class="pop-actions"><a class="btn sm primary" href="${esc(ghref(m, "f" + i))}">Open with its worked example →</a></div>` };
+}
+function popStandard(key, i) {
+  const m = MODS.get(key), s = m && m.standards[+i];
+  if (!s) return null;
+  return { kind: `Standard · ${m.vol.short} ${m.n}`, html: `<h4 id="pop-title">${esc(s.id ? s.id + " " : "")}${fmt(s.name)}</h4>
+    ${s.summary ? `<p>${fmt(s.summary)}</p>` : ""}${s.pitfall ? `<div class="pitfall"><b>Pitfall</b>${fmt(s.pitfall)}</div>` : ""}
+    <div class="pop-actions"><a class="btn sm primary" href="${esc(ghref(m, "s" + i))}">Open →</a></div>` };
+}
+function popTerm(id) {
+  const t = TERM_BY_ID.get(id);
+  if (!t) return null;
+  const see = t.see && TERM_BY_ID.get(t.see), cons = conceptsNamed(t).slice(0, 6);
+  return { kind: "Glossary", html: `<h4 id="pop-title">${esc(t.term)}</h4>
+    ${see ? `<p>See <a class="xref" href="#glossary&amp;t=${esc(see.id)}" data-pop="${esc("t:" + see.id)}" aria-haspopup="dialog">${esc(see.term)}</a>: ${fmt(see.def)}</p>`
+      : `<p>${fmtL(t.def, linkCtx(null, ["t:" + id]))}</p>`}
+    ${arr(t.aka).length ? `<p class="muted small">Also: ${arr(t.aka).map(esc).join(" · ")}</p>` : ""}
+    ${cons.length ? `<div class="sub">In the guide</div><div class="chips">${cons.map((h) => gchip({ kind: "concept", mod: h.mod, i: h.i }, null)).join("")}</div>` : ""}
+    <div class="pop-actions"><a class="btn sm" href="#glossary&amp;t=${esc(id)}">Open in the glossary</a></div>` };
+}
+function popContent(key) {
+  const at = key.indexOf(":"), type = key.slice(0, at), [a, b] = key.slice(at + 1).split("|");
+  return ({ mod: () => popModule(a), con: () => popConcept(a, b), f: () => popFormula(a, b), s: () => popStandard(a, b), t: () => popTerm(a) })[type]?.() || null;
+}
+function showPop(key) {
+  const c = popContent(key);
+  if (!c) return false;
+  $("pop-kind").textContent = c.kind;
+  $("pop-body").innerHTML = c.html;
+  $("pop-back").hidden = POP.stack.length < 2;
+  popEl.scrollTop = 0;
+  typeset($("pop-body"));
+  return true;
+}
+function openPop(trigger, key, pinned) {
+  clearTimeout(POP.hoverT); clearTimeout(POP.closeT);
+  if (POP.trigger && POP.trigger !== trigger) POP.trigger.setAttribute("aria-expanded", "false");
+  POP.stack = [key];
+  if (!showPop(key)) return;
+  POP.open = true; POP.pinned = pinned; POP.trigger = trigger;
+  trigger.setAttribute("aria-expanded", "true");
+  trigger.setAttribute("aria-controls", "pop");
+  popEl.hidden = false;
+  placePop();
+  if (pinned) popEl.focus({ preventScroll: true });
+}
+function pushPop(key) {
+  POP.stack.push(key);
+  if (!showPop(key)) POP.stack.pop();
+  POP.pinned = true;
+  placePop();
+}
+function closePop(returnFocus) {
+  clearTimeout(POP.hoverT); clearTimeout(POP.closeT);
+  if (!POP.open) return;
+  POP.open = false; POP.pinned = false;
+  popEl.hidden = true;
+  const t = POP.trigger;
+  POP.trigger = null;
+  if (t) { t.setAttribute("aria-expanded", "false"); if (returnFocus && t.isConnected) t.focus({ preventScroll: true }); }
+  if (PENDING) { PENDING = false; render(true); }
+}
+function placePop() {
+  const vw = document.documentElement.clientWidth, vh = window.innerHeight, sheet = vw < 600;
+  popEl.classList.toggle("sheet", sheet);
+  if (sheet) { popEl.style.left = popEl.style.top = popEl.style.width = ""; return; }
+  const t = POP.trigger;
+  if (!t || !t.isConnected) return;
+  const rects = [...t.getClientRects()].filter((x) => x.bottom > 0 && x.top < vh);
+  const r = (POP.y !== null && rects.length > 1 ? rects.sort((a, b) => Math.abs((a.top + a.bottom) / 2 - POP.y) - Math.abs((b.top + b.bottom) / 2 - POP.y))[0] : rects[0]) || t.getBoundingClientRect();
+  const w = Math.min(380, vw - 24);
+  popEl.style.width = w + "px";
+  const h = Math.min(popEl.scrollHeight, Math.min(460, vh * .72)) + 2;
+  const below = vh - r.bottom, above = r.top;
+  let top = below >= h + 12 || below >= above ? r.bottom + 8 : r.top - 8 - h;
+  top = Math.max(8, Math.min(top, vh - h - 8));
+  const left = Math.max(12, Math.min(r.left, vw - w - 12));
+  popEl.style.left = left + window.scrollX + "px";
+  popEl.style.top = top + window.scrollY + "px";
+}
+const modClick = (e) => e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button > 0;
+document.addEventListener("click", (e) => {
+  const trig = e.target.closest("[data-pop]"), inPop = popEl.contains(e.target);
+  if (e.target.closest("#pop-x")) { closePop(true); return; }
+  if (e.target.closest("#pop-back")) { POP.stack.pop(); showPop(POP.stack[POP.stack.length - 1]); placePop(); popEl.focus({ preventScroll: true }); return; }
+  if (trig && !modClick(e)) {
+    e.preventDefault();
+    if (inPop) { pushPop(trig.dataset.pop); popEl.focus({ preventScroll: true }); return; }
+    if (POP.open && POP.trigger === trig && POP.pinned) { closePop(false); return; }
+    POP.y = e.detail ? e.clientY : null;  // a keyboard "click" has no position
+    openPop(trig, trig.dataset.pop, true);
+    return;
+  }
+  if (inPop) { if (e.target.closest("a[href]")) closePop(false); return; }  // an "open" button: go there
+  if (POP.open) closePop(false);  // a tap outside (not a scroll: those don't make clicks)
+});
+document.addEventListener("pointerover", (e) => {
+  if (e.pointerType !== "mouse") return;
+  const trig = e.target.closest("[data-pop]");
+  if (popEl.contains(e.target)) { clearTimeout(POP.closeT); return; }
+  if (!trig) return;
+  clearTimeout(POP.closeT);
+  if (POP.open && (POP.trigger === trig || POP.pinned)) return;
+  clearTimeout(POP.hoverT);
+  const y = e.clientY;
+  POP.hoverT = setTimeout(() => { POP.y = y; openPop(trig, trig.dataset.pop, false); }, POP.open ? 150 : 380);
+});
+document.addEventListener("pointerout", (e) => {
+  if (e.pointerType !== "mouse") return;
+  if (e.target.closest("[data-pop]")) clearTimeout(POP.hoverT);
+  if (!POP.open || POP.pinned) return;
+  const to = e.relatedTarget;
+  if (to && (popEl.contains(to) || (POP.trigger && POP.trigger.contains(to)))) return;
+  POP.closeT = setTimeout(() => { if (!POP.pinned) closePop(false); }, 280);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && POP.open) { e.preventDefault(); closePop(true); return; }
+  if (e.key === "Tab" && POP.open && popEl.contains(document.activeElement)) {  // Tab past either end of the pop-up returns to the link that opened it
+    const f = [...popEl.querySelectorAll("a[href], button:not([hidden])")].filter((x) => x.offsetParent !== null);
+    if (!f.length || (e.shiftKey && (document.activeElement === f[0] || document.activeElement === popEl)) || (!e.shiftKey && document.activeElement === f[f.length - 1])) {
+      e.preventDefault(); closePop(true);
+    }
+  }
+});
+popEl.addEventListener("focusout", (e) => { if (POP.open && e.relatedTarget && !popEl.contains(e.relatedTarget) && e.relatedTarget !== POP.trigger) closePop(false); });
+let resizeT = 0;
+window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => { setStick(); if (POP.open) placePop();
+  if (CURVOL && !CURMOD && $("dg") && dgFit(CURVOL.keys.length).per !== DG.per) render(true); }, 120); });
+
+// ------------------------------------------------------------------ guide behaviour: lazy maths, answers on demand, step-by-step example, reading progress
+let SECOBS = null, READOBS = null, PENDING = false;
+const typesetOnce = (el) => { if (el && !el.dataset.ts) { el.dataset.ts = "1"; typeset(el); } };
+function anchorId(at) { return !at ? "" : /^[cfsqw]\d+$/.test(at) ? "g" + at : /^gl-/.test(at) ? at : "sec-" + at; }
+function goAnchor(at, smooth) {
+  const el = document.getElementById(anchorId(at));
+  if (!el) return false;
+  for (const s of $("content").querySelectorAll(".sec")) { typesetOnce(s); if (s.contains(el)) break; }  // so nothing above it shifts afterwards
+  if (el.tagName === "DETAILS") el.open = true;
+  const go = () => {
+    el.scrollIntoView({ block: "start", behavior: smooth && !REDUCED ? "smooth" : "auto" });
+    if (!el.classList.contains("sec") && !el.classList.contains("gl-group")) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+  };
+  window.katex ? requestAnimationFrame(go) : setTimeout(go, 400);
+  return true;
+}
+function wireGuide(view, m) {
+  if (SECOBS) SECOBS.disconnect();
+  if (READOBS) READOBS.disconnect();
+  const secs = [...$("content").querySelectorAll(".sec")];
+  if (view !== "gmod" || !("IntersectionObserver" in window)) typeset($("content"));
+  else {
+    SECOBS = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { typesetOnce(en.target); SECOBS.unobserve(en.target); } }), { rootMargin: "700px 0px" });
+    secs.forEach((s) => SECOBS.observe(s));
+    typesetOnce($("content").querySelector(".lede"));
+  }
+  $("content").querySelectorAll("[data-ex]").forEach((c) => c.matches(".g-ex") && exUpdate(c));
+  fillHub();
+  if (view === "gmod") {
+    store.set("last", m.key);
+    const end = $("sec-check");
+    if (end && "IntersectionObserver" in window) {  // reaching "Check yourself" counts as having read the module
+      READOBS = new IntersectionObserver((ents) => { if (ents.some((en) => en.isIntersecting) && !isRead(m.key)) { setRead(m.key, true); readUI(m.key); } }, { threshold: .6 });
+      READOBS.observe(end);
+    }
+  }
+}
+function readUI(key) {
+  const on = isRead(key), b = $("g-read");
+  if (b) { b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); b.textContent = on ? "✓ Read" : "Mark as read"; }
+  drawNav();
+}
+$("content").addEventListener("click", (e) => {
+  const rb = e.target.closest("#g-read");
+  if (rb) { const k = route().get("g"); if (k) { setRead(k, !isRead(k)); readUI(k); } return; }
+  const j = e.target.closest("[data-jump]");
+  if (j && !modClick(e)) {
+    e.preventDefault();
+    const r = route();
+    if (goAnchor(j.dataset.jump, true) && r.get("g")) { r.set("at", j.dataset.jump); history.replaceState(null, "", "#" + r.toString()); }
+    return;
+  }
+  const b = e.target.closest("button[data-ex]"), card = b && b.closest(".g-ex");
+  if (card) {
+    const steps = [...card.querySelectorAll(".g-steps > li")], ans = card.querySelector(".g-ex-a"), act = b.dataset.ex;
+    if (act === "reset") { steps.forEach((li) => (li.hidden = true)); if (ans) ans.hidden = true; }
+    else if (act === "all") { steps.forEach((li) => (li.hidden = false)); if (ans) ans.hidden = false; }
+    else { const nx = steps.find((li) => li.hidden); if (nx) nx.hidden = false; else if (ans) ans.hidden = false; }
+    exUpdate(card);
+    const shown = act === "reset" ? card : [...steps, ans].filter((x) => x && !x.hidden).pop();
+    if (shown && shown.getBoundingClientRect().bottom > window.innerHeight - 40) shown.scrollIntoView({ block: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+    const nextBtn = card.querySelector('[data-ex="next"]'), resetBtn = card.querySelector('[data-ex="reset"]');
+    (nextBtn.hidden ? resetBtn : nextBtn).focus({ preventScroll: true });
+  }
+});
+// An answer is rendered when its question is opened (toggle doesn't bubble, so listen while it travels down).
+$("content").addEventListener("toggle", (e) => {
+  const d = e.target;
+  if (!(d instanceof HTMLDetailsElement) || !d.open) return;
+  const body = d.querySelector(":scope > .body[data-fill]");
+  if (!body) return;
+  const [key, i] = body.dataset.fill.split("|");
+  body.removeAttribute("data-fill");
+  const m = MODS.get(key), g = m && m.guide[+i];
+  if (g) { body.innerHTML = qaBody(g, m); typeset(body); }
+}, true);
+// ← and → move between modules in the guide (when you're not typing or in a pop-up)
+document.addEventListener("keydown", (e) => {
+  if ((e.key !== "ArrowLeft" && e.key !== "ArrowRight") || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || POP.open) return;
+  if (e.target.closest && e.target.closest("input, textarea, select, [contenteditable], .dgscroll, .ftex, .katex-display")) return;
+  const a = $("content").querySelector(e.key === "ArrowLeft" ? ".g-pager .prev" : ".g-pager .next");
+  if (a) { e.preventDefault(); location.hash = a.getAttribute("href"); }
+});
+function setStick() { document.documentElement.style.setProperty("--stick", ($("top").offsetHeight || 64) + "px"); }
+
+// ------------------------------------------------------------------ render
+let LAST = { view: "", key: "" }, GLOSS_FAILED = false;
+function render(keepScroll) {
+  if (!DATA) return;
+  const r = route(), view = viewOf(r);
+  const key = view === "gmod" ? r.get("g") : view === "mmod" ? r.get("m") : view === "mvol" ? r.get("v") : view === "pmod" ? r.get("pm") : view === "lmod" ? r.get("lm") : "";
+  if (location.hash.slice(1) && new URLSearchParams(location.hash.slice(1)).has("module")) history.replaceState(null, "", "#" + r.toString());  
+  closePop(false);
+  // Same guide module, new anchor (a search result, a pop-up's "go to"): just scroll there.
+  if (!keepScroll && view === "gmod" && LAST.view === "gmod" && LAST.key === key && $("content").querySelector(".guide")) {
+    if (!goAnchor(r.get("at"), true)) window.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
+    return;
+  }
+  const y = window.scrollY, sc = $("dgscroll"), dgPos = sc ? [sc.scrollLeft, sc.scrollTop] : null;
+  const sameView = LAST.view === view && LAST.key === key;
+  const openIds = keepScroll && sameView ? [...$("content").querySelectorAll("details[open]")].map((d) => d.id || d.querySelector("summary").textContent.slice(0, 20)) : [];
+  const exState = keepScroll && sameView ? [...$("content").querySelectorAll(".g-ex")].map((c) => [...c.querySelectorAll(".g-steps > li, .g-ex-a")].map((x) => x.hidden)) : [];
+  MODE = view[0] === "g" ? "guide" : view[0] === "p" || view[0] === "l" ? "path" : "map";
+  document.body.dataset.mode = MODE;
+  const m = (view === "gmod" || view === "mmod") ? MODS.get(key) : null, v = view === "mvol" ? VOL_BY_ID.get(key) : null;
+  CURVOL = m ? m.vol : v || null; CURMOD = m || null;
+  $("content").innerHTML = view === "gmod" ? viewGuideModule(m) : view === "ghome" ? viewGuideHome() : view === "gloss" ? viewGlossary()
+    : view === "mmod" ? viewModule(m) : view === "mvol" ? viewVolume(v) : view === "phome" ? PathView.home() : view === "pmod" ? PathView.module(key, r.get("st")) : view === "lhome" || view === "lmod" ? LosView.render(r) : viewHome();
+  document.title = view === "gmod" ? `${m.vol.short} ${m.n} · Guide · CFA L2 Study` : view === "ghome" ? "Guide · Study Map · CFA L2 Study" : view === "gloss" ? "Glossary · Study Map"
+    : view === "mmod" ? `${m.vol.short} ${m.n} · Study Map` : view === "mvol" ? `${v.short} · Study Map` : view === "pmod" ? `${key} · Path · CFA L2 Study` : view === "phome" ? "Study path · CFA L2 Study" : view === "lmod" ? `${key} · LOS cards · CFA L2 Study` : view === "lhome" ? "LOS cards · CFA L2 Study" : "Study Map · CFA L2 Study";
+  drawNav();
+  drawSwitch(view, key);
+  LAST = { view, key };
+  if (MODE === "map") { wireDiagram(); wireMaster(); typeset($("content")); } else if (MODE === "path") PathView.wire(); else wireGuide(view, m);
+  setStick();
+  if (keepScroll && sameView) {
+    $("content").querySelectorAll("details").forEach((d) => { if (openIds.includes(d.id || d.querySelector("summary").textContent.slice(0, 20))) d.open = true; });
+    $("content").querySelectorAll(".g-ex").forEach((c, i) => { const st = exState[i]; if (st) [...c.querySelectorAll(".g-steps > li, .g-ex-a")].forEach((x, j) => (x.hidden = st[j] ?? x.hidden)); exUpdate(c); });
+    if (view === "gmod") $("content").querySelectorAll(".sec").forEach(typesetOnce);  // keep the page the same height as before
+    window.scrollTo(0, y);
+    const s2 = $("dgscroll"); if (s2 && dgPos) { s2.scrollLeft = dgPos[0]; s2.scrollTop = dgPos[1]; }
+    return;
+  }
+  const at = view === "gmod" ? r.get("at") : view === "gloss" ? (r.get("t") ? "t-" + r.get("t") : r.get("l") ? "gl-" + r.get("l") : "") : view === "ghome" && r.get("vol") ? "gvol-" + r.get("vol") : "";
+  const mapTarget = view === "mmod" ? (r.get("c") !== null ? "c" + r.get("c") : r.get("f") !== null ? "f" + r.get("f") : r.get("s") !== null ? "s" + r.get("s") : null) : null;
+  const el = mapTarget ? document.getElementById(mapTarget) : null;
+  if (el) { requestAnimationFrame(() => { el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.add("flash"); }); }
+  else if (at && (view === "gmod" ? goAnchor(at, false) : (() => { const t = document.getElementById(at); if (t) { requestAnimationFrame(() => { t.scrollIntoView({ block: "start" }); if (t.classList.contains("gl-entry")) t.classList.add("flash"); }); } return !!t; })())) { /* scrolled */ }
+  else window.scrollTo(0, 0);
+  const cur = $("nav").querySelector("a.cur");
+  if (cur && window.innerWidth > 860) cur.scrollIntoView({ block: "nearest" });
+}
+window.addEventListener("hashchange", () => render(false));
+function forceRender() { LAST = { view: "", key: "" }; render(false); }  // same module, new content: rebuild it (and start at the top)
+
+// ------------------------------------------------------------------ search
+let hits = [], sel = 0;
+const hrefOf = (s) => (s.type === "term" ? "#glossary&t=" + encodeURIComponent(s.id) : MODE === "guide" ? ghref(s.mod, s.at) : href(s.mod, s.mx));
+function search(q) {
+  const words = norm(q).split(" ").filter(Boolean);
+  if (!words.length) return [];
+  const scored = [];
+  for (const s of SEARCH) {
+    const inName = words.every((w) => s.n.includes(w));
+    const inAll = inName || words.every((w) => s.n.includes(w) || s.x.includes(w));
+    if (!inAll) continue;
+    const score = (inName ? 0 : 10) + (s.n.startsWith(words[0]) ? 0 : 2) + { formula: 0, standard: 0, concept: 1, term: 2, module: 3 }[s.type];
+    scored.push([score, s]);
+  }
+  return scored.sort((a, b) => a[0] - b[0]).slice(0, 40).map((x) => x[1]);
+}
+function drawResults() {
+  const box = $("results"), q = $("q").value.trim();
+  if (!q) { box.classList.remove("show"); return; }
+  box.innerHTML = hits.length ? hits.map((h, i) => `<a href="${esc(hrefOf(h))}" class="${i === sel ? "sel" : ""}"><span class="rt">${h.type}</span>
+      <span class="rl">${esc(h.label)}</span><span class="rm">${h.mod ? `${esc(h.mod.vol.abbr)} ${h.mod.n}` : "Glossary"}</span></a>`).join("")
+    : `<div class="empty">Nothing matches “${esc(q)}” yet.</div>`;
+  box.classList.add("show");
+  const s = box.querySelector("a.sel"); if (s) s.scrollIntoView({ block: "nearest" });
+}
+$("q").addEventListener("input", () => { hits = search($("q").value); sel = 0; drawResults(); });
+$("q").addEventListener("focus", () => { if ($("q").value.trim()) drawResults(); });
+$("q").addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown") { sel = Math.min(hits.length - 1, sel + 1); drawResults(); e.preventDefault(); }
+  else if (e.key === "ArrowUp") { sel = Math.max(0, sel - 1); drawResults(); e.preventDefault(); }
+  else if (e.key === "Enter" && hits[sel]) { const h = hrefOf(hits[sel]); closeSearch(); if (location.hash === h) render(false); else location.hash = h; }
+  else if (e.key === "Escape") { $("q").value = ""; closeSearch(); }
+});
+function closeSearch() { $("results").classList.remove("show"); $("q").blur(); }
+$("results").addEventListener("click", (e) => { const a = e.target.closest("a"); if (a) { closeSearch(); if (location.hash === a.getAttribute("href")) render(false); } });
+document.addEventListener("click", (e) => { if (!e.target.closest(".search")) $("results").classList.remove("show"); });
+
+
+const GLOSS_P = fetchJSON("static/glossary.json").then(setGlossary).catch(() => { GLOSS_FAILED = true; });
+const NARR_P = loadNarratives();
+const HUB_P = loadHub();
+let LOADED_AT = 0;
+async function load() {
+  const live = $("live");
+  if (document.hidden && DATA) return;  // the page is in the background: refresh when it's looked at again
+  try {
+    const r = await fetch("mapdata", { cache: "no-store" });
+    const d = await r.json();
+    LOADED_AT = Date.now();
+    const key = JSON.stringify([d.concepts, d.formulas, d.guide, d.memory]);
+    const first = !DATA;
+    if (key !== DATAKEY) {
+      const before = LAST.view === "gmod" && MODS.get(LAST.key) ? MODS.get(LAST.key).sig : null;
+      if (first) await Promise.race([Promise.allSettled([GLOSS_P, NARR_P, window.PATH_P || 0, window.LOS_P || 0]), sleep(2500)]);  // the small files, so the first page has its links
+      DATA = d; DATAKEY = key; build(d); buildLinks();
+      if (first) render(false);
+      else if (MODE === "path") drawNav();  
+      else if (before !== null && MODS.get(LAST.key) && MODS.get(LAST.key).sig === before) drawNav();  // the module you're reading didn't change
+      else if (POP.open && POP.pinned) PENDING = true;  // don't pull the page out from under an open pop-up
+      else render(true);
+      if ($("q").value.trim()) { hits = search($("q").value); drawResults(); }
+    }
+    live.className = "live";
+    live.innerHTML = "<i></i>Copy from 2026-10-07";
+  } catch {
+    live.className = "live stale"; live.innerHTML = "<i></i>Couldn't load the data";
+    if (!DATA) $("content").innerHTML = `<p class="offline">Can't load the Study Map data.</p>`;
+  }
+}
+async function refreshNarratives() {
+  const before = LAST.view === "gmod" ? JSON.stringify(NARR[LAST.key] || null) : null;
+  if (!(await loadNarratives()) || !DATA) return;
+  if (LAST.view === "gmod") {
+    if (JSON.stringify(NARR[LAST.key] || null) !== before) {  // this module's walkthrough arrived or changed: offer it rather than move the page
+      const b = $("g-banner");
+      if (b && window.scrollY < 150 && !POP.open) render(true);
+      else if (b) b.innerHTML = `<div class="g-banner"><span>${before === "null" ? "This module's walkthrough was updated." : "This module's walkthrough was updated."}</span>
+        <button type="button" class="btn sm primary" onclick="forceRender()">Show it</button></div>`;
+    }
+    drawNav();
+  } else if (LAST.view === "ghome" && !POP.open) render(true);
+  else drawNav();
+}
+GLOSS_P.then(() => { if (DATA) { buildLinks(); if (LAST.view === "gloss") render(false); } });
+setStick();
+load();
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) return;
+  if (Date.now() - LOADED_AT > 25000) load();
+  if (Date.now() - NARR_AT > 60000) refreshNarratives();
+  loadHub();
+});
+</script>
+</body>
+</html>

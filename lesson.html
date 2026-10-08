@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CFA Level II Study · Guided lessons</title>
+<link rel="stylesheet" href="static/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-180.png">
+<link rel="icon" href="static/icon-192.png">
+<meta name="theme-color" content="#16181f">
+<script src="static/lock-config.js"></script>
+<script src="static/lock.js"></script>
+<script src="static/profile.js"></script>
+<script>StudyProfile.guard();</script>
+<link rel="stylesheet" href="static/katex/katex.min.css">
+<script defer src="static/katex/katex.min.js"></script>
+<style>
+  main { max-width: 860px; margin: 0 auto; padding: var(--sp-4) var(--sp-4) 150px; }
+  .offline { display: none; padding: var(--sp-4); border: 1px solid var(--line); border-radius: 12px; }
+  select, button { font: inherit; color: inherit; }
+  select { min-height: 40px; max-width: 100%; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: transparent; }
+
+  /* choosing a lesson */
+  .gl-pick { display: grid; gap: var(--sp-3); margin-top: var(--sp-4); }
+  .gl-subject { margin: var(--sp-5) 0 var(--sp-2); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .gl-mod { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; width: 100%; text-align: left; padding: 12px 14px; border: 1px solid var(--line);
+    border-radius: 12px; background: var(--card); cursor: pointer; }
+  .gl-mod:hover, .gl-mod:focus-visible { border-color: var(--accent); }
+  .gl-mod .t { font-weight: 650; }
+  .gl-mod .s { grid-column: 1; color: var(--muted); font-size: 14px; }
+  .gl-mod .go { grid-row: 1 / span 2; grid-column: 2; font-weight: 650; color: var(--accent); white-space: nowrap; }
+  .gl-mod .bar { grid-column: 1 / -1; height: 4px; border-radius: 4px; background: var(--track, #e4e2dc); overflow: hidden; }
+  .gl-mod .bar i { display: block; height: 100%; background: var(--accent); }
+
+  /* the lesson */
+  .gl-top { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin: var(--sp-3) 0 var(--sp-2); }
+  .gl-top .back { font-weight: 600; }
+  .gl-top h1 { flex: 1 1 260px; margin: 0; font-size: 20px; }
+  .gl-where { color: var(--muted); font-size: 14px; }
+  .gl-track { height: 6px; border-radius: 6px; background: var(--track, #e4e2dc); overflow: hidden; margin-bottom: var(--sp-4); }
+  .gl-track i { display: block; height: 100%; background: var(--accent); transition: width .25s; }
+  .gl-stage { padding: var(--sp-5); border: 1px solid var(--line); border-radius: 16px; background: var(--card); min-height: 240px; font-size: 18px; line-height: 1.55; overflow-wrap: anywhere; }
+  .gl-stage > :first-child { margin-top: 0; }
+  .gl-stage > :last-child { margin-bottom: 0; }
+  .gl-kicker { font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 0 0 6px; }
+  .gl-stage h2 { margin: 0 0 var(--sp-3); font-size: 26px; line-height: 1.2; }
+  .gl-out { margin: 0 0 var(--sp-3); padding: 10px 14px; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 10px 10px 0; font-size: 16px; }
+  .gl-stage ul, .gl-stage ol { padding-left: 1.3em; }
+  .gl-stage li { margin: 4px 0; }
+  .gl-stage table { border-collapse: collapse; font-size: 15.5px; display: block; overflow-x: auto; max-width: 100%; }
+  .gl-stage th, .gl-stage td { border: 1px solid var(--line); padding: 5px 9px; text-align: left; }
+  .gl-stage .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+  .gl-fits { margin-top: var(--sp-4); font-size: 15.5px; color: var(--muted); }
+  .gl-fits b { color: var(--ink); }
+  .gl-big { font-size: 15px; color: var(--muted); margin: 0; }
+  .gl-f { border: 1px solid var(--line); border-radius: 12px; padding: var(--sp-4); margin-top: var(--sp-2); }
+  .gl-f .eq { font-size: 1.12em; }
+  .gl-vars { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: var(--sp-3) 0; font-size: 16px; }
+  .gl-note { margin: 8px 0 0; font-size: 16px; }
+  .gl-note b { display: inline-block; min-width: 0; }
+  .gl-warn { color: var(--bad, #b3261e); }
+  .gl-opts { display: grid; gap: 10px; margin-top: var(--sp-3); }
+  .gl-opt { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; text-align: left; padding: 12px 14px; border: 1px solid var(--line-strong, var(--line));
+    border-radius: 12px; background: transparent; cursor: pointer; font-size: 17px; }
+  .gl-opt:hover:not(:disabled), .gl-opt:focus-visible { border-color: var(--accent); }
+  .gl-opt .l { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-strong, var(--line)); font-weight: 700; font-size: 15px; }
+  .gl-opt.right { border-color: var(--good, #1a7f47); background: var(--good-soft, #e6f4ea); }
+  .gl-opt.wrong { border-color: var(--bad, #b3261e); background: var(--bad-soft, #fbe9e7); }
+  .gl-opt:disabled { cursor: default; opacity: 1; }
+  .gl-verdict { margin-top: var(--sp-4); padding-top: var(--sp-3); border-top: 1px solid var(--line); font-size: 16.5px; }
+  .gl-verdict .v { font-weight: 700; }
+  .gl-steps li { padding: 3px 8px; margin-left: -8px; border-radius: 8px; transition: opacity .25s, background-color .25s; }
+  .gl-steps li.now { background: var(--accent-soft); }
+  .gl-steps li.todo { opacity: .32; }
+  .gl-case { margin: 0 0 var(--sp-3); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: 16px; }
+  .gl-case summary { cursor: pointer; font-weight: 600; }
+  .gl-trap { margin: 10px 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 16.5px; }
+  .gl-trap .a { display: block; margin-top: 4px; color: var(--muted); }
+  .gl-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: var(--sp-4); }
+  .gl-links a { padding: 9px 14px; border: 1px solid var(--line-strong, var(--line)); border-radius: 999px; font-weight: 600; text-decoration: none; }
+
+  /* what is being said, and the controls: always in reach at the foot of the screen */
+  .gl-foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--bar-bg, rgba(255, 255, 255, .94)); backdrop-filter: blur(8px); border-top: 1px solid var(--line); }
+  .gl-foot-in { max-width: 860px; margin: 0 auto; padding: 8px var(--sp-4) calc(10px + env(safe-area-inset-bottom)); }
+  .gl-cap { min-height: 2.9em; margin: 0 0 8px; font-size: 15.5px; line-height: 1.45; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .gl-cap.on { color: var(--ink); }
+  .gl-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .gl-btn { min-height: 44px; min-width: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-strong, var(--line)); background: var(--card); cursor: pointer; font-weight: 650; }
+  .gl-btn.main { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); min-width: 104px; }
+  .gl-btn:disabled { opacity: .45; cursor: default; }
+  .gl-set { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+  .gl-set select { min-height: 36px; font-size: 14px; max-width: 150px; }
+  .gl-set label { display: inline-flex; align-items: center; gap: 5px; }
+  .gl-set input { accent-color: var(--accent); }
+  .gl-keys { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+  .gl-more { display: none; }
+  @media (max-width: 620px) { .gl-stage { padding: var(--sp-4); font-size: 17px; } .gl-stage h2 { font-size: 22px; } .gl-keys { display: none; }
+    .gl-more { display: inline-block; margin-left: auto; } .gl-set { display: none; margin-left: 0; width: 100%; } .gl-foot.open .gl-set { display: flex; }
+    .gl-cap { min-height: 1.45em; -webkit-line-clamp: 2; } .gl-btn { padding: 8px 12px; } .gl-btn.main { min-width: 84px; } }
+  [hidden] { display: none !important; }
+  .gl-voice { margin: 0 0 var(--sp-4); padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--accent-soft); font-size: 15.5px; }
+  /* follow mode (?follow=1): a display only, inside a page that says which step to show and does the talking */
+  body.follow .site-bar, body.follow .gl-foot, body.follow #tolist, body.follow .gl-links { display: none; }
+  body.follow main { padding-top: 14px; padding-bottom: 24px; }
+</style>
+</head>
+<body>
+<header class="site-bar"><div class="site-bar-in">
+  <a class="site-brand" href="app.html#path">CFA Level II Study</a>
+  <div class="site-nav" role="navigation" aria-label="Pages"><a href="app.html" aria-label="Study Map"><span class="nav-long">Study Map</span><span class="nav-short">Map</span></a><a href="lesson.html">Lessons</a><a href="cases.html" aria-label="Case studies"><span class="nav-long">Case studies</span><span class="nav-short">Cases</span></a><a href="rapid.html" aria-label="Rapid fire"><span class="nav-long">Rapid fire</span><span class="nav-short">Rapid</span></a><a href="notecards.html" aria-label="Note cards"><span class="nav-long">Note cards</span><span class="nav-short">Cards</span></a></div>
+  <div id="userbar"></div>
+</div></header>
+<main>
+  <div class="offline" id="offline">The lessons couldn't be loaded.</div>
+
+  <section id="pick" hidden>
+    <div class="site-head"><span class="eyebrow">Listen, watch, answer</span></div>
+    <h1 class="site-title">Guided lessons</h1>
+    <p class="lede">A module taught start to finish: it is read to you one step at a time while the screen shows the same thing with its formulas, and every part ends with a question. Everything in a lesson comes from the study guide that has been checked against the notes.</p>
+    <div id="mods" class="gl-pick"></div>
+  </section>
+
+  <section id="play" hidden>
+    <div class="gl-top"><a class="back" href="lesson.html" id="tolist">‹ All lessons</a><h1 id="ltitle"></h1><span class="gl-where" id="where"></span></div>
+    <div class="gl-track"><i id="track" style="width:0"></i></div>
+    <div class="gl-stage" id="stage" aria-live="polite"></div>
+  </section>
+</main>
+
+<div class="gl-foot" id="foot" hidden><div class="gl-foot-in">
+  <p class="gl-cap" id="cap" aria-hidden="true"></p>
+  <div class="gl-ctl">
+    <button class="gl-btn" id="b-back" type="button" aria-label="Back one step">‹ Back</button>
+    <button class="gl-btn main" id="b-play" type="button">Play</button>
+    <button class="gl-btn" id="b-next" type="button" aria-label="Next step">Next ›</button>
+    <button class="gl-btn" id="b-again" type="button" aria-label="Say this step again">Again</button>
+    <button class="gl-btn gl-more" id="b-set" type="button" aria-expanded="false" aria-controls="gl-set">Voice</button>
+    <div class="gl-set" id="gl-set">
+      <label><input type="checkbox" id="s-voice" checked> Voice</label>
+      <label><input type="checkbox" id="s-auto" checked> Carry on by itself</label>
+      <select id="s-rate" aria-label="Speaking speed"><option value="0.85">Slower</option><option value="1" selected>Normal speed</option><option value="1.15">Faster</option><option value="1.3">Fastest</option></select>
+      <select id="s-who" aria-label="Voice"></select>
+    </div>
+  </div>
+  <p class="gl-keys">Space: play or pause · arrows: back and next · R: again · A, B, C: answer a question</p>
+</div></div>
+
+<script src="static/data/lesson-index.js"></script>
+<script src="static/standalone.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const cap1 = (s) => s ? s[0].toUpperCase() + s.slice(1) : s;
+
+// ------------------------------------------------------------------ text with formulas (paragraphs, lists, tables) + KaTeX
+function math(tex, display) {
+  if (!window.katex) return esc(display ? `\\[${tex}\\]` : `\\(${tex}\\)`);
+  try { return katex.renderToString(tex, { displayMode: display, throwOnError: false }); } catch { return esc(tex); }
+}
+function inline(s, slots) {
+  return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<em>$2</em>").replace(/\u0001(\d+)\u0002/g, (_, i) => slots[+i]);
+}
+function md(src) {
+  const slots = [];
+  const text = String(src ?? "").replace(/\r\n?/g, "\n").replace(/\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$/g, (m, d, i, dd) => {
+    const display = i === undefined;
+    slots.push(math(d ?? dd ?? i, display)); return display ? `\n\u0001${slots.length - 1}\u0002\n` : `\u0001${slots.length - 1}\u0002`;
+  });
+  const lines = text.split("\n"), out = [];
+  let para = [], list = null;
+  const flush = () => { if (para.length) out.push(`<p>${inline(para.join(" "), slots)}</p>`); para = []; if (list) { out.push(`<${list.tag}>${list.items.map((x) => `<li>${inline(x, slots)}</li>`).join("")}</${list.tag}>`); list = null; } };
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (!l.trim()) { flush(); continue; }
+    if (/^\s*\|/.test(l)) {
+      flush(); const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(lines[i++]);
+      i--;
+      const cells = rows.filter((r) => !/^\s*\|[\s:|-]+\|\s*$/.test(r)).map((r) => r.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim()));
+      out.push("<table>" + cells.map((r, n) => "<tr>" + r.map((c) => `<${n ? "td" : "th"}>${inline(c, slots)}</${n ? "td" : "th"}>`).join("") + "</tr>").join("") + "</table>");
+      continue;
+    }
+    const li = l.match(/^\s*(?:([-•])|(\d+)\.)\s+(.*)$/);
+    if (li) { if (para.length) { out.push(`<p>${inline(para.join(" "), slots)}</p>`); para = []; } const tag = li[1] ? "ul" : "ol"; if (!list || list.tag !== tag) { flush(); list = { tag, items: [] }; } list.items.push(li[3]); continue; }
+    if (list) flush();
+    para.push(l.trim());
+  }
+  flush();
+  return out.join("");
+}
+
+// ------------------------------------------------------------------ what is remembered on this device
+const KEY = "site-lesson-v1", HKEY = "site-rapid-v1";
+const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } };
+const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* not remembered */ } };
+let MEM = read(KEY, { at: {}, ans: {}, set: {} });
+MEM.at = MEM.at || {}; MEM.ans = MEM.ans || {}; MEM.set = MEM.set || {};
+const save = () => write(KEY, MEM);
+function noteAnswer(id, ok) {   // the same history the rapid-fire round keeps: [right, wrong, last one right?, when]
+  const h = read(HKEY, { v: 1, q: {} }); h.q = h.q || {};
+  const r = h.q[id] || [0, 0, 0, 0];
+  r[ok ? 0 : 1] += 1; r[2] = ok ? 1 : 0; r[3] = Date.now(); h.q[id] = r; write(HKEY, h);
+}
+
+// ------------------------------------------------------------------ the voice: the device's own, one sentence at a time
+const synth = window.speechSynthesis || null;
+let voices = [], queue = [], speaking = false, paused = false, token = 0;
+function loadVoices() {
+  if (!synth) return;
+  voices = synth.getVoices().filter((v) => /^en[-_]/i.test(v.lang));
+  const sel = $("#s-who"), want = MEM.set.who;
+  const rank = (v) => (/(premium|enhanced|natural|neural)/i.test(v.name) ? 0 : 2) + (v.localService ? 0 : 1) + (/en[-_](US|GB)/i.test(v.lang) ? 0 : .5);
+  voices.sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
+  sel.innerHTML = voices.map((v) => `<option value="${esc(v.name)}"${v.name === want ? " selected" : ""}>${esc(v.name.replace(/\s*\(.*?\)\s*/g, " ").trim())} · ${esc(v.lang)}</option>`).join("") || "<option value=''>This device's voice</option>";
+}
+// cut after . ! or ? only where a space and then a capital or a digit follow, so "2.5 percent" and "e.g. oil" stay whole
+const sentences = (text) => String(text || "").replace(/\s+/g, " ").replace(/\b(U\.S|vs|e\.g|i\.e|approx|No)\. /g, "$1.\u0002")
+  .replace(/([.!?]["')\]]?) (?=["'(\[]?[A-Z0-9])/g, "$1\u0001").split("\u0001").map((s) => s.replace(/\u0002/g, " ").trim()).filter(Boolean);
+function markStep(k) {   // the step of a working that is being said: it is lit, the ones still to come are dimmed
+  const ol = document.querySelector("#stage .gl-steps");
+  if (!ol) return;
+  [...ol.children].forEach((li, i) => { li.classList.toggle("now", k != null && i === k); li.classList.toggle("todo", k != null && i > k); });
+  if (k != null && ol.children[k] && ol.children[k].scrollIntoView) ol.children[k].scrollIntoView({ block: "nearest" });
+}
+function hush() { token++; queue = []; speaking = false; paused = false; if (synth) { try { synth.cancel(); } catch { /* nothing to stop */ } } markStep(null); }
+function caption(text, on) { const c = $("#cap"); c.textContent = text || ""; c.classList.toggle("on", !!on); }
+function speakAll(text, done) {   // text: a string, or a list of { say, mark } where mark is the step of a working to light while it is said
+  hush();
+  const mine = ++token, parts = [];
+  for (const p of Array.isArray(text) ? text : [{ say: text }]) sentences(p.say).forEach((s, i) => parts.push({ s, mark: i === 0 ? p.mark : undefined }));
+  queue = parts.slice(); speaking = true; setPlay();
+  const voiceOn = $("#s-voice").checked && !!synth;
+  const step = () => {
+    if (mine !== token) return;
+    if (!queue.length) { speaking = false; setPlay(); caption(parts.length ? parts[parts.length - 1].s : "", false); markStep(null); if (done) done(); return; }
+    const { s, mark } = queue.shift();
+    if (mark !== undefined) markStep(mark);
+    caption(s, true);
+    if (!voiceOn) { setTimeout(step, Math.max(900, s.length * 55 / (+$("#s-rate").value || 1))); return; }   // no voice: the caption keeps the pace of reading
+    const u = new SpeechSynthesisUtterance(s);
+    const v = voices.find((x) => x.name === $("#s-who").value); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-US";
+    u.rate = +$("#s-rate").value || 1;
+    u.onend = step; u.onerror = (e) => { if (e.error === "interrupted" || e.error === "canceled") return; step(); };
+    try { synth.speak(u); } catch { step(); }
+  };
+  step();
+}
+function pause() { if (!speaking) return; paused = true; if (synth && $("#s-voice").checked) { try { synth.pause(); } catch { /* */ } } else token++; setPlay(); }
+function resume() { if (!paused) return; paused = false; if (synth && $("#s-voice").checked && synth.paused) { try { synth.resume(); } catch { /* */ } } else say(); setPlay(); }
+function setPlay() { $("#b-play").textContent = speaking && !paused ? "Pause" : "Play"; }
+
+// ------------------------------------------------------------------ lessons
+let INDEX = null, LES = null, I = 0;
+const FOLLOW = new URLSearchParams(location.search).has("follow");   // a display only: nothing is spoken or remembered here
+const get = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+const meta = (key) => { for (const p of INDEX.phases) for (const m of p.modules) if (m.key === key) return m; return null; };
+
+function listHTML() {
+  return INDEX.phases.map((p) => `<h2 class="gl-subject">${esc(p.title)}</h2>` + p.modules.map((m) => {
+    const at = MEM.at[m.key] || 0, pc = Math.round(100 * Math.min(at, m.steps - 1) / Math.max(1, m.steps - 1));
+    return `<button class="gl-mod" type="button" data-m="${esc(m.key)}"><span class="t">${esc(m.title)}</span><span class="go">${at >= m.steps - 1 ? "Again ›" : at ? "Carry on ›" : "Start ›"}</span>
+      <span class="s">${esc(m.key)} · about ${m.minutes} min · ${m.outcomes} outcomes${at ? ` · ${pc}% done` : ""}</span>${at ? `<span class="bar"><i style="width:${pc}%"></i></span>` : ""}</button>`;
+  }).join("")).join("");
+}
+
+function stepHTML(s) {
+  const out = (n, text, first) => first === false ? "" : `<p class="gl-out"><b>Outcome ${n}.</b> ${esc(cap1(text))}</p>`;
+  if (s.kind === "intro") return `<p class="gl-kicker">${esc(LES.module)} · about ${LES.minutes} minutes</p><h2>${esc(s.title)}</h2>${s.why ? `<p>${esc(s.why)}</p>` : ""}
+    <p class="gl-big">In this lesson</p><ol>${s.parts.map((p) => `<li>${esc(p)}</li>`).join("")}</ol>
+    ${s.fits && s.fits.length ? `<div class="gl-fits"><p class="gl-big">Where it fits</p>${s.fits.map((f) => `<p><b>${esc(f.module)}.</b> ${esc(f.how)}</p>`).join("")}</div>` : ""}`;
+  if (s.kind === "part") return `<p class="gl-kicker">Part ${s.n} of ${s.of}</p><h2>${esc(s.title)}</h2><p class="gl-big">You should come out able to</p><ul>${s.outcomes.map((o) => `<li>${esc(o)}</li>`).join("")}</ul>`;
+  if (s.kind === "explain") return out(s.outcome, s.text, s.first) + md(s.md);
+  if (s.kind === "recap") return out(s.outcome, s.text) + `<p>What you have just heard answers this outcome too.</p>`;
+  if (s.kind === "formula") return `<p class="gl-kicker">Formula · outcome ${s.outcome}</p><h2>${esc(s.name)}</h2><div class="gl-f"><div class="eq">${math(s.latex, true)}</div>
+    ${s.vars && s.vars.length ? `<div class="gl-vars">${s.vars.map(([sym, mean]) => `<span>${math(sym, false)}</span><span>${inline(String(mean), [])}</span>`).join("")}</div>` : ""}
+    ${s.use ? `<p class="gl-note"><b>When to use it.</b> ${md(s.use).replace(/^<p>|<\/p>$/g, "")}</p>` : ""}${s.pitfall ? `<p class="gl-note gl-warn"><b>The common mistake.</b> ${md(s.pitfall).replace(/^<p>|<\/p>$/g, "")}</p>` : ""}</div>`;
+  if (s.kind === "check") {
+    const got = MEM.ans[s.qid];
+    return `<p class="gl-kicker">Check yourself</p>${s.case ? `<details class="gl-case"><summary>The case: ${esc(s.case.title)}</summary>${md(s.case.vignette)}</details>` : ""}
+      <div class="gl-stem">${md(s.stem)}</div><div class="gl-opts">${Object.entries(s.options).map(([l, t]) =>
+        `<button type="button" class="gl-opt ${got ? (l === s.answer ? "right" : l === got ? "wrong" : "") : ""}" data-l="${l}"${got ? " disabled" : ""}><span class="l">${l}</span><span>${md(t).replace(/^<p>|<\/p>$/g, "")}</span></button>`).join("")}</div>
+      ${got ? `<div class="gl-verdict"><p class="v">${got === s.answer ? "Correct." : got === "-" ? `The answer is ${s.answer}.` : `Not quite: the answer is ${s.answer}.`}</p>${s.steps && s.steps.length ? `<ol class="gl-steps">${s.steps.map((x) => `<li>${md(x).replace(/^<p>|<\/p>$/g, "")}</li>`).join("")}</ol>` : ""}${md(s.explanation)}</div>` : ""}`;
+  }
+  if (s.kind === "traps") return `<p class="gl-kicker">Before you finish</p><h2>The traps in this module</h2>${s.traps.map((t) => `<div class="gl-trap"><b>${esc(t.trap)}</b><span class="a">${esc(t.avoid)}</span></div>`).join("")}`;
+  if (s.kind === "end") {
+    const k = encodeURIComponent(LES.module), map = (window.Site && Site.links.map) || "app.html";
+    return `<p class="gl-kicker">End of the lesson</p><h2>${esc(s.title)}</h2><p>Now use it. The questions come first, then a case.</p><div class="gl-links">
+      <a href="${map}#path&pm=${k}">Practise in the Study Path</a><a href="${map}#los&lm=${k}">Outcome cards</a><a href="notecards.html?m=${k}&view=flip">Flip through the note cards</a>
+      <a href="lesson.html">Another lesson</a></div>`;
+  }
+  return "";
+}
+
+function show(n, speakIt) {
+  I = Math.max(0, Math.min(LES.steps.length - 1, n));
+  const s = LES.steps[I];
+  if (!FOLLOW) { MEM.at[LES.module] = Math.max(MEM.at[LES.module] || 0, I); save(); }
+  $("#stage").innerHTML = stepHTML(s);
+  const part = LES.steps.slice(0, I + 1).filter((x) => x.kind === "part").length, parts = LES.steps.filter((x) => x.kind === "part").length;
+  $("#where").textContent = `${part ? `Part ${part} of ${parts} · ` : ""}step ${I + 1} of ${LES.steps.length}`;
+  $("#track").style.width = (100 * I / Math.max(1, LES.steps.length - 1)) + "%";
+  $("#b-back").disabled = I === 0; $("#b-next").disabled = I === LES.steps.length - 1;
+  if (!FOLLOW) history.replaceState(null, "", `lesson.html?m=${encodeURIComponent(LES.module)}&s=${I + 1}`);
+  window.scrollTo({ top: 0 });
+  if (speakIt && !FOLLOW) say(); else { hush(); caption(sentences(s.say)[0] || "", false); setPlay(); }
+}
+function say() {   // speak the step on screen; afterwards carry on, except at a question (it waits for an answer) and at the end
+  const s = LES.steps[I], asked = s.kind === "check" && !MEM.ans[s.qid];
+  const got = s.kind === "check" ? MEM.ans[s.qid] : null, walk = got && s.say_steps && s.say_steps.length > 1 ? s.say_steps : null;
+  const text = !got ? s.say : !walk ? (got === s.answer ? s.say_right : s.say_wrong)   // a working of several steps is said one step at a time
+    : [{ say: (got === s.answer ? "Correct." : "Not quite. " + s.say_answer) + " Here is the working, one step at a time." }].concat(walk.map((t, k) => ({ say: `Step ${k + 1}. ${t}`, mark: k })));
+  speakAll(text, () => {
+    if ($("#s-auto").checked && !asked && I < LES.steps.length - 1) setTimeout(() => { if (!speaking && !paused) show(I + 1, true); }, 650);
+  });
+}
+function answer(l) {
+  const s = LES.steps[I];
+  if (s.kind !== "check" || MEM.ans[s.qid]) return;
+  MEM.ans[s.qid] = l; save(); noteAnswer(s.qid, l === s.answer);
+  $("#stage").innerHTML = stepHTML(s);
+  say();
+}
+
+async function open(key, at) {
+  const m = meta(key);
+  if (!m) return list();
+  LES = await get(`static/lessons/${m.slug}.json`);
+  $("#pick").hidden = true; $("#play").hidden = false; $("#foot").hidden = false;
+  $("#ltitle").textContent = LES.title; document.title = `${LES.title} · Guided lesson · CFA L2 Study`;
+  show(at != null ? at : Math.min(MEM.at[key] || 0, LES.steps.length - 1) >= LES.steps.length - 1 ? 0 : (MEM.at[key] || 0), false);
+}
+function list() {
+  hush(); LES = null;
+  $("#play").hidden = true; $("#foot").hidden = true; $("#pick").hidden = false;
+  $("#mods").innerHTML = listHTML(); document.title = "Guided lessons · CFA L2 Study";
+  history.replaceState(null, "", "lesson.html");
+}
+
+document.addEventListener("click", (e) => {
+  if (FOLLOW) return;
+  const mod = e.target.closest(".gl-mod"), opt = e.target.closest(".gl-opt");
+  if (mod) { open(mod.dataset.m); return; }
+  if (opt && !opt.disabled) { answer(opt.dataset.l); return; }
+  if (e.target.closest("#tolist")) { e.preventDefault(); list(); return; }
+  if (e.target.closest("#b-play")) { if (speaking && !paused) pause(); else if (paused) resume(); else say(); return; }
+  if (e.target.closest("#b-next")) { show(I + 1, speaking || $("#s-auto").checked); return; }
+  if (e.target.closest("#b-back")) { show(I - 1, false); return; }
+  if (e.target.closest("#b-again")) { say(); return; }
+  if (e.target.closest("#b-set")) { const on = $("#foot").classList.toggle("open"); $("#b-set").setAttribute("aria-expanded", on); }
+});
+document.addEventListener("keydown", (e) => {
+  const t = e.target && e.target.closest ? e.target : null;
+  if (!LES || FOLLOW || e.metaKey || e.ctrlKey || e.altKey || (t && t.closest("select, input, textarea"))) return;
+  const k = e.key.toLowerCase();
+  if (k === " ") { e.preventDefault(); $("#b-play").click(); }
+  else if (k === "arrowright") $("#b-next").click();
+  else if (k === "arrowleft") $("#b-back").click();
+  else if (k === "r") say();
+  else if ("abc".includes(k) && k.length === 1) answer(k.toUpperCase());
+});
+for (const id of ["s-voice", "s-auto", "s-rate", "s-who"]) $("#" + id).addEventListener("change", () => {
+  MEM.set = { voice: $("#s-voice").checked, auto: $("#s-auto").checked, rate: $("#s-rate").value, who: $("#s-who").value }; save();
+  if (id !== "s-auto" && speaking) say();
+});
+window.addEventListener("pagehide", hush);
+
+// follow mode: the page that embeds this one sends { lesson: { module, step, answer } } whenever its step changes
+let want = null, following = false;
+async function follow() {
+  if (following || !INDEX) return;
+  following = true;
+  while (want) {
+    const l = want; want = null;
+    try {
+      if (!LES || LES.module !== l.module) await open(l.module, l.step);
+      const s = LES && LES.steps[l.step];
+      if (!s) continue;
+      if (s.kind === "check") { if (l.answer) MEM.ans[s.qid] = l.answer; else delete MEM.ans[s.qid]; }
+      if (I !== l.step || s.kind !== "check" || l.at == null || !document.querySelector("#stage .gl-steps")) show(l.step, false);   // a new step of the same working: no redraw
+      markStep(l.at == null ? null : l.at);
+    } catch { /* the next message tries again */ }
+  }
+  following = false;
+}
+if (FOLLOW) {
+  document.body.classList.add("follow");
+  window.addEventListener("message", (e) => {
+    if (e.origin !== location.origin || e.source !== window.parent || !e.data || !e.data.lesson) return;
+    want = e.data.lesson; follow();
+  });
+}
+
+(async function start() {
+  if (window.Site) Site.fill();
+  if (MEM.set.voice === false) $("#s-voice").checked = false;
+  if (MEM.set.auto === false) $("#s-auto").checked = false;
+  if (MEM.set.rate) $("#s-rate").value = MEM.set.rate;
+  if (!synth) { $("#s-voice").checked = false; $("#s-voice").disabled = true; $("#s-who").hidden = true; }
+  else { loadVoices(); synth.onvoiceschanged = loadVoices; }
+  try {
+    await new Promise((r) => (window.katex ? r() : window.addEventListener("load", r, { once: true })));
+    INDEX = await get("static/lessons/index.json");
+  } catch { $("#offline").style.display = "block"; return; }
+  const q = new URLSearchParams(location.search), key = q.get("m");
+  if (key && meta(key)) await open(key, q.get("s") ? Math.max(0, +q.get("s") - 1) : null); else list();
+  if (FOLLOW && window.parent !== window) { window.parent.postMessage({ lessonReady: true }, location.origin); follow(); }
+})();
+</script>
+</body>
+</html>

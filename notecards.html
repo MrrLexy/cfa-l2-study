@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CFA Level II Study · Note cards</title>
+<link rel="stylesheet" href="static/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-180.png">
+<link rel="icon" href="static/icon-192.png">
+<meta name="theme-color" content="#16181f">
+<script src="static/lock-config.js"></script>
+<script src="static/lock.js"></script>
+<script src="static/profile.js"></script>
+<script>StudyProfile.guard();</script>
+<link rel="stylesheet" href="static/katex/katex.min.css">
+<script defer src="static/katex/katex.min.js"></script>
+<style>
+  main { max-width: 860px; margin: 0 auto; padding: var(--sp-4); }
+  .nc-controls { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); margin: var(--sp-4) 0; padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--radius, 12px); background: var(--panel, transparent); }
+  .nc-controls .row { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
+  .nc-controls .eyebrow { flex: 0 0 100%; }
+  .nc-controls select { min-height: 38px; max-width: 100%; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: inherit; font: inherit; }
+  .nc-controls label.opt { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
+  .nc-controls label.opt input { accent-color: var(--accent); }
+  .nc-count { color: var(--muted); font-size: 14px; }
+  .nc-hint { color: var(--muted); font-size: 13.5px; margin: 0; }
+  #offline { display: none; }
+
+  /* the sheet: the same widths on screen and on paper, so what you see is what prints */
+  .sheet { --ink: #14161c; --rule: #9aa1ad; --soft: #eef1f6; --tag: #2b4a8b; font: var(--nc-pt, 10pt)/1.38 "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); background: #fff;
+    max-width: 190mm; margin: 0 auto var(--sp-5); padding: 6mm; border-radius: 10px; box-shadow: 0 1px 12px rgba(0, 0, 0, .18); }
+  .sheet a { color: inherit; text-decoration: none; }
+  .cover { margin-bottom: 5mm; padding-bottom: 3mm; border-bottom: 1.2pt solid var(--ink); }
+  .cover .kicker { font-size: .85em; letter-spacing: .08em; text-transform: uppercase; color: var(--tag); font-weight: 700; }
+  .cover h1 { font-size: 1.9em; line-height: 1.15; margin: 1mm 0 1.5mm; color: var(--ink); }
+  .cover p { margin: 0; color: #454b57; }
+  .cover ol { margin: 2.5mm 0 0; padding-left: 1.4em; columns: 2; column-gap: 8mm; }
+  .cover li { break-inside: avoid; }
+  .cover .how { margin-top: 2.5mm; font-size: .9em; }
+  .mod { margin-top: 6mm; }
+  .mod-h { display: flex; align-items: baseline; gap: 3mm; padding: 2mm 3mm; background: var(--ink); color: #fff; border-radius: 5px; break-after: avoid; }
+  .mod-h b { font-size: 1.18em; }
+  .mod-h span { font-size: .85em; opacity: .85; white-space: nowrap; }
+  .nc-cols { column-width: 86mm; column-gap: 6mm; margin-top: 3mm; }
+  .nc { break-inside: avoid; margin: 0 0 3mm; padding: 2.4mm 3mm 2.6mm; border: .7pt solid var(--rule); border-radius: 6px; background: #fff; overflow: hidden; }
+  .nc-top { display: flex; justify-content: space-between; gap: 3mm; font-size: .78em; letter-spacing: .05em; text-transform: uppercase; font-weight: 700; color: var(--tag); }
+  .nc-top span:last-child { color: #6b7280; font-weight: 600; white-space: nowrap; }
+  .nc h4 { font-size: 1.04em; line-height: 1.28; margin: 1mm 0 1.6mm; padding-bottom: 1.4mm; border-bottom: .6pt dashed var(--rule); color: var(--ink); }
+  .nc h5 { font-size: .86em; letter-spacing: .05em; text-transform: uppercase; margin: 2mm 0 .6mm; color: var(--tag); }
+  .nc p { margin: 0 0 1.4mm; }
+  .nc ul, .nc ol { margin: 0 0 1.4mm; padding-left: 1.25em; }
+  .nc li { margin-bottom: .5mm; }
+  .nc .md + .md, .nc .md + .sub { margin-top: 1.4mm; }
+  .nc .md > :last-child { margin-bottom: 0; }
+  .nc .sub { font-weight: 700; margin: 1.4mm 0 .5mm; }
+  .nc .f { margin-top: 1.6mm; padding: 1.4mm 2mm; background: var(--soft); border-radius: 4px; }
+  .nc .f .name { font-weight: 700; font-size: .92em; }
+  .nc .f p { font-size: .9em; margin: 0 0 .6mm; }
+  .nc .foot { margin-top: 1.4mm; font-size: .82em; color: #6b7280; }
+  .nc .foot.again { color: #454b57; }
+  .nc .katex-display { margin: 1.2mm 0; text-align: center; overflow-x: auto; overflow-y: hidden; }  /* on a narrow screen a formula still too wide at the smallest size scrolls in its own box */
+  .nc .katex-display > .katex { display: inline-block; white-space: nowrap; }
+  .nc .table-wrap { overflow: hidden; }
+  .nc table { border-collapse: collapse; width: 100%; font-size: .88em; margin: 1mm 0 1.4mm; }
+  .nc th, .nc td { border-bottom: .5pt solid var(--rule); padding: .6mm 1mm; text-align: left; vertical-align: top; color: var(--ink); background: none; }
+  .nc td.r, .nc th.r { text-align: right; }
+  .nc.sum { background: var(--soft); border-color: var(--ink); break-inside: auto; margin-top: 3mm; }
+  .nc.sum h4 { border-bottom-style: solid; }
+  .nc.sum .two { column-width: 80mm; column-gap: 6mm; }
+  .nc.sum .two h5:first-child { margin-top: 0; }
+  .nc.sum .two li, .nc.sum .two p { break-inside: avoid; }
+  .sheet .empty { padding: 6mm; text-align: center; color: #6b7280; }
+  .nc.eq .nc-top span:first-child { color: #7a4a00; } .nc.case .nc-top span:first-child { color: #1f6b4a; }
+  .nc.eq { border-left: 2.2pt solid #c98a1b; } .nc.case { border-left: 2.2pt solid #2f8f63; }
+  .sheet.self .ans { display: none; }
+  .sheet .lines { display: none; }
+  .sheet.self .lines { display: block; height: 30mm; margin-top: 1.5mm; background: repeating-linear-gradient(to bottom, transparent 0, transparent 6.9mm, var(--rule) 6.9mm, var(--rule) 7.1mm); }
+
+  /* cards to print, cut and fold: every card the same size, the question on the left face and the answer on the right; folded on the
+     dotted line they sit back to back. A long answer runs on to a second card. */
+  .sheet.cut { max-width: 100%; width: fit-content; overflow-x: auto; }
+  .cpair { display: flex; width: fit-content; margin: 0 auto; break-inside: avoid; }
+  .cpair + .cpair { margin-top: -.6pt; }
+  .cpair.probe { position: absolute; left: -9999px; top: 0; visibility: hidden; }
+  .cface { box-sizing: border-box; flex: none; display: flex; flex-direction: column; padding: 3.2mm 4.5mm 2.6mm; border: .6pt dashed #7d8490; background: #fff; overflow: hidden; }
+  .cface.back { border-left: .6pt dotted #aab0bb; }
+  .cface.front { border-right: 0; }
+  .ctop { display: flex; justify-content: space-between; gap: 3mm; font-size: .72em; letter-spacing: .05em; text-transform: uppercase; font-weight: 700; color: var(--tag); }
+  .ctop span { white-space: nowrap; }
+  .ctop span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .ctop span:last-child { color: #6b7280; font-weight: 600; }
+  .k-eq .ctop span:first-child { color: #7a4a00; } .k-case .ctop span:first-child { color: #1f6b4a; }
+  .cface .cbody { flex: 1; min-height: 0; overflow: hidden; margin-top: 1.6mm; }
+  .cface.front .cbody, .ff.front .fbody { display: flex; flex-direction: column; justify-content: center; }
+  .cface.front h4, .ff.front h4 { font-size: 1.2em; line-height: 1.3; margin: 0 0 1.6mm; padding: 0; border: 0; color: var(--ink); }
+  .cface.front h5, .ff.front h5 { font-size: .8em; letter-spacing: .05em; text-transform: uppercase; margin: 1.6mm 0 .6mm; color: var(--tag); }
+  .cface.front p, .cface.front ol, .cface.front ul { margin: 0 0 1mm; } .cface.front ol, .cface.front ul { padding-left: 1.25em; }
+  .cbody.nc, .fbody.nc { border: 0; margin-bottom: 0; padding: 0; border-radius: 0; background: none; break-inside: auto; }
+  .cbody.nc { margin-top: 1.6mm; }
+  .cbody.nc .two { column-width: auto; }
+  .cfoot { font-size: .66em; color: #8a909c; text-align: right; }
+  .cclip { font-size: .7em; color: #8a5a00; }
+  .sheet.self .cface.back .cbody { visibility: hidden; }
+  .cuthow { max-width: 190mm; margin: 0 auto 4mm; font-size: .92em; color: #454b57; }
+
+  /* flip through on screen: one card at a time, question first */
+  .flip { --ink: #14161c; --rule: #9aa1ad; --soft: #eef1f6; --tag: #2b4a8b; max-width: 720px; margin: 0 auto var(--sp-5); }
+  .flip-bar, .flip-nav, .flip-mark { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; margin: 10px 0; }
+  .flip-nav { justify-content: center; }
+  .flip-mark { justify-content: center; }
+  .flip-bar label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+  .flip-card { position: relative; border-radius: 14px; background: #fff; color: var(--ink); box-shadow: 0 2px 18px rgba(0, 0, 0, .28); cursor: pointer; outline-offset: 3px;
+    font: 15px/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  .flip-card .ff { box-sizing: border-box; min-height: min(56vh, 420px); max-height: 68vh; overflow-y: auto; padding: 18px 22px 16px; display: flex; flex-direction: column; }
+  .flip-card .ff.back, .flip-card.turned .ff.front { display: none; }
+  .flip-card.turned .ff.back { display: flex; }
+  .flip-card.turn .ff { animation: nc-turn .22s ease-out; }
+  @keyframes nc-turn { from { transform: scaleX(.05); opacity: .4; } to { transform: scaleX(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .flip-card.turn .ff { animation: none; } }
+  .flip-card .ctop { font-size: 12px; }
+  .flip-card .fbody { flex: 1; margin-top: 12px; }
+  .flip-card .ff.front h4 { font-size: 1.35em; text-align: center; }
+  .flip-card .ff.front .fbody > :not(h4) { max-width: 520px; margin-left: auto; margin-right: auto; }
+  .flip-card .fhint { margin-top: 10px; text-align: center; font-size: 12.5px; color: #6b7280; }
+  .flip-card .fmsg { margin: auto; text-align: center; color: #454b57; }
+  .flip-card a { color: inherit; text-decoration: none; }
+  .flip .btn.on { border-color: var(--accent); background: var(--accent-soft); }
+  .flip-score { text-align: center; color: var(--muted); font-size: 13.5px; }
+  body[data-view="flip"] #sheet, body[data-view="flip"] #print, body[data-view="flip"] #pdf, body[data-view="flip"] #size, body[data-view="flip"] .opt.selfopt { display: none !important; }
+  body:not([data-view="flip"]) #flip { display: none; }
+  body:not([data-view="cut"]) #cardsize { display: none; }
+  .nc-controls [hidden] { display: none !important; }
+
+  @media (max-width: 560px) { .sheet { padding: 3mm; --nc-pt: 9.5pt !important; } }
+  @media (max-width: 560px) { .mod-h { flex-wrap: wrap; } .mod-h span { white-space: normal; } }
+  @page { margin: 10mm 10mm 13mm; }
+  @media print {
+    html, body { background: #fff !important; }
+    header, .site-head, .site-title, .lede, .nc-controls, .offline, #userbar { display: none !important; }
+    main { max-width: none; margin: 0; padding: 0; }
+    .sheet { max-width: none; margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
+    .mod { break-before: page; margin-top: 0; }
+    .mod.first { break-before: auto; margin-top: 5mm; }
+    .nc, .mod-h, .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .nc .katex-display { overflow: hidden; }
+    .sheet.cut { width: auto; max-width: none; overflow: visible; }
+    .sheet.cut .cuthow, #flip { display: none !important; }
+    .cface { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+<style id="footer-style"></style>
+</head>
+<body>
+<header class="site-bar"><div class="site-bar-in">
+  <a class="site-brand" href="app.html#path">CFA Level II Study</a>
+  <div class="site-nav" role="navigation" aria-label="Pages"><a href="app.html" aria-label="Study Map"><span class="nav-long">Study Map</span><span class="nav-short">Map</span></a><a href="lesson.html">Lessons</a><a href="cases.html" aria-label="Case studies"><span class="nav-long">Case studies</span><span class="nav-short">Cases</span></a><a href="rapid.html" aria-label="Rapid fire"><span class="nav-long">Rapid fire</span><span class="nav-short">Rapid</span></a><a href="notecards.html" aria-label="Note cards"><span class="nav-long">Note cards</span><span class="nav-short">Cards</span></a></div>
+  <div id="userbar"></div>
+</div></header>
+<main>
+  <div class="site-head"><span class="eyebrow">Read, print or flip through</span></div>
+  <h1 class="site-title">Note cards</h1>
+  <p class="lede">Four kinds of card, all made the same way, with the question on one side and the answer on the other: a summary of each module, a card for every learning outcome, an equation card that says when to use each formula and what to pull from the case, and a case study card with the details to look for. Read them as sheets, print them as cards to cut and fold, or flip through them on screen. Print them, save them as a PDF, or print a self-test copy with the answers left blank.</p>
+  <div class="offline" id="offline">The note cards couldn't be loaded.</div>
+  <div class="nc-controls" id="controls" hidden>
+    <div class="row"><span class="eyebrow">Layout</span>
+      <select id="layout" aria-label="Layout"><option value="sheets">Sheets to read or print</option><option value="cut">Cards to print, cut and fold</option><option value="flip">Flip through on screen</option></select>
+      <select id="cardsize" aria-label="Card size"><option value="index">3 × 5 in index cards (2 to a page)</option><option value="large">Taller cards, more on each (2 to a page)</option></select></div>
+    <div class="row"><span class="eyebrow">Subject</span><select id="phase" aria-label="Subject"></select><select id="module" aria-label="Module"></select></div>
+    <div class="row"><span class="eyebrow">On the cards</span>
+      <label class="opt"><input type="checkbox" id="o-sum" checked> Module summaries</label>
+      <label class="opt"><input type="checkbox" id="o-los" checked> Outcome cards</label>
+      <label class="opt"><input type="checkbox" id="o-for"> Equation cards</label>
+      <label class="opt"><input type="checkbox" id="o-case"> Case study cards</label>
+      <label class="opt selfopt"><input type="checkbox" id="o-self"> Self-test (answers left blank)</label>
+      <select id="size" aria-label="Text size"><option value="9">Small text</option><option value="10" selected>Standard text</option><option value="11.5">Large text</option></select></div>
+    <div class="row"><button type="button" class="btn primary" id="print">Print or save as PDF</button><a class="btn" id="pdf" hidden download>Download the PDF</a>
+      <span class="nc-count" id="count"></span></div>
+    <p class="nc-hint" id="hint">In the print window choose your printer, or "Save as PDF" to keep a copy. Two cards fit side by side on Letter or A4 paper.</p>
+  </div>
+  <div class="sheet" id="sheet" hidden></div>
+  <div class="flip" id="flip">
+    <div class="flip-bar"><b id="f-pos"></b><span><label><input type="checkbox" id="f-left"> Only the cards I'm still learning</label> <button type="button" class="btn sm" id="f-shuffle">Shuffle</button></span></div>
+    <div class="flip-card" id="f-card" tabindex="0" role="button" aria-label="Card. Press Space to turn it over."></div>
+    <div class="flip-nav"><button type="button" class="btn" id="f-prev">‹ Previous</button><button type="button" class="btn primary" id="f-turn">Show the answer</button><button type="button" class="btn" id="f-next">Next ›</button></div>
+    <div class="flip-mark"><button type="button" class="btn sm" id="f-again">Still learning</button><button type="button" class="btn sm" id="f-know">I know this</button></div>
+    <div class="flip-score" id="f-score"></div>
+  </div>
+</main>
+<script src="static/data/study-path.js"></script>
+<script src="static/data/los-cards.js"></script>
+<script src="static/data/guide-narratives.js"></script>
+<script src="static/data/mapdata.js"></script>
+<script src="static/data/casedata.js"></script>
+<script src="static/data/notecards-index.js"></script>
+<script src="static/standalone.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many || one + "s"}`;
+const LEVEL = "CFA Level II";
+
+// ------------------------------------------------------------------ Markdown (paragraphs, lists, tables) + KaTeX
+function math(tex, display) {
+  if (!window.katex) return esc(display ? `\\[${tex}\\]` : `\\(${tex}\\)`);
+  try { return katex.renderToString(tex, { displayMode: display, throwOnError: false }); } catch { return esc(tex); }
+}
+function inline(s, slots) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<em>$2</em>")
+    .replace(/\u0001(\d+)\u0002/g, (_, i) => slots[+i]);
+}
+function table(rows, slots) {
+  const split = (l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
+  const head = split(rows[0]), sep = rows[1] && /^\s*\|?[\s:\-|]+\|?\s*$/.test(rows[1]);
+  const body = rows.slice(sep ? 2 : 1).map(split);
+  return `<div class="table-wrap"><table><thead><tr>${head.map((h) => `<th>${inline(h, slots)}</th>`).join("")}</tr></thead>
+    <tbody>${body.map((r) => `<tr>${head.map((_, i) => `<td>${inline(r[i] || "", slots)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function md(src) {
+  const slots = [];
+  const text = String(src ?? "").replace(/\r\n?/g, "\n").replace(/\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$/g, (m, d, i, dd) => {
+    const display = i === undefined;
+    slots.push(math(d ?? dd ?? i, display)); return display ? `\n\u0001${slots.length - 1}\u0002\n` : `\u0001${slots.length - 1}\u0002`;
+  });
+  const lines = text.split("\n"), out = [];
+  let para = [];
+  const flush = () => { if (para.length) out.push(`<p>${inline(para.join(" "), slots)}</p>`); para = []; };
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (!l.trim()) { flush(); continue; }
+    if (/^\s*\|/.test(l)) {
+      flush(); const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(lines[i++]);
+      i--; out.push(table(rows, slots)); continue;
+    }
+    if (/^\s*([-*+]|\d+[.)])\s+/.test(l)) {
+      flush(); const ordered = /^\s*\d/.test(l), items = [];
+      while (i < lines.length && /^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) items.push(`<li>${inline(lines[i++].replace(/^\s*([-*+]|\d+[.)])\s+/, ""), slots)}</li>`);
+      i--; out.push(ordered ? `<ol>${items.join("")}</ol>` : `<ul>${items.join("")}</ul>`); continue;
+    }
+    if (/^\s*\u0001\d+\u0002\s*$/.test(l) && /katex-display/.test(slots[+l.match(/\d+/)[0]])) { flush(); out.push(slots[+l.match(/\d+/)[0]]); continue; }
+    para.push(l.replace(/^#{1,6}\s+/, "").trim());
+  }
+  flush();
+  return `<div class="md">${out.join("")}</div>`;
+}
+const one = (s) => md(s).replace(/^<div class="md"><p>([\s\S]*)<\/p><\/div>$/, "$1");   // a single line, no paragraph wrapper
+
+// ------------------------------------------------------------------ data
+let P = null, L = null, N = null, F = {}, C = {}, PDFS = null;
+const q = new URLSearchParams(location.search);
+const cap = (s) => s ? s[0].toUpperCase() + s.slice(1) : s;
+const phaseOf = (id) => P.phases.find((p) => p.id === id) || P.phases[0];
+const mods = (p) => p.modules.filter((k) => L[k]);
+const nLos = (k) => (L[k] && L[k].los.length) || 0;
+
+// where the full text is: the reading (subject, learning module, title) and, when the notes name them cleanly, its sections
+const ACR = { ar: "AR", arch: "ARCH", bsm: "BSM", cds: "CDS", cfa: "CFA", ddm: "DDM", ebita: "EBITA", ebitda: "EBITDA", esg: "ESG", etf: "ETF", etfs: "ETFs", fcfe: "FCFE", fcff: "FCFF", ml: "ML",
+  var: "VaR", ytm: "YTM", ifrs: "IFRS", camels: "CAMELS", ict: "ICT", erp: "ERP", cva: "CVA", nav: "NAV", reit: "REIT", reits: "REITs" };
+const SMALL = new Set(["and", "of", "the", "in", "on", "for", "to", "a", "an", "vs", "vs.", "or", "with", "from"]);
+const tidy = (h) => h.split(" ").map((w, i) => { const l = w.toLowerCase(), core = l.replace(/[^a-z]/g, ""); return ACR[core] ? w.replace(new RegExp(core, "i"), ACR[core]) : i && SMALL.has(l) ? l : w; }).join(" ");
+const whole = (h) => h.trim().split(/\s+/).length >= 3 && !/^(and|of|or|they|vs\.?|for|to|in|on)\b/i.test(h) && !/\b(and|of|or|the|for|to|in|on)$/i.test(h);
+function sourceLine(k, c) {
+  const src = (N[k] && N[k].source) || `${k}: ${P.modules[k].title}`;
+  const secs = c ? [...new Set((c.notes || []).filter(whole).map(tidy))] : [];
+  return `<div class="foot"><b>Full text in the curriculum:</b> ${esc(src)}${secs.length ? `. Section${secs.length > 1 ? "s" : ""}: ${esc(secs.join("; "))}` : ""}.</div>`;
+}
+
+function formulaHTML(f) {
+  const vars = f.vars || (f.variables || []).map((v) => [v.latex, v.meaning]);
+  return `<div class="f"><div class="name">${one(f.name)}</div>${md("\\[" + f.latex + "\\]")}
+    ${vars.length ? `<p>${vars.map(([l, m]) => `${one("\\(" + l + "\\)")} ${one(m)}`).join("; ")}</p>` : ""}
+    ${f.use ? `<p><b>Use.</b> ${one(f.use)}</p>` : ""}${f.pitfall ? `<p><b>Watch for.</b> ${one(f.pitfall)}</p>` : ""}</div>`;
+}
+// Every card is made the same way: a top line (what it is, and the module), the prompt (its title, with anything else that belongs on the
+// question side), the answer, and a closing line. sheetHTML() sets a card out for reading; the cut and flip layouts put the prompt and
+// the answer on two faces. A summary card has no question to hide, so on a sheet it is shown whole ("open").
+const card = (id, cls, kind, k, title, front, back, after, open) => ({ id, cls, kind, k, title, front, back, after, open: !!open });
+const sheetHTML = (c) => `<article class="nc ${c.cls}"><div class="nc-top"><span>${esc(c.kind)}</span><span>${esc(c.k)}</span></div><h4>${c.title}</h4>
+    ${c.open ? c.back : `${c.front}<div class="ans">${c.back}</div><div class="lines"></div>`}${c.after}</article>`;
+function summaryCard(k) {
+  const n = (N[k] || {}), list = (a, tag) => a && a.length ? `<${tag}>${a.map((x) => `<li>${one(x)}</li>`).join("")}</${tag}>` : "";
+  if (!n.big_picture && !(n.how_to_think || []).length && !(n.pitfalls || []).length) return null;
+  return card("sum|" + k, "sum", "Module summary", k, esc(P.modules[k].title), "", `<div class="two">${n.big_picture ? `<h5>Big picture</h5>${md(n.big_picture)}` : ""}
+    ${(n.how_to_think || []).length ? `<h5>How to think</h5>${list(n.how_to_think, "ol")}` : ""}
+    ${(n.pitfalls || []).length ? `<h5>Watch out</h5>${list(n.pitfalls, "ul")}` : ""}</div>`, sourceLine(k), true);
+}
+// a formula is set out in full on the first card of its module that uses it; later cards point back to that card
+// On a sheet, a paragraph already printed under an earlier outcome of the module is not printed again: the card points back to it
+// ("said" maps a paragraph to the outcome that carries it). A card that stands alone (to cut, or to flip through) is always whole.
+function outcomeCard(k, c, total, namesOnly, seen, said) {
+  const own = [], back = new Map();
+  for (const a of c.answer) {
+    const key = a.p.trim(), at = said && said.get(key);
+    if (at) back.set(at, (back.get(at) || []).concat(a));
+    else { own.push(a); if (said) said.set(key, c.i + 1); }
+  }
+  const where = [...back].sort((a, b) => a[0] - b[0]).map(([n, as]) => `outcome ${n}${as.some((a) => a.h) ? ` (${as.filter((a) => a.h).map((a) => one(a.h)).join("; ")})` : ""}`).join(" and ");
+  const ans = own.map((a) => `${a.h ? `<div class="sub">${one(a.h)}</div>` : ""}${md(a.p)}`).join("")
+    + (back.size ? `<div class="foot again"><b>${own.length ? "The rest of the answer is" : "The answer is"} on the ${back.size > 1 ? "cards" : "card"} for ${where}.</b></div>` : "");
+  const fresh = namesOnly ? [] : c.formulas.filter((f) => !seen.has(f.name)), again = c.formulas.filter((f) => !fresh.includes(f));
+  fresh.forEach((f) => seen.set(f.name, c.i + 1));
+  const forms = fresh.map(formulaHTML).join("") + (!again.length ? "" : `<div class="foot"><b>${namesOnly ? "Formulas" : "Also uses"}:</b> ${again.map((f) =>
+    one(f.name) + (seen.has(f.name) ? ` (outcome ${seen.get(f.name)})` : "")).join("; ")}</div>`);
+  return card(`los|${k}|${c.i}`, "", `Outcome ${c.i + 1} of ${total}`, k, esc(cap(c.text)), "", ans + forms, sourceLine(k, c));
+}
+// an equation card: when to reach for the formula, what to find in the case, and the usual slip
+function formulaCards(k) {
+  const fs = (F[k] && F[k].formulas) || [];
+  return fs.map((f, i) => {
+    const vars = f.vars || (f.variables || []).map((v) => [v.latex, v.meaning]);
+    return card(`eq|${k}|${f.id || i}`, "eq", `Equation ${i + 1} of ${fs.length}`, k, one(f.name), f.use ? `<h5>Use it when</h5><p>${one(f.use)}</p>` : "",
+      `${md("\\[" + f.latex + "\\]")}
+        ${vars.length ? `<h5>Find in the case</h5><ul>${vars.map(([l, m]) => `<li>${one("\\(" + l + "\\)")} ${one(m)}</li>`).join("")}</ul>` : ""}
+        ${f.pitfall ? `<h5>Watch for</h5><p>${one(f.pitfall)}</p>` : ""}
+        ${(f.builds_on || []).length ? `<div class="foot"><b>Builds on:</b> ${f.builds_on.map((x) => one(x)).join("; ")}</div>` : ""}`, "");
+  });
+}
+// a case study card: what the case is about, the details to look for, what its questions test and the traps in them
+function caseCards(k) {
+  const fams = C[k] ? [...C[k].values()] : [];
+  return fams.map((vs, i) => {
+    vs.sort((a, b) => (a.variant || 1) - (b.variant || 1));
+    const st = vs[0], topic = (q) => { const m = String(q.explanation || "").match(/\n\(((?:[^()\n]|\([^()\n]*\))+)\)\s*$/); return m ? m[1].replace(/^[^,]*,\s*/, "").replace(/\.$/, "") : ""; };
+    const tests = st.questions.map((q) => topic(q) || q.los || "").filter(Boolean), traps = [...new Set(st.questions.map((q) => q.trap).filter(Boolean))];
+    return card(`case|${k}|${st.family || st.id}`, "case", `Case study ${i + 1} of ${fams.length}`, k, esc(st.family_title || st.title),
+      tests.length ? `<h5>The questions test</h5><ol>${tests.map((x) => `<li>${one(cap(x))}</li>`).join("")}</ol>` : "",
+      `${(st.look_for || []).length ? `<h5>Key details to look for</h5><ul>${st.look_for.map((x) => `<li>${one(x)}</li>`).join("")}</ul>` : ""}
+        ${traps.length ? `<h5>Traps</h5><ul>${traps.map((x) => `<li>${one(x)}</li>`).join("")}</ul>` : ""}`,
+      `<div class="foot">${vs.length > 1 ? `${vs.length} variations` : "One set"} in Case studies: ${esc(vs.map((x) => x.title).join("; "))}.</div>`);
+  });
+}
+
+function draw() {
+  const p = phaseOf($("phase").value), only = $("module").value, show = { sum: $("o-sum").checked, los: $("o-los").checked, f: $("o-for").checked, c: $("o-case").checked }, self = $("o-self").checked;
+  const list = mods(p).filter((k) => !only || k === only);
+  const subject = p.title.replace(/^\d+\.\s*/, "");
+  const view = $("layout").value, own = view !== "sheets";   // a card that will stand on its own carries its formulas in full
+  const deck = [];
+  let cards = 0;
+  const body = list.map((k, n) => {
+    const parts = [], sum = show.sum ? summaryCard(k) : null;
+    const seen = new Map(), said = new Map();
+    if (show.los) parts.push(...L[k].los.map((c) => outcomeCard(k, c, L[k].los.length, own ? false : show.f, own ? new Map() : seen, own ? null : said)));
+    if (show.f) parts.push(...formulaCards(k));
+    if (show.c) parts.push(...caseCards(k));
+    const all = (sum ? [sum] : []).concat(parts);
+    cards += all.length;
+    deck.push(...all);
+    return !all.length ? "" : `<section class="mod${n ? "" : " first"}"><div class="mod-h"><b>${esc(P.modules[k].title)}</b><span>${esc(k)} · ${plural(nLos(k), "outcome")}</span></div>
+      ${sum ? sheetHTML(sum) : ""}<div class="nc-cols">${parts.map(sheetHTML).join("")}</div></section>`;
+  }).join("");
+  const title = `${LEVEL} note cards`;
+  $("sheet").style.setProperty("--nc-pt", $("size").value + "pt");
+  $("sheet").classList.toggle("self", self);
+  const cover = `<div class="cover"><div class="kicker">${esc(title)}</div><h1>${esc(only ? P.modules[only].title : subject)}</h1>
+      <p>${only ? esc(only) : plural(list.length, "module")} · ${plural(list.reduce((t, k) => t + nLos(k), 0), "learning outcome")} · ${plural(cards, "card")}</p>
+      ${only ? "" : `<ol>${list.map((k) => `<li>${esc(P.modules[k].title)}</li>`).join("")}</ol>`}
+      <p class="how">Each card carries the material itself. An outcome or summary card ends with the curriculum reading it comes from, so you can read the full text in your own copy.${self ? " This is a self-test copy: write your answer in the ruled space, then check it against the full cards." : ""}</p></div>`;
+  const none = `<div class="empty">Nothing to show with these choices. Tick at least one kind of card.</div>`;
+  DECK = deck;
+  document.body.dataset.view = view;
+  $("sheet").classList.toggle("cut", view === "cut");
+  $("hint").textContent = HINTS[view];
+  if (view === "cut") layCut(deck, none);
+  else $("sheet").innerHTML = view === "flip" ? "" : cover + (body || none);
+  if (view === "flip") flipStart(deck);
+  $("count").textContent = plural(cards, "card");
+  document.title = `${title} - ${only ? P.modules[only].title : subject}`;
+  $("footer-style").textContent = `@page { @bottom-left { content: ${JSON.stringify(`${title} · ${only || subject}`)}; font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #6b7280; }
+    @bottom-right { content: counter(page) " / " counter(pages); font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #6b7280; } }`;
+  // two ready-made PDFs per subject: the outcome cards (with summaries) and the method cards (equations and case studies)
+  if (view === "cut") $("footer-style").textContent = `@page { size: ${CARD_SIZES[$("cardsize").value].land ? "landscape" : "portrait"}; margin: 10mm; }`;
+  const kind = only || self || view !== "sheets" ? "" : show.sum && show.los && !show.f && !show.c ? "outcomes" : !show.sum && !show.los && show.f && show.c ? "methods" : "";
+  const file = kind && PDFS && PDFS.files && PDFS.files[p.id] && PDFS.files[p.id][kind];
+  $("pdf").hidden = !file;
+  if (file) { $("pdf").href = "static/notecards/" + file.name; $("pdf").textContent = `Download the PDF (${plural(file.pages, "page")})`; $("pdf").dataset.id = p.id + "-" + kind; $("pdf").dataset.name = file.name; }
+  const u = new URLSearchParams({ p: p.id });
+  if (only) u.set("m", only);
+  const kinds = [["sum", show.sum], ["los", show.los], ["eq", show.f], ["case", show.c]].filter((x) => x[1]).map((x) => x[0]).join(",");
+  if (kinds !== "sum,los") u.set("show", kinds);
+  if (self) u.set("self", "1");
+  if (view !== "sheets") u.set("view", view);
+  if (view === "cut") u.set("cs", $("cardsize").value);
+  history.replaceState(null, "", location.pathname + "?" + u);
+  if (view === "sheets") fit();
+}
+// a formula wider than its card is scaled down to fit (measured at the card's real width, the same on paper)
+function fit(root, floor) {
+  (root && root.querySelectorAll ? root : $("sheet")).querySelectorAll(".katex-display").forEach((d) => {
+    d.style.fontSize = "";
+    const k = d.firstElementChild, room = d.clientWidth;
+    if (k && room && k.offsetWidth > room) d.style.fontSize = Math.max(floor || 55, Math.floor(100 * room / k.offsetWidth) - 1) + "%";
+  });
+}
+
+// ---------------------------------------------------------------- cards to print, cut and fold
+const HINTS = {
+  sheets: "In the print window choose your printer, or \"Save as PDF\" to keep a copy. Two cards fit side by side on Letter or A4 paper.",
+  cut: "Print on one side of the paper at 100% (not \"fit to page\"). Cut along the dashed lines, then fold each strip on the dotted line: the question ends up on one side and the answer on the other. A long answer runs on to a second card.",
+  flip: "Tap the card, or press Space, to turn it over. The arrow keys move between cards; K marks a card as known and L as still learning. Your marks stay on this device.",
+};
+const CARD_SIZES = { index: { w: 127, h: 76.2, land: true }, large: { w: 127, h: 94, land: true } };   // one face, in millimetres; two strips fit a landscape page
+// the answer as a run of blocks that can be dealt onto one card after another (a list is dealt item by item)
+function blocksOf(html) {
+  const box = document.createElement("div"), out = [];
+  box.innerHTML = html;
+  let lists = 0;
+  const walk = (el) => {
+    for (const ch of [...el.children]) {
+      if (ch.matches("div.md, div.two")) walk(ch);
+      else if (ch.matches("ul, ol") && ch.children.length > 1) { lists++; [...ch.children].forEach((li, i) => out.push({ list: ch.tagName.toLowerCase(), g: lists, n: i + 1, html: li.outerHTML })); }
+      else out.push({ html: ch.outerHTML });
+    }
+  };
+  walk(box);
+  return out;
+}
+function joinBlocks(bs) {
+  let out = "", open = null, tag = "";
+  const close = () => { if (open !== null) { out += `</${tag}>`; open = null; } };
+  for (const b of bs) {
+    if (b.list) { if (open !== b.g) { close(); tag = b.list; open = b.g; out += tag === "ol" ? `<ol start="${b.n}">` : "<ul>"; } out += b.html; }
+    else { close(); out += b.html; }
+  }
+  close();
+  return out;
+}
+function layCut(deck, none) {
+  const S = CARD_SIZES[$("cardsize").value] || CARD_SIZES.index, sheet = $("sheet"), box = `style="width:${S.w}mm;height:${S.h}mm"`;
+  sheet.innerHTML = `<div class="cpair probe"><div class="cface back" ${box}><div class="ctop"><span>Outcome 10 of 10 · answer · part 2 of 2</span><span>Module</span></div><div class="cbody nc"></div></div></div>`;
+  const body = sheet.querySelector(".probe .cbody");
+  const fits = (html, scale) => { body.style.fontSize = scale * 100 + "%"; body.innerHTML = html; return body.scrollHeight <= body.clientHeight + 1; };
+  const top = (c, i, n, back) => `<div class="ctop"><span>${esc(c.kind)}${back ? " · answer" : ""}${n > 1 ? ` · part ${i + 1} of ${n}` : ""}</span><span>${esc(c.k)}</span></div>`;
+  const pairs = [];
+  for (const c of deck) {
+    const blocks = blocksOf(c.back + (c.after || "")), whole = joinBlocks(blocks);
+    let backs = null;
+    for (const sc of [1, .92, .85]) if (fits(whole, sc)) { backs = [{ html: whole, sc }]; break; }
+    const SC = .88;   // the type size of a card that is one of several
+    if (!backs) {   // too long for one card: deal the blocks onto as many as it takes
+      backs = [];
+      let cur = [];
+      const isHead = (x) => !x.list && /^<(h5|div class="sub")/.test(x.html);
+      for (const b of blocks) {
+        if (cur.length && !fits(joinBlocks(cur.concat(b)), SC)) {
+          const carry = [];   // a heading goes with what it heads, not at the foot of the card before
+          while (cur.length > 1 && isHead(cur[cur.length - 1])) carry.unshift(cur.pop());
+          backs.push({ html: joinBlocks(cur), sc: SC });
+          cur = carry.concat([b]);
+        } else cur.push(b);
+      }
+      if (cur.length) backs.push({ html: joinBlocks(cur), sc: SC });
+      // one block taller than a card on its own: smaller type, and a note if even that is not enough
+      for (const bk of backs) if (!fits(bk.html, bk.sc)) { bk.sc = .78; bk.clip = !fits(bk.html, .78); }
+    }
+    backs.forEach((bk, i) => pairs.push(`<div class="cpair${c.cls ? " k-" + c.cls : ""}"><div class="cface front" ${box}>${top(c, i, backs.length)}<div class="cbody"><h4>${c.title}</h4>${c.open ? "" : c.front}</div><div class="cfoot">question</div></div>
+      <div class="cface back" ${box}>${top(c, i, backs.length, true)}<div class="cbody nc" style="font-size:${bk.sc * 100}%">${bk.html}</div>${bk.clip ? `<div class="cclip">Too long for this card: the Sheets layout has it in full.</div>` : ""}</div></div>`));
+  }
+  const pages = Math.ceil(pairs.length / Math.floor((S.land ? 190 : 256) / S.h));
+  const tidy = () => {   // the last word: nothing is left hanging over the edge of a card
+    fit(sheet, 36);   // a card can't scroll, so a very wide formula is set as small as it takes
+    sheet.querySelectorAll(".cface .cbody").forEach((b) => { let sc = parseFloat(b.style.fontSize) || 100; while (b.scrollHeight > b.clientHeight + 1 && sc > 64) { sc -= 6; b.style.fontSize = sc + "%"; } });
+  };
+  sheet.innerHTML = pairs.length ? `<p class="cuthow">${plural(deck.length, "card")} on ${plural(pairs.length, "strip")}, about ${plural(pages, "page")}. Each strip is one card: question on the left, answer on the right.</p>${pairs.join("")}` : none;
+  tidy();
+  CUT = { cards: deck.length, strips: pairs.length, pages, tidy };
+}
+
+// ---------------------------------------------------------------- flip through on screen
+const CKEY = "site-cards-v1";   // which cards are known (1) or still being learned (0), by card
+let DECK = [], CUT = null, FL = { cards: [], at: 0, turned: false };
+let MARK = (() => { try { return JSON.parse(localStorage.getItem(CKEY)) || {}; } catch { return {}; } })();
+const saveMarks = () => { try { localStorage.setItem(CKEY, JSON.stringify(MARK)); } catch { /* not remembered */ } };
+function flipStart(deck) {
+  const pool = deck.filter((c) => !$("f-left").checked || MARK[c.id] !== 1);
+  const here = FL.cards[FL.at] && pool.findIndex((c) => c.id === FL.cards[FL.at].id);
+  FL = { cards: pool, at: here > 0 ? here : 0, turned: false };
+  flipDraw();
+}
+function flipDraw(turning) {
+  const c = FL.cards[FL.at], el = $("f-card"), known = DECK.filter((x) => MARK[x.id] === 1).length;
+  $("f-score").textContent = DECK.length ? `${known} of ${plural(DECK.length, "card")} marked as known` : "";
+  for (const id of ["f-prev", "f-next", "f-turn", "f-again", "f-know", "f-shuffle"]) $(id).disabled = !c;
+  if (!c) {
+    el.className = "flip-card";
+    el.innerHTML = `<div class="ff"><div class="fmsg">${DECK.length ? "Every card here is marked as known. Untick the box above to see them all again." : "No cards with these choices. Tick at least one kind of card."}</div></div>`;
+    $("f-pos").textContent = "";
+    return;
+  }
+  $("f-pos").textContent = `Card ${FL.at + 1} of ${FL.cards.length}`;
+  $("f-prev").disabled = FL.at === 0;
+  $("f-next").disabled = FL.at >= FL.cards.length - 1;
+  el.className = "flip-card" + (FL.turned ? " turned" : "") + (turning ? " turn" : "") + (c.cls ? " k-" + c.cls : "");
+  el.innerHTML = `<div class="ff front"><div class="ctop"><span>${esc(c.kind)}</span><span>${esc(c.k)}</span></div><div class="fbody"><h4>${c.title}</h4>${c.open ? "" : c.front}</div><div class="fhint">Tap the card, or press Space, to see the answer</div></div>
+    <div class="ff back"><div class="ctop"><span>${esc(c.kind)} · answer</span><span>${esc(c.k)}</span></div><div class="fbody nc">${c.back}${c.after || ""}</div></div>`;
+  $("f-turn").textContent = FL.turned ? "Show the question" : "Show the answer";
+  $("f-know").classList.toggle("on", MARK[c.id] === 1);
+  $("f-again").classList.toggle("on", MARK[c.id] === 0);
+  fit($("flip"));
+}
+const flipTurn = () => { if (FL.cards[FL.at]) { FL.turned = !FL.turned; flipDraw(true); } };
+const flipGo = (d) => { const to = FL.at + d; if (to >= 0 && to < FL.cards.length) { FL.at = to; FL.turned = false; flipDraw(); } };
+function flipMark(v) {
+  const c = FL.cards[FL.at];
+  if (!c) return;
+  MARK[c.id] = v;
+  saveMarks();
+  if (v === 1 && $("f-left").checked) { FL.cards.splice(FL.at, 1); FL.at = Math.min(FL.at, Math.max(0, FL.cards.length - 1)); FL.turned = false; flipDraw(); }
+  else if (FL.at < FL.cards.length - 1) flipGo(1);
+  else flipDraw();
+}
+function flipShuffle() {
+  const a = FL.cards;
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  FL.at = 0; FL.turned = false;
+  flipDraw();
+}
+function fillModules() {
+  const p = phaseOf($("phase").value), want = $("module").dataset.want || "";
+  $("module").innerHTML = `<option value="">All ${mods(p).length} modules</option>` + mods(p).map((k) => `<option value="${esc(k)}">${esc(k.replace(/^.*\s(\d+)$/, "$1"))}. ${esc(P.modules[k].title)}</option>`).join("");
+  $("module").value = mods(p).includes(want) ? want : "";
+  $("module").dataset.want = "";
+}
+async function load() {
+  try {
+    const get = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const [sp, los, narr] = await Promise.all([get("static/study-path.json"), get("static/los-cards.json"), get("static/guide-narratives.json")]);
+    P = sp; L = los.modules || {}; N = narr.modules || {};
+    try { F = (await get("mapdata")).formulas || {}; } catch { F = {}; }
+    try {   // case studies, grouped by module and then by case (a case can have several variations)
+      for (const v of (await get("casedata")).volumes || []) for (const st of v.sets) {
+        const m = (C[st.module] = C[st.module] || new Map()), f = st.family || st.id;
+        if (!m.has(f)) m.set(f, []);
+        m.get(f).push(st);
+      }
+    } catch { C = {}; }
+    try { PDFS = await get("static/notecards/index.json"); } catch { PDFS = null; }
+    const phases = P.phases.filter((p) => mods(p).some(nLos) || mods(p).length);
+    if (!phases.length) throw new Error("empty");
+    $("phase").innerHTML = phases.map((p) => `<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("");
+    const m = q.get("m"), viaModule = m && P.phases.find((p) => p.modules.includes(m));
+    $("phase").value = (viaModule || phaseOf(q.get("p"))).id;
+    $("module").dataset.want = m || "";
+    fillModules();
+    if (q.get("show") !== null) { const want = q.get("show").split(","); for (const [id, key] of [["o-sum", "sum"], ["o-los", "los"], ["o-for", "eq"], ["o-case", "case"]]) $(id).checked = want.includes(key); }
+    $("o-self").checked = q.get("self") === "1";
+    if (HINTS[q.get("view")]) $("layout").value = q.get("view");
+    if (CARD_SIZES[q.get("cs")]) $("cardsize").value = q.get("cs");
+    $("controls").hidden = $("sheet").hidden = false;
+    draw();
+    document.documentElement.dataset.ready = "1";
+  } catch (e) {
+    $("offline").style.display = "block";
+  }
+}
+function start() {
+  $("phase").addEventListener("change", () => { fillModules(); draw(); });
+  for (const id of ["module", "o-sum", "o-los", "o-for", "o-case", "o-self", "size", "layout", "cardsize"]) $(id).addEventListener("change", draw);
+  $("f-left").addEventListener("change", () => flipStart(DECK));
+  $("f-card").addEventListener("click", (e) => { if (!e.target.closest("a")) flipTurn(); });
+  $("f-turn").addEventListener("click", flipTurn);
+  $("f-prev").addEventListener("click", () => flipGo(-1));
+  $("f-next").addEventListener("click", () => flipGo(1));
+  $("f-know").addEventListener("click", () => flipMark(1));
+  $("f-again").addEventListener("click", () => flipMark(0));
+  $("f-shuffle").addEventListener("click", flipShuffle);
+  document.addEventListener("keydown", (e) => {
+    if (document.body.dataset.view !== "flip" || e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target && e.target.closest ? e.target : null;   // typing in a control, or pressing a button, is left alone
+    if (t && (t.closest("input, select, textarea, a") || (t.closest("button") && (e.key === " " || e.key === "Enter")))) return;
+    const k = e.key.toLowerCase();
+    if (k === " " || k === "enter") flipTurn();
+    else if (k === "arrowright") flipGo(1);
+    else if (k === "arrowleft") flipGo(-1);
+    else if (k === "k") flipMark(1);
+    else if (k === "l") flipMark(0);
+    else if (k === "s") flipShuffle();
+    else return;
+    e.preventDefault();
+  });
+  // the cards are dealt by measured height, so they are dealt again once the fonts are in, and checked again whenever a late font arrives
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (document.body.dataset.view === "cut") draw(); });
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", () => { if (document.body.dataset.view === "cut" && CUT && CUT.tidy) CUT.tidy(); });
+  $("print").addEventListener("click", () => window.print());
+  // where the PDFs are packed inside the app's data, the file is unpacked here and handed to the browser to save
+  const got = new Set();
+  $("pdf").addEventListener("click", async (e) => {
+    if (!PDFS || !PDFS.packed) return;
+    e.preventDefault();
+    const a = $("pdf"), id = a.dataset.id, f = { name: a.dataset.name }, label = a.textContent;
+    a.textContent = "Preparing the PDF…";
+    try {
+      if (!got.has(id)) await new Promise((ok, no) => { const s = document.createElement("script"); s.src = `static/data/notecards-${id}.js`; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+      got.add(id);
+      const d = await fetch("static/notecards/" + f.name + ".json").then((r) => r.json());
+      const bin = atob(d.pdf), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+      const dl = Object.assign(document.createElement("a"), { href: url, download: f.name });
+      document.body.appendChild(dl); dl.click(); dl.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      a.textContent = label;
+    } catch { a.textContent = "The PDF needs a connection the first time. Try again when you're online."; }
+  });
+  window.addEventListener("resize", () => { const v = document.body.dataset.view; if (v === "flip") fit($("flip")); else if (v !== "cut") fit(); });
+  load();
+}
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+</script>
+</body>
+</html>

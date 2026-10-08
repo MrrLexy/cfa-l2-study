@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CFA Level II Study · Rapid fire</title>
+<link rel="stylesheet" href="static/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-180.png">
+<link rel="icon" href="static/icon-192.png">
+<meta name="theme-color" content="#16181f">
+<script src="static/lock-config.js"></script>
+<script src="static/lock.js"></script>
+<script src="static/profile.js"></script>
+<script>StudyProfile.guard();</script>
+<link rel="stylesheet" href="static/katex/katex.min.css">
+<script defer src="static/katex/katex.min.js"></script>
+<script src="static/ties.js"></script>
+<script src="static/walk.js"></script>
+<script src="static/learn.js"></script>
+<style>
+  :root { --page-max: 1320px; }
+  main { max-width: var(--page-max); margin: 0 auto; padding: var(--sp-5) var(--gutter) var(--sp-8); }
+  h1.site-title { font-size: var(--fs-xl); letter-spacing: -.02em; }
+  .lede { color: var(--muted); font-size: var(--fs-md); margin: 6px 0 0; max-width: 780px; }
+  .offline { margin-top: var(--sp-5); color: var(--muted); }
+
+  /* choosing a topic */
+  .tgrid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-top: var(--sp-5); }
+  .topic { font: inherit; color: inherit; text-align: left; width: 100%; padding: var(--sp-4); display: flex; flex-direction: column; gap: 4px; }
+  .topic .name { font-weight: 700; font-size: 16.5px; line-height: 1.3; }
+  .topic .facts { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .topic.all { border-color: var(--accent); }
+  .topic .progress { margin-top: 6px; }
+
+  /* the session strip */
+  .rbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--sp-2) var(--sp-4); margin-bottom: var(--sp-3); font-size: var(--fs-sm); }
+  .rstat { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-variant-numeric: tabular-nums; }
+  .rstat b { font-size: 17px; }
+  .pips { display: inline-flex; gap: 5px; align-items: center; }
+  .pips i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line-strong); display: block; }
+  .pips i.on { background: var(--good); border-color: var(--good); }
+
+  /* one question */
+  .one { max-width: 860px; margin: 0 auto; }
+  .q { padding: var(--sp-5); }
+  .q .qh { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px 12px; flex-wrap: wrap; margin-bottom: var(--sp-3); }
+  .seen { display: inline-flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+  .q .stem { font-size: 17px; font-weight: 600; line-height: 1.45; }
+  .q .stem p { margin: 0 0 .5em; } .q .stem p:last-child { margin-bottom: 0; }
+  .opts { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-4); }
+  .opt { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; text-align: left; cursor: pointer; font-family: inherit;
+         border: 1.5px solid var(--line-strong); background: var(--card); color: var(--ink); border-radius: var(--r); padding: 10px 12px; font-size: 15.5px; line-height: 1.45; min-height: 48px; }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .opt:disabled { cursor: default; }
+  .opt .L { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background: var(--sunk); color: var(--muted); }
+  .opt .v { padding-top: 2px; overflow-wrap: anywhere; }
+  .opt .v p { margin: 0; }
+  .opt.right { border-color: var(--good); background: var(--good-soft); }
+  .opt.right .L { background: var(--good); color: var(--card); }
+  .opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+  .opt.wrong .L { background: var(--bad); color: var(--card); }
+  .opt.dim { opacity: .62; }
+  .verdict { margin-top: var(--sp-4); font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+  .verdict.good { color: var(--good); } .verdict.bad { color: var(--bad); }
+  .verdict .row { font-weight: 500; font-size: 14px; color: var(--muted); }
+  .expl { margin-top: var(--sp-2); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
+  .expl p { margin: 0 0 .6em; } .expl p:last-child { margin-bottom: 0; }
+  .los { font-size: 13px; color: var(--muted); margin-top: var(--sp-2); }
+  .trap { margin-top: var(--sp-2); border-left: 3px solid var(--warn, #c98a1b); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
+  .trap p { margin: 0 0 .4em; } .trap p:last-child { margin: 0; }
+  .walk { margin-top: var(--sp-3); border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); }
+  .walk ol { margin: 6px 0 0; padding-left: 22px; } .walk li { margin: 0 0 6px; } .walk li:last-child { margin: 0; }
+  .walk .md p { margin: 0; }
+  .nav { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2) var(--sp-3); flex-wrap: wrap; margin-top: var(--sp-3); }
+  .nav .keys { font-size: 13px; }
+  .nav .fw { display: inline-flex; gap: var(--sp-2); }
+  @media (hover: none), (max-width: 700px) { .nav .keys { display: none; } }
+
+  /* a case: the vignette on the left, one question at a time on the right, each side scrolling on its own */
+  .chead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-3); }
+  .chead h2 { font-size: var(--fs-lg); line-height: 1.2; margin: 2px 0 0; }
+  .chead .fw { display: inline-flex; flex-wrap: wrap; gap: var(--sp-2); }
+  .case { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: var(--sp-5); align-items: stretch; }
+  .lpane { min-width: 0; }
+  .vig { padding: var(--sp-4) var(--sp-5); }
+  .case .rpane { display: flex; flex-direction: column; min-width: 0; padding: 0; }
+  .grow { flex: 1 1 auto; }
+  .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--line); }
+  .qtab { min-width: 46px; height: 34px; padding: 0 10px; border-radius: var(--r-sm); border: 1.5px solid var(--line-strong); background: var(--card); color: var(--ink);
+          font: inherit; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; cursor: pointer; }
+  .qtab:hover { border-color: var(--accent); }
+  .qtab.ok { border-color: var(--good); color: var(--good); } .qtab.bad { border-color: var(--bad); color: var(--bad); }
+  .qtab[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+  .rscroll { flex: 1 1 auto; min-height: 0; padding: var(--sp-4) var(--sp-5); }
+  .rpane .q { padding: 0; }
+  .qbar { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--line); font-size: 14px; }
+  .jump { display: none; }
+  @media (min-width: 961px) {
+    body.incase main { padding-top: var(--sp-3); padding-bottom: var(--sp-3); }
+    .case { height: var(--ws-h, 72vh); grid-template-rows: minmax(0, 1fr); }
+    .case .lpane, .case .rpane { min-height: 0; }
+    .case .lpane, .case .rscroll { overflow-y: auto; overscroll-behavior: contain; }
+  }
+  @media (max-width: 960px) {
+    .case { grid-template-columns: minmax(0, 1fr); }
+    .jump { display: inline-flex; }
+  }
+
+  /* the end of a session */
+  .sum { max-width: 860px; margin: 0 auto; display: grid; gap: var(--sp-4); }
+  .sum .big { font-size: 34px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+  .sum .facts { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .again { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+  .again button { font: inherit; color: inherit; text-align: left; width: 100%; background: none; border: 1px solid var(--line); border-radius: var(--r); padding: 8px 12px; cursor: pointer; }
+  .again button:hover { border-color: var(--accent); }
+  .again .m { display: block; font-size: 13px; color: var(--muted); }
+
+  /* text with formulas and tables */
+  .md { font-size: 15.5px; line-height: 1.6; overflow-wrap: break-word; }
+  .md p { margin: 0 0 .8em; }
+  .md h3, .md h4, .md h5 { font-size: 15.5px; margin: 1.2em 0 .5em; }
+  .md ul, .md ol { margin: 0 0 .8em; padding-left: 1.4em; }
+  .md li { margin: .2em 0; }
+  .md .table-wrap { margin: .4em 0 1em; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); }
+  .md .table { font-size: 14.5px; }
+  .md .table th { white-space: normal; background: var(--sunk); text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink); }
+  .md .table td { padding: 8px 10px; }
+  .md .table td.r, .md .table th.r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .md .table td.c, .md .table th.c { text-align: center; }
+  .md .cap { font-weight: 700; font-size: 14px; margin: 1.1em 0 .3em; }
+  .md code { font-family: var(--mono); font-size: .9em; background: var(--sunk); padding: 1px 5px; border-radius: 5px; }
+  .katex { font-size: 1.06em; }
+  .katex-display { margin: .5em 0; padding: .4em .6em; background: var(--sunk); border-radius: var(--r-sm); overflow-x: auto; overflow-y: hidden; }
+  .expl .katex-display { background: var(--card); }
+  @media (max-width: 520px) {
+    .q, .card { padding: var(--sp-4); }
+    .rpane .q { padding: 0; }
+    .case .rpane { padding: 0; }
+    .rscroll { padding: var(--sp-4); }
+    .md .table { font-size: 13.5px; }
+    .md .table td, .md .table th { padding: 7px 7px; }
+  }
+</style>
+</head>
+<body>
+<header class="site-bar"><div class="site-bar-in">
+  <a class="site-brand" href="app.html#path">CFA Level II Study</a>
+  <div class="site-nav" role="navigation" aria-label="Pages"><a href="app.html" aria-label="Study Map"><span class="nav-long">Study Map</span><span class="nav-short">Map</span></a><a href="lesson.html">Lessons</a><a href="cases.html" aria-label="Case studies"><span class="nav-long">Case studies</span><span class="nav-short">Cases</span></a><a href="rapid.html" aria-label="Rapid fire"><span class="nav-long">Rapid fire</span><span class="nav-short">Rapid</span></a><a href="notecards.html" aria-label="Note cards"><span class="nav-long">Note cards</span><span class="nav-short">Cards</span></a></div>
+  <div id="userbar"></div>
+</div></header>
+<main>
+  <div id="view"><p class="offline">Loading…</p></div>
+</main>
+<script src="static/data/study-path.js"></script>
+<script src="static/data/casedata.js"></script>
+<script src="static/data/los-cards.js"></script>
+<script src="static/data/guide-narratives.js"></script>
+<script src="static/data/glossary.js"></script>
+<script src="static/standalone.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many || one + "s"}`;
+const GOAL = 5;                       // right answers in a row that bring a case
+const ALL = "All topics";
+const HKEY = "site-rapid-v1", RKEY = "site-rapid-run", TIEPREF = "site-ties";
+function loadJSON(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v && typeof v === "object" ? v : d; } catch { return d; } }
+function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+let H = loadJSON(HKEY, null);         // every answer given here: question id -> [times right, times wrong, the last one right (1 or 0), when]
+if (!H || !H.q) H = { v: 1, q: {} };
+let run = loadJSON(RKEY, null);       // the session in hand: { topic, trail: [what came up, in order, with the answers], at, streak, n, right, ... }
+let tiesOn = (() => { try { return localStorage.getItem(TIEPREF) !== "off"; } catch { return true; } })();
+let TIE = null, TIE_GIVEN = false;    // what md() marks while it renders, and whether only the values the question gives count
+const tieCache = new Map();
+const marked = (q) => tiesOn || !!(window.Walk && Walk.active(q.id));   // the guided walkthrough (static/walk.js) shows the number marks even when they are off
+if (window.Ties) Ties.style();
+
+// ------------------------------------------------------------------ text: paragraphs, lists, tables and formulas
+function math(tex, display) {
+  if (!window.katex) return esc(display ? `\\[${tex}\\]` : `\\(${tex}\\)`);
+  try { return katex.renderToString(tex, { displayMode: display, throwOnError: false, ...(window.Ties ? Ties.katexOptions : {}) }); } catch { return esc(tex); }
+}
+function inline(s, slots) { return TIE ? Ties.html(inline0(TIE.text(s, TIE_GIVEN), slots)) : inline0(s, slots); }
+function inline0(s, slots) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<em>$2</em>")
+    .replace(/(^|[^\w])_([^_\s][^_]*?)_(?!\w)/g, "$1<em>$2</em>")
+    .replace(/\u0001(\d+)\u0002/g, (_, i) => slots[+i]);
+}
+const NUMERIC = /^[\s(−\-+$€£]*[\d.,]+\s*(%|bp|bps|x|×|years?|yrs?|m|mn|bn|million|billion)?\)?\s*$|^[−\-–]+$|^n\/?a$/i;
+function table(rows, slots) {
+  const split = (l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
+  const head = split(rows[0]), sep = rows[1] && /^\s*\|?[\s:\-|]+\|?\s*$/.test(rows[1]) ? split(rows[1]) : null;
+  const align = head.map((_, i) => { const a = sep && sep[i] || ""; return /^:-+:$/.test(a) ? "c" : /-+:$/.test(a) ? "r" : /^:-/.test(a) ? "" : null; });
+  const body = rows.slice(sep ? 2 : 1).map(split);
+  const cls = (i, txt) => { const a = align[i]; const k = a !== null && a !== undefined ? a : i > 0 && NUMERIC.test(txt.replace(/\u0001\d+\u0002/g, "1")) ? "r" : ""; return k ? ` class="${k}"` : ""; };
+  return `<div class="table-wrap"><table class="table"><thead><tr>${head.map((h, i) => `<th${align[i] ? ` class="${align[i]}"` : i > 0 && body.every((r) => !(r[i] || "").trim() || NUMERIC.test((r[i] || "").replace(/\u0001\d+\u0002/g, "1"))) ? ' class="r"' : ""}>${inline(h, slots)}</th>`).join("")}</tr></thead>
+    <tbody>${body.map((r) => `<tr>${head.map((_, i) => `<td${cls(i, r[i] || "")}>${inline(r[i] || "", slots)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function md(src) {
+  const slots = [];
+  const text = String(src ?? "").replace(/\r\n?/g, "\n").replace(/\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$/g, (m, d, i, dd) => {
+    const tx = d ?? dd ?? i; slots.push(math(TIE ? TIE.tex(tx, TIE_GIVEN) : tx, i === undefined)); return `\u0001${slots.length - 1}\u0002`;
+  });
+  const lines = text.split("\n"), out = [];
+  let para = [];
+  const flush = () => { if (para.length) out.push(`<p>${inline(para.join(" "), slots)}</p>`); para = []; };
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (!l.trim()) { flush(); continue; }
+    if (/^\s*\|/.test(l)) {
+      flush(); const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(lines[i++]);
+      i--; out.push(table(rows, slots)); continue;
+    }
+    const h = l.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { flush(); const lv = Math.min(5, h[1].length + 2); out.push(`<h${lv}>${inline(h[2], slots)}</h${lv}>`); continue; }
+    if (/^\s*([-*+]|\d+[.)])\s+/.test(l)) {
+      flush(); const ordered = /^\s*\d/.test(l), items = [];
+      while (i < lines.length && /^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) {
+        let item = lines[i++].replace(/^\s*([-*+]|\d+[.)])\s+/, "");
+        while (i < lines.length && lines[i].trim() && /^\s{2,}\S/.test(lines[i]) && !/^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) item += " " + lines[i++].trim();
+        items.push(`<li>${inline(item, slots)}</li>`);
+      }
+      i--; out.push(ordered ? `<ol>${items.join("")}</ol>` : `<ul>${items.join("")}</ul>`); continue;
+    }
+    if (/^\s*\*\*[^*]+\*\*\s*$/.test(l) && lines[i + 1] && /^\s*\|/.test(lines[i + 1])) { flush(); out.push(`<div class="cap">${inline(l.trim().slice(2, -2), slots)}</div>`); continue; }
+    if (/^\s*\u0001\d+\u0002\s*$/.test(l) && /katex-display|\\\[/.test(slots[+l.match(/\d+/)[0]])) { flush(); out.push(inline(l.trim(), slots)); continue; }
+    para.push(l.trim());
+  }
+  flush();
+  return `<div class="md">${out.join("")}</div>`;
+}
+function mdT(src, t, givenOnly) { TIE = t && t.groups.length ? t : null; TIE_GIVEN = !!givenOnly; try { return md(src); } finally { TIE = null; } }
+// the values a question's solution uses, tied to where the question (and its vignette) gives them
+function tiesOf(q) {
+  if (!window.Ties) return null;
+  if (!tieCache.has(q.id)) {
+    const c = q.kase ? CASES.get(q.kase) : null;
+    tieCache.set(q.id, Ties.build({ source: [c ? c.vignette : "", q.stem], solution: [...(q.steps || []), q.explanation, q.trap, q.avoid], options: Object.values(q.options || {}) }));
+  }
+  return tieCache.get(q.id);
+}
+const tieKey = (live, inCase) => `<div class="tiekey"><button type="button" class="btn ghost sm" data-act="ties" aria-pressed="${live}">Trace the numbers: ${live ? "on" : "off"}</button>${live
+  ? `<span><mark class="tie tg h0">12</mark> given in the ${inCase ? "case" : "question"}</span><span><mark class="tie td h2">12</mark> worked out on the way</span><span>Click a number to follow it.</span>` : ""}</div>`;
+
+// ------------------------------------------------------------------ the questions, by topic
+let ready = false, SUBJ = [], hasCaseBank = false;
+const QI = new Map(), CASES = new Map();   // every question by id; every case (a vignette and its questions) by key
+const other = new Map();                   // question id -> the answer saved on the Study Map or the case studies page
+const subjectOf = (m) => String(m || "").replace(/\s+\d+$/, "");
+function readOther() {
+  other.clear();
+  try { const s = JSON.parse(localStorage.getItem("study.path.v1")); for (const m of Object.values((s && s.mods) || {})) for (const r of ["A", "B"]) for (const [id, a] of Object.entries(m[r] || {})) if (Array.isArray(a) && a[0] && a[0] !== "-") other.set(id, a[0]); } catch {}
+  try { const s = JSON.parse(localStorage.getItem("site-cases-v1")); for (const set of Object.values(s || {})) for (const [id, a] of Object.entries(set || {})) if (typeof a === "string") other.set(id, a); } catch {}
+}
+function index(P, vols) {
+  QI.clear(); CASES.clear();
+  const by = new Map(), sub = (name) => { if (!by.has(name)) by.set(name, { name, singles: [], cases: [] }); return by.get(name); };
+  for (const ph of P.phases || []) for (const m of ph.modules || []) sub(subjectOf(m));
+  const mods = P.modules || {}, sets = P.sets || {}, grouped = new Map();
+  for (const [id, q] of Object.entries(P.questions || {})) {
+    const m = mods[q.module] || {}, t = (m.topics || [])[q.t];
+    const x = { id, stem: q.stem, options: q.options, answer: q.answer, explanation: q.explanation, steps: q.steps, module: q.module, where: [m.title, t && t.title].filter(Boolean).join(": ") };
+    if (!q.set) { QI.set(id, x); sub(subjectOf(q.module)).singles.push(id); }
+    else if (sets[q.set]) { if (!grouped.has(q.set)) grouped.set(q.set, []); grouped.get(q.set).push(x); }
+  }
+  const add = (c) => { CASES.set(c.key, c); for (const q of c.questions) { q.kase = c.key; QI.set(q.id, q); } sub(subjectOf(c.module)).cases.push(c.key); };
+  hasCaseBank = vols.some((v) => (v.sets || []).length);
+  if (hasCaseBank) {
+    for (const v of vols) for (const s of v.sets || []) if ((s.questions || []).length)
+      add({ key: s.id, family: s.family || s.id, title: s.title, module: s.module || v.volume, vignette: s.vignette, questions: s.questions.map((q) => ({ ...q, module: s.module || v.volume })) });
+  } else {
+    for (const [k, qs] of grouped) add({ key: k, family: k, title: sets[k].title, module: qs[0].module, vignette: sets[k].vignette, questions: qs });
+  }
+  SUBJ = [...by.values()].filter((s) => s.singles.length);
+}
+const inRun = () => (run.topic === ALL ? SUBJ : SUBJ.filter((s) => s.name === run.topic));
+
+// ------------------------------------------------------------------ what you have answered before
+function record(id, ok) {
+  const h = H.q[id] || [0, 0, 0, 0];
+  h[ok ? 0 : 1]++; h[2] = ok ? 1 : 0; h[3] = Date.now();
+  H.q[id] = h; saveJSON(HKEY, H);
+}
+const times = (id) => { const h = H.q[id]; return h ? h[0] + h[1] : 0; };
+function seen(q) {
+  const h = H.q[q.id], o = other.get(q.id), n = times(q.id), out = [];
+  if (n) out.push(`<span class="chip ${h[2] ? "good" : "bad"}">Answered ${n === 1 ? "once" : n + " times"} here: ${h[0]} right, ${h[1]} wrong${n > 1 ? `, last time ${h[2] ? "right" : "wrong"}` : ""}</span>`);
+  if (o) out.push(`<span class="chip ${o === q.answer ? "good" : "bad"}">${q.kase && hasCaseBank ? "On the case studies page" : "On the Study Map"}: ${o === q.answer ? "right" : "wrong"}</span>`);
+  return `<span class="seen">${out.length ? out.join("") : `<span class="chip accent">New to you</span>`}</span>`;
+}
+
+// ------------------------------------------------------------------ the session
+const cur = () => run.trail[run.at];
+const done = (it) => (it.k === "q" ? !!it.a : CASES.get(it.key).questions.every((q) => it.a[q.id]));
+const skipped = () => run.trail.map((it, i) => i).filter((i) => i !== run.at && !done(run.trail[i]));
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+function pickSingle() {
+  const pool = inRun().flatMap((s) => s.singles);
+  if (!pool.length) return null;
+  const up = run.trail.filter((x) => x.k === "q").map((x) => x.id), inTrail = new Set(up);
+  let cand = pool.filter((id) => !inTrail.has(id));
+  if (!cand.length) {   // everything in the topic has come up this session: go round again, leaving out the latest few
+    const recent = new Set(up.slice(-Math.min(10, pool.length - 1)));
+    cand = pool.filter((id) => !recent.has(id));
+  }
+  if (!cand.length) cand = pool;
+  // new questions first, then the ones last answered wrong, then the ones answered right longest ago
+  const rank = (id) => { const h = H.q[id], o = other.get(id); return !h && !o ? 0 : (h ? !h[2] : o !== QI.get(id).answer) ? 1 : 2; };
+  const best = Math.min(...cand.map(rank));
+  let tier = cand.filter((id) => rank(id) === best);
+  if (best === 2) { tier.sort((a, b) => ((H.q[a] || [])[3] || 0) - ((H.q[b] || [])[3] || 0)); tier = tier.slice(0, Math.max(5, Math.ceil(tier.length / 3))); }
+  return pick(tier);
+}
+function pickCase() {
+  const all = inRun().flatMap((s) => s.cases).map((k) => CASES.get(k));
+  if (!all.length) return null;
+  const used = new Set(run.trail.filter((x) => x.k === "v").map((x) => CASES.get(x.key).family));
+  let cand = all.filter((c) => !used.has(c.family));
+  if (!cand.length) cand = all;
+  const met = (c) => c.questions.reduce((n, q) => n + times(q.id) + (other.has(q.id) ? 1 : 0), 0);
+  const least = Math.min(...cand.map(met));
+  let tier = cand.filter((c) => met(c) === least);
+  // a case on what the last few questions were about, when there is one
+  const mods = new Set(run.trail.slice(-8).filter((x) => x.k === "q").map((x) => QI.get(x.id).module)), near = tier.filter((c) => mods.has(c.module));
+  return pick(near.length ? near : tier).key;
+}
+function make() {   // what comes up next: a case after enough right answers in a row, otherwise one more question
+  if (run.streak >= GOAL) { run.streak = 0; const key = pickCase(); if (key) { run.cases++; return { k: "v", key, at: 0, a: {} }; } }
+  const id = pickSingle();
+  return id ? { k: "q", id } : null;
+}
+function begin(topic) {
+  run = { v: 1, topic, start: Date.now(), trail: [], at: -1, streak: 0, row: 0, best: 0, n: 0, right: 0, cases: 0 };
+  step();
+}
+function step() {   // on to the next thing not answered yet: something skipped further along, or something new
+  let j = run.trail.findIndex((it, i) => i > run.at && !done(it));
+  if (j < 0) { const it = make(); if (!it) return; run.trail.push(it); j = run.trail.length - 1; }
+  show(j);
+}
+function show(j) { run.at = Math.max(0, Math.min(j, run.trail.length - 1)); run.over = false; saveJSON(RKEY, run); draw(); window.scrollTo({ top: 0 }); }
+function answer(letter) {
+  const it = cur();
+  let q;
+  if (it.k === "q") {
+    if (it.a) return;
+    q = QI.get(it.id); it.a = letter;
+    if (letter === q.answer) { run.streak++; run.row++; run.best = Math.max(run.best, run.row); } else { run.streak = 0; run.row = 0; }
+    it.s = run.streak;
+  } else {
+    q = CASES.get(it.key).questions[it.at];
+    if (it.a[q.id]) return;
+    it.a[q.id] = letter;
+  }
+  run.n++; if (letter === q.answer) run.right++;
+  record(q.id, letter === q.answer);
+  saveJSON(RKEY, run);
+  const y = window.scrollY; draw(); window.scrollTo(0, y);
+  const b = document.querySelector("[data-fwd]"); if (b) b.focus({ preventScroll: true });
+  if (window.Walk) Walk.after(q.id);
+}
+function valid(r) {   // a saved session only counts if everything in it still exists
+  if (!r || !Array.isArray(r.trail) || !r.trail.length || !(r.topic === ALL || SUBJ.some((s) => s.name === r.topic))) return false;
+  return r.trail.every((it) => (it.k === "q" ? QI.has(it.id) && !QI.get(it.id).kase : it.k === "v" && CASES.has(it.key) && it.a && typeof it.a === "object"));
+}
+
+// ------------------------------------------------------------------ drawing
+function options(q, got) {
+  const T = got && marked(q) ? tiesOf(q) : null;
+  return `<div class="opts" role="group" aria-label="Answer options">${Object.entries(q.options || {}).map(([L, txt]) =>
+    `<button type="button" class="opt ${!got ? "" : L === q.answer ? "right" : L === got ? "wrong" : "dim"}" data-opt="${esc(L)}" ${got ? "disabled" : ""}><span class="L">${esc(L)}</span><span class="v">${mdT(txt, T).replace(/^<div class="md">|<\/div>$/g, "")}</span></button>`).join("")}</div>`;
+}
+function after(q, got, note) {   // the verdict and the full explanation, straight after the answer
+  const t = tiesOf(q), has = !!(t && t.groups.length), T = has && marked(q) ? t : null, ok = got === q.answer;
+  return `<div class="verdict ${ok ? "good" : "bad"}"><span>${ok ? "✓ Correct" : `✗ Incorrect: you chose ${esc(got)}, the answer is ${esc(q.answer)}`}</span>${note ? `<span class="row">${note}</span>` : ""}</div>
+    ${has ? tieKey(!!T, !!q.kase) : ""}${(q.steps || []).length ? `<div class="walk"><span class="eyebrow">Walkthrough</span><ol>${q.steps.map((x, i) => `<li data-seg="s${i}">${mdT(x, T)}</li>`).join("")}</ol></div>` : ""}
+    <div class="expl" data-seg="expl">${mdT(q.explanation, T)}</div>${q.trap ? `<div class="trap" data-seg="trap">${mdT("**The trap.** " + q.trap + (q.avoid ? "\n\n**How to avoid it.** " + q.avoid : ""), T)}</div>` : ""}
+    ${q.where ? `<div class="los">From: ${esc(q.where)}</div>` : q.los ? `<div class="los">LOS: ${esc(q.los)}</div>` : ""}${window.Walk ? Walk.bar(q.id) : ""}`;
+}
+function strip() {
+  const it = cur(), sk = skipped().length, cases = inRun().some((s) => s.cases.length), left = GOAL - run.streak;
+  const pips = Array.from({ length: GOAL }, (_, i) => `<i class="${i < run.streak ? "on" : ""}"></i>`).join("");
+  const next = it.k === "v" ? "Case study: then the count starts again" : left > 0 ? (cases ? `${left} more in a row for a case study` : `${left} more for ${GOAL} in a row`) : cases ? "A case study is next" : `${GOAL} in a row`;
+  return `<div class="rbar"><div class="rstat"><span class="chip accent">${esc(run.topic)}</span><span><b>${run.n}</b> answered</span><span><b>${run.right}</b> right${run.n ? ` (${Math.round(100 * run.right / run.n)}%)` : ""}</span>
+      <span class="pips" role="img" aria-label="${Math.min(run.streak, GOAL)} of ${GOAL} right in a row">${pips}</span><span class="muted">${next}</span></div>
+    <div class="rstat">${sk ? `<button type="button" class="btn sm" data-act="skipped">Skipped: ${sk} · go back</button>` : ""}<button type="button" class="btn ghost sm" data-act="end">End session</button></div></div>`;
+}
+function single(it) {
+  const q = QI.get(it.id), got = it.a, T = got && marked(q) ? tiesOf(q) : null;
+  const cases = inRun().some((s) => s.cases.length);
+  const row = it.s || 0, note = !got ? "" : got !== q.answer ? "The count starts again." : row >= GOAL ? (cases ? `${row} in a row: a case study is next.` : `${row} in a row.`) : `${row} in a row.`;
+  const later = run.trail.some((x, i) => i > run.at && !done(x));
+  return `<div class="one"><article class="card q" id="qcard"${T && T.groups.length ? ' data-t="1"' : ""}>
+      <div class="qh"><span class="eyebrow">Question ${run.at + 1} · ${esc(q.module)}</span>${seen(q)}</div>
+      <div class="stem" data-seg="ask">${mdT(q.stem, T, true)}</div>
+      ${options(q, got)}
+      ${got ? after(q, got, note) : ""}
+    </article>
+    <div class="nav"><button type="button" class="btn" data-act="prev" ${run.at ? "" : "disabled"}>‹ Previous</button>
+      <span class="keys muted">Keys: A, B, C to answer · Enter for the next · S to skip</span>
+      <span class="fw">${got ? `<button type="button" class="btn primary" data-act="next" data-fwd>${later ? "Next skipped ›" : "Next ›"}</button>` : `<button type="button" class="btn" data-act="next" data-skip>Skip ›</button>`}</span></div></div>`;
+}
+function kase(it) {
+  const c = CASES.get(it.key), Q = c.questions;
+  it.at = Math.max(0, Math.min(it.at || 0, Q.length - 1));
+  const q = Q[it.at], got = it.a[q.id], all = Q.every((x) => it.a[x.id]), last = it.at >= Q.length - 1, open = Q.findIndex((x, i) => i !== it.at && !it.a[x.id]);
+  const t = got && marked(q) ? tiesOf(q) : null, T = t && t.groups.length ? t : null;
+  const out = all ? `<button type="button" class="btn primary" data-act="next" ${last && got ? "data-fwd" : ""}>Back to single questions ›</button>` : `<button type="button" class="btn" data-act="next" data-skip>Skip this case ›</button>`;
+  return `<div class="chead"><div><span class="eyebrow">Case study · ${esc(c.module)}</span><h2>${esc(c.title)}</h2></div>
+      <span class="fw"><button type="button" class="btn" data-act="prev" ${run.at ? "" : "disabled"}>‹ Previous</button>${out}</span></div>
+    <div class="case" id="ws">
+      <div class="lpane" id="lpane"><section class="card vig" id="vig">${T && T.given ? `<p class="tienote">Highlighted: the values question ${it.at + 1} uses.</p>` : ""}${mdT(c.vignette, T && T.given ? T : null, true)}</section></div>
+      <section class="card rpane" aria-label="Question">
+        <div class="qnav" role="tablist" aria-label="Questions">${Q.map((x, i) => { const a = it.a[x.id], st = !a ? "" : a === x.answer ? "ok" : "bad"; return `<button type="button" role="tab" class="qtab ${st}" data-act="qat" data-i="${i}" aria-selected="${i === it.at}" title="Question ${i + 1}">${i + 1}${st === "ok" ? " ✓" : st === "bad" ? " ✗" : ""}</button>`; }).join("")}
+          <span class="grow"></span><button type="button" class="btn ghost sm jump" data-act="jump">Vignette ↑</button></div>
+        <div class="rscroll" id="rscroll"><article class="q" id="qcard"${T ? ' data-t="1"' : ""}>
+          <div class="qh"><span class="eyebrow">Question ${it.at + 1} of ${Q.length}</span>${seen(q)}</div>
+          <div class="stem" data-seg="ask">${mdT(q.stem, T, true)}</div>
+          ${options(q, got)}
+          ${got ? after(q, got, "") : ""}</article></div>
+        <div class="qbar"><button type="button" class="btn" data-act="cprev" ${it.at ? "" : "disabled"}>‹ Previous</button><span class="muted">${Q.filter((x) => it.a[x.id]).length} of ${Q.length} answered</span>
+          ${last ? (all ? `<button type="button" class="btn primary" data-act="next" ${got ? "data-fwd" : ""}>Carry on ›</button>` : open >= 0 ? `<button type="button" class="btn ${got ? "primary" : ""}" data-act="qat" data-i="${open}" ${got ? "data-fwd" : ""}>Question ${open + 1} ›</button>` : `<button type="button" class="btn" disabled>Next ›</button>`)
+                 : `<button type="button" class="btn ${got ? "primary" : ""}" data-act="cnext" ${got ? "data-fwd" : ""}>Next ›</button>`}</div>
+      </section></div>`;
+}
+function picker() {
+  const total = (ids) => { let seenN = 0, r = 0, w = 0; for (const id of ids) { const h = H.q[id]; if (h) { seenN++; r += h[0]; w += h[1]; } } return { seenN, r, w }; };
+  const card = (name, singles, cases, cls) => {
+    const s = total(singles);
+    return `<button type="button" class="card card-link topic ${cls}" data-topic="${esc(name)}"><span class="name">${esc(name)}</span>
+      <span class="facts">${plural(singles.length, "question")}${cases ? ` · ${plural(cases, "case")}` : ""}</span>
+      <span class="facts">${s.seenN ? `${s.seenN} answered here · ${Math.round(100 * s.r / (s.r + s.w))}% right` : "Not started"}</span>
+      <span class="progress thin"><i style="width:${Math.round(100 * s.seenN / Math.max(1, singles.length))}%"></i></span></button>`;
+  };
+  $("view").innerHTML = `<h1 class="site-title">Rapid fire</h1>
+    <p class="lede">Pick a topic and answer one question after another. The full explanation shows as soon as you answer. ${CASES.size ? `${GOAL} right in a row brings a case study, then the count starts again. ` : ""}Skip anything and come back to it. A question you have met before says how often you answered it and how it went. Your answers stay on this device.</p>
+    <div class="tgrid">${SUBJ.length > 1 ? card(ALL, SUBJ.flatMap((s) => s.singles), SUBJ.reduce((n, s) => n + s.cases.length, 0), "all") : ""}${SUBJ.map((s) => card(s.name, s.singles, s.cases.length, "")).join("")}</div>`;
+}
+function summary() {
+  const mins = Math.max(1, Math.round(((run.end || Date.now()) - run.start) / 60000));
+  const miss = [];
+  run.trail.forEach((it, i) => {
+    if (it.k === "q") { const q = QI.get(it.id); if (it.a && it.a !== q.answer) miss.push([i, q.stem, q.module]); }
+    else { const c = CASES.get(it.key), n = c.questions.filter((q) => it.a[q.id] && it.a[q.id] !== q.answer).length; if (n) miss.push([i, `Case study: ${c.title} (${n} wrong)`, c.module]); }
+  });
+  const sk = run.trail.filter((it, i) => !done(it) && i < run.trail.length - 1).length;   // the one on screen when the session ended is not a skip
+  const plain = (s) => String(s).replace(/\\\(|\\\)|\\\[|\\\]|\*\*?/g, "").replace(/\s+/g, " ").slice(0, 150);
+  $("view").innerHTML = `<div class="sum"><div><span class="eyebrow">Session over · ${esc(run.topic)}</span>
+      <div class="big">${run.n ? `${run.right} of ${run.n} right (${Math.round(100 * run.right / run.n)}%)` : "Nothing answered"}</div>
+      <div class="facts"><span>${plural(mins, "minute")}</span><span>Longest run: ${run.best} in a row</span><span>${plural(run.cases, "case study", "case studies")}</span>${sk ? `<span>${sk} skipped</span>` : ""}</div></div>
+    ${miss.length ? `<div class="card"><span class="eyebrow">To see again</span><ul class="again">${miss.map(([i, s, m]) => `<li><button type="button" data-act="review" data-i="${i}">${esc(plain(s))}<span class="m">${esc(m)}</span></button></li>`).join("")}</ul></div>` : ""}
+    <div class="nav"><button type="button" class="btn" data-act="resume">Keep going with this session</button><button type="button" class="btn primary" data-act="fresh">Choose a topic</button></div></div>`;
+}
+function fit() {   // on a wide screen the two panes of a case fill what is left of the window, so the page itself does not scroll
+  const ws = $("ws");
+  if (!ws) return;
+  if (matchMedia("(max-width: 960px)").matches) return void ws.style.removeProperty("--ws-h");
+  ws.style.setProperty("--ws-h", Math.max(440, window.innerHeight - (ws.getBoundingClientRect().top + window.scrollY) - 14) + "px");
+}
+function onScreen() {   // the question on screen and the answer given to it
+  const it = run && !run.over ? cur() : null;
+  if (!it) return null;
+  if (it.k === "q") return { q: QI.get(it.id), n: run.at + 1, got: it.a };
+  const Q = CASES.get(it.key).questions, i = Math.max(0, Math.min(it.at || 0, Q.length - 1));
+  return { q: Q[i], n: i + 1, got: it.a[Q[i].id] };
+}
+function draw() {
+  if (!ready) return;
+  document.body.classList.toggle("incase", !!run && !run.over && cur().k === "v");
+  const o = onScreen();
+  if (!run || run.over) { if (window.Walk) Walk.sync(null); }
+  if (!run) return picker();
+  if (run.over) return summary();
+  const it = cur();
+  $("view").innerHTML = strip() + (it.k === "q" ? single(it) : kase(it));
+  fit();
+  if (window.Walk) Walk.sync(o && o.got ? o.q.id : null);
+}
+if (window.Walk) Walk.provide((id) => {
+  const o = onScreen();
+  if (!o || o.q.id !== id || !o.got) return null;
+  return { ...o, module: o.q.module, t: tiesOf(o.q), render: md, root: () => $("qcard"), vig: () => $("vig"), pane: () => $("lpane"), scroller: () => $("rscroll"),
+    redraw: () => { const y = window.scrollY, r = $("rscroll"), ry = r ? r.scrollTop : 0; draw(); window.scrollTo(0, y); if ($("rscroll")) $("rscroll").scrollTop = ry; } };
+});
+
+// ------------------------------------------------------------------ what the buttons and keys do
+$("view").addEventListener("click", (e) => {
+  const t = e.target;
+  const tp = t.closest("[data-topic]"); if (tp) return begin(tp.dataset.topic);
+  const b = t.closest("[data-act]");
+  if (b && !b.disabled) {
+    const act = b.dataset.act, it = run && cur();
+    if (act === "next") return step();
+    if (act === "prev") return show(run.at - 1);
+    if (act === "skipped") return show(skipped()[0]);
+    if (act === "end") { run.over = true; run.end = Date.now(); saveJSON(RKEY, run); draw(); window.scrollTo({ top: 0 }); return; }
+    if (act === "resume") { const j = run.trail.findIndex((x) => !done(x)); if (j < 0) { run.over = false; run.at = run.trail.length - 1; return step(); } return show(j); }
+    if (act === "review") return show(+b.dataset.i);
+    if (act === "fresh") { run = null; saveJSON(RKEY, null); try { localStorage.removeItem(RKEY); } catch {} draw(); window.scrollTo({ top: 0 }); return; }
+    if (act === "ties") { tiesOn = !tiesOn; try { localStorage.setItem(TIEPREF, tiesOn ? "on" : "off"); } catch {} const y = window.scrollY, r = $("rscroll"), ry = r ? r.scrollTop : 0; draw(); window.scrollTo(0, y); if ($("rscroll")) $("rscroll").scrollTop = ry; return; }
+    if (act === "jump") { const v = $("vig"); if (v) v.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+    if (it && it.k === "v" && (act === "qat" || act === "cprev" || act === "cnext")) {
+      it.at = act === "qat" ? +b.dataset.i : it.at + (act === "cnext" ? 1 : -1);
+      saveJSON(RKEY, run); draw();
+      const r = $("rscroll"); if (r) r.scrollTop = 0;
+      if (matchMedia("(max-width: 960px)").matches) { const w = document.querySelector(".rpane"); if (w) w.scrollIntoView({ block: "start" }); }
+      return;
+    }
+  }
+  const o = t.closest("[data-opt]"); if (o && !o.disabled && run && !run.over) return answer(o.dataset.opt);
+  if (window.Ties) {   // click a highlighted number to see everywhere it is used
+    const mark = t.closest(".tie"), card = $("qcard"), inKey = t.closest(".tiekey");
+    const was = mark && mark.classList.contains("on");
+    document.querySelectorAll(".tie-focus").forEach((el) => Ties.focus([el], null));
+    if (mark && !inKey && card && card.dataset.t && !was) { const id = Ties.idOf(mark); if (id !== null) Ties.focus([card, $("vig")], id); }
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.altKey || e.ctrlKey || e.metaKey || !run || run.over || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key, onButton = e.target.tagName === "BUTTON";
+  const click = (sel) => { const b = document.querySelector(sel); if (b && !b.disabled) { e.preventDefault(); b.click(); return true; } return false; };
+  const L = { a: "A", b: "B", c: "C", 1: "A", 2: "B", 3: "C" }[k];
+  if (L) return void click(`[data-opt="${L}"]`);
+  if (k === "s") return void click("[data-skip]");
+  if ((k === "Enter" || k === " ") && !onButton) return void click("[data-fwd]");
+  if (k === "ArrowRight") return void (cur().k === "v" ? click('.qbar [data-act="cnext"]') || click(".qbar [data-fwd]") : click("[data-fwd]"));
+  if (k === "ArrowLeft") return void (cur().k === "v" ? click('.qbar [data-act="cprev"]') : click('[data-act="prev"]'));
+});
+window.addEventListener("resize", fit);
+
+// ------------------------------------------------------------------ data
+async function load() {
+  try {
+    const get = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const P = await get("static/study-path.json");
+    let vols = [];
+    try { vols = (await get("casedata")).volumes || []; } catch { vols = []; }
+    index(P, vols); readOther();
+    if (run && !valid(run)) { run = null; try { localStorage.removeItem(RKEY); } catch {} }
+    ready = true; draw();
+  } catch {
+    $("view").innerHTML = `<p class="offline">The questions couldn't be loaded.</p>`;
+  }
+}
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", load); else load();
+</script>
+</body>
+</html>
