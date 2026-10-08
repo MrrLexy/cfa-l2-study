@@ -99,6 +99,8 @@
   @media (max-width: 620px) { .gl-stage { padding: var(--sp-4); font-size: 17px; } .gl-stage h2 { font-size: 22px; } .gl-keys { display: none; }
     .gl-more { display: inline-block; margin-left: auto; } .gl-set { display: none; margin-left: 0; width: 100%; } .gl-foot.open .gl-set { display: flex; }
     .gl-cap { min-height: 1.45em; -webkit-line-clamp: 2; } .gl-btn { padding: 8px 12px; } .gl-btn.main { min-width: 84px; } }
+  @media (max-width: 430px) { .gl-ctl { gap: 6px; flex-wrap: nowrap; } .gl-btn { padding: 8px 9px; font-size: 14.5px; min-width: 0; } .gl-btn.main { min-width: 66px; }
+    .gl-foot.open .gl-ctl { flex-wrap: wrap; } }   /* on a phone the five controls share one line */
   [hidden] { display: none !important; }
   .gl-voice { margin: 0 0 var(--sp-4); padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--accent-soft); font-size: 15.5px; }
   /* follow mode (?follow=1): a display only, inside a page that says which step to show and does the talking */
@@ -219,18 +221,30 @@ function loadVoices() {
 // cut after . ! or ? only where a space and then a capital or a digit follow, so "2.5 percent" and "e.g. oil" stay whole
 const sentences = (text) => String(text || "").replace(/\s+/g, " ").replace(/\b(U\.S|vs|e\.g|i\.e|approx|No)\. /g, "$1.\u0002")
   .replace(/([.!?]["')\]]?) (?=["'(\[]?[A-Z0-9])/g, "$1\u0001").split("\u0001").map((s) => s.replace(/\u0002/g, " ").trim()).filter(Boolean);
+// said a few sentences to a breath (about twelve seconds), not one at a time: a voice that stops at every full stop sounds like a machine
+function breaths(text) {
+  const out = [];
+  let cur = "";
+  for (const s of sentences(text)) {
+    if (cur && (cur + " " + s).length > 180) { out.push(cur); cur = ""; }
+    cur = cur ? cur + " " + s : s;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+const leads = (n) => (n === 2 ? ["First,", "Then,"] : ["First,", ...Array.from({ length: Math.max(0, n - 2) }, (_, i) => ["Next,", "Then,", "After that,"][i % 3]), "Finally,"]);
 function markStep(k) {   // the step of a working that is being said: it is lit, the ones still to come are dimmed
   const ol = document.querySelector("#stage .gl-steps");
   if (!ol) return;
   [...ol.children].forEach((li, i) => { li.classList.toggle("now", k != null && i === k); li.classList.toggle("todo", k != null && i > k); });
-  if (k != null && ol.children[k] && ol.children[k].scrollIntoView) ol.children[k].scrollIntoView({ block: "nearest" });
+  if (k != null && ol.children[k] && ol.children[k].scrollIntoView) ol.children[k].scrollIntoView({ block: "center", behavior: "smooth" });   // clear of the controls at the foot
 }
 function hush() { token++; queue = []; speaking = false; paused = false; if (synth) { try { synth.cancel(); } catch { /* nothing to stop */ } } markStep(null); }
 function caption(text, on) { const c = $("#cap"); c.textContent = text || ""; c.classList.toggle("on", !!on); }
 function speakAll(text, done) {   // text: a string, or a list of { say, mark } where mark is the step of a working to light while it is said
   hush();
   const mine = ++token, parts = [];
-  for (const p of Array.isArray(text) ? text : [{ say: text }]) sentences(p.say).forEach((s, i) => parts.push({ s, mark: i === 0 ? p.mark : undefined }));
+  for (const p of Array.isArray(text) ? text : [{ say: text }]) breaths(p.say).forEach((s, i) => parts.push({ s, mark: i === 0 ? p.mark : undefined }));
   queue = parts.slice(); speaking = true; setPlay();
   const voiceOn = $("#s-voice").checked && !!synth;
   const step = () => {
@@ -305,13 +319,14 @@ function show(n, speakIt) {
   $("#b-back").disabled = I === 0; $("#b-next").disabled = I === LES.steps.length - 1;
   if (!FOLLOW) history.replaceState(null, "", `lesson.html?m=${encodeURIComponent(LES.module)}&s=${I + 1}`);
   window.scrollTo({ top: 0 });
-  if (speakIt && !FOLLOW) say(); else { hush(); caption(sentences(s.say)[0] || "", false); setPlay(); }
+  if (speakIt && !FOLLOW) say(); else { hush(); caption(breaths(s.say)[0] || "", false); setPlay(); }
 }
 function say() {   // speak the step on screen; afterwards carry on, except at a question (it waits for an answer) and at the end
   const s = LES.steps[I], asked = s.kind === "check" && !MEM.ans[s.qid];
   const got = s.kind === "check" ? MEM.ans[s.qid] : null, walk = got && s.say_steps && s.say_steps.length > 1 ? s.say_steps : null;
   const text = !got ? s.say : !walk ? (got === s.answer ? s.say_right : s.say_wrong)   // a working of several steps is said one step at a time
-    : [{ say: (got === s.answer ? "Correct." : "Not quite. " + s.say_answer) + " Here is the working, one step at a time." }].concat(walk.map((t, k) => ({ say: `Step ${k + 1}. ${t}`, mark: k })));
+    : [{ say: (got === s.answer ? "Correct." : "Not quite. " + s.say_answer) + ` Here is the working, in ${["", "one", "two", "three", "four", "five", "six", "seven", "eight"][walk.length] || walk.length} steps.` }]
+      .concat(walk.map((t, k) => ({ say: `${leads(walk.length)[k]} ${t}`, mark: k })));
   speakAll(text, () => {
     if ($("#s-auto").checked && !asked && I < LES.steps.length - 1) setTimeout(() => { if (!speaking && !paused) show(I + 1, true); }, 650);
   });

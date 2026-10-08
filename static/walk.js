@@ -431,7 +431,6 @@
     if (!W || W.now === id) return;
     W.now = id;
     markNow(true);
-    paintCap();
   }
 
   // ------------------------------------------------------------------ what the page shows
@@ -466,7 +465,7 @@
   function unpaint(w) {
     const card = w.cfg.root && w.cfg.root(), vig = w.cfg.vig && w.cfg.vig();
     for (const x of [card, vig]) if (x) { x.classList.remove("wk-run"); x.querySelectorAll(".wk-on, .wk-now, .wk-veil").forEach((y) => y.classList.remove("wk-on", "wk-now", "wk-veil")); }
-    if (card) card.querySelectorAll("[data-wk-panel]").forEach((x) => x.remove());
+    if (card) card.querySelectorAll("[data-wk-panel], .wk-from").forEach((x) => x.remove());
     if (window.Ties) Ties.focus([card, vig], null);
     const bar = barOf(w.id);
     if (bar) { bar.classList.remove("on"); bar.innerHTML = inner(w.id); }
@@ -490,6 +489,7 @@
     });
     const ids = live && W.state !== "think" ? [...new Set(seg.marks.map((m) => m.id))] : [];
     if (window.Ties) Ties.focus([card, vig], ids.length ? ids : null);
+    origins();
     markNow(scroll);
     if (scroll && part) into(part, el("scroller"), true);
     if (scroll && ids.length && vig) {   // the first number the case gives for this part, in view in the vignette
@@ -503,11 +503,16 @@
     for (const x of [card, vig]) if (x) x.querySelectorAll(".wk-now").forEach((y) => y.classList.remove("wk-now"));
     if (!W || W.now === null || W.state === "done") return;
     for (const x of [card, vig]) if (x) x.querySelectorAll(".tie-" + W.now).forEach((y) => { y.classList.add("on", "wk-now"); });
+    if (card) card.querySelectorAll(".wk-from .wksrc").forEach((y) => y.classList.toggle("cur", +y.dataset.tie === W.now));
     if (scroll && vig) { const v = vig.querySelector(".tie-" + W.now); if (v) into(v, el("pane"), false); }
   }
   // where each number of a part comes from: a row of an exhibit, a sentence of the case, the question, an earlier step, or this one
   function sources(seg) {
     const card = el("root"), vig = el("vig"), out = [], seen = new Set(), here = W.segs.indexOf(seg);
+    // a figure the part works out itself (it only ever follows "equals") is its own, even when the case shows the same value
+    const after = (m) => /equals\s*$/.test(seg.text.slice(Math.max(0, m.s - 9), m.s));
+    const made = new Set(seg.marks.filter(after).map((m) => m.id));
+    seg.marks.filter((m) => !after(m)).forEach((m) => made.delete(m.id));
     for (const m of seg.marks) {
       if (seen.has(m.id)) continue;
       seen.add(m.id);
@@ -525,6 +530,7 @@
           o.cap = wrap && wrap.previousElementSibling && wrap.previousElementSibling.classList.contains("cap") ? wrap.previousElementSibling.textContent.trim() : "";
           o.label = [row, col].filter(Boolean).join(" · ");
           o.where = `in the case${o.cap ? ", " + o.cap : ""}: ${o.label || "a table"}`;
+          if (seg.kind === "step" && made.has(m.id)) { o.kind = "here"; o.where = `worked out here; the case shows it too${o.cap ? ", in " + o.cap.split(":")[0].trim() : ""}`; }
         } else {
           const blk = inVig.closest("li, p") || inVig.parentElement, txt = blk.textContent.replace(/\s+/g, " ").trim();
           const at = Math.max(0, txt.indexOf(inVig.textContent));
@@ -533,6 +539,7 @@
           if (b < txt.length) b = Math.max(at + inVig.textContent.length, txt.lastIndexOf(" ", b));
           o.quote = `“${a > 0 ? "…" : ""}${txt.slice(a, b)}${b < txt.length ? "…" : ""}”`;
           o.where = "in the case";
+          if (seg.kind === "step" && made.has(m.id)) { o.kind = "here"; o.where = "worked out here; the case shows it too"; o.quote = ""; }
         }
       } else {
         const k = W.segs.findIndex((x) => { const node = card && card.querySelector(x.sel); return node && node.querySelector(".tie-" + m.id); });
@@ -552,10 +559,7 @@
     const here = W.segs.indexOf(seg), earlier = W.segs.slice(0, here).filter((x) => x.kind === "step");
     const used = new Set(earlier.flatMap((x) => x.marks.map((m) => m.id)));
     const figure = (o) => /[.,%$€£¥]|\d{3,}/.test(o.raw);
-    // nor is a figure this step works out itself (it follows "equals"), even when the case happens to show the same value
-    const made = new Set(seg.marks.filter((m) => /equals\s*$/.test(seg.text.slice(Math.max(0, m.s - 9), m.s))).map((m) => m.id));
-    const taken = new Set(seg.marks.filter((m) => !/equals\s*$/.test(seg.text.slice(Math.max(0, m.s - 9), m.s))).map((m) => m.id));
-    const all = sources(seg).filter((o) => o.kind === "case" && !used.has(o.id) && figure(o) && !(made.has(o.id) && !taken.has(o.id))), fresh = all.slice(0, 4);
+    const all = sources(seg).filter((o) => o.kind === "case" && !used.has(o.id) && figure(o)), fresh = all.slice(0, 4);
     if (!fresh.length) return null;
     const plain = (x) => finish(speech(x, null)).text.replace(/[.\s]+$/, "");
     const place = (o) => (!o.label && !o.cap ? "" : o.cap && o.cap.split(":")[0].trim().length <= 40 ? plain(o.cap.split(":")[0]) : "the table");
@@ -582,17 +586,25 @@
     if (!p) return count ? { text: count.trim(), marks: [] } : null;
     return { text: count + p.text, marks: p.marks.map((m) => ({ id: m.id, s: m.s + count.length, e: m.e + count.length })) };
   }
-  // under the controls: the prompt while you think, or where the numbers of the part being read come from, the one being said picked out
+  // under the controls: the prompt while you think
   function caption() {
-    if (!W || W.state === "done") return "";
-    if (W.state === "think") {
-      const first = !W.segs.slice(0, W.i).some((x) => x.kind === "step");
-      return `<span class="wkthink">${first ? "Before the first step: how would you start?" : "What comes next?"}</span> <span class="src">Think it through, then press Show (or W). Clicking the step shows it too.</span>`;
-    }
-    const list = sources(W.segs[W.i]);
-    if (!list.length) return "";
-    return `<span class="wkfrom">Where the numbers come from</span>` + list.slice(0, 10).map((o) =>
-      `<span class="wksrc${o.id === W.now ? " cur" : ""}"><mark class="${esc(o.cls)}">${esc(o.raw)}</mark> <span class="src">${esc(o.where)}${o.quote && o.id === W.now ? ": " + esc(o.quote) : ""}</span></span>`).join("");
+    if (!W || W.state !== "think") return "";
+    const first = !W.segs.slice(0, W.i).some((x) => x.kind === "step");
+    return `<span class="wkthink">${first ? "Before the first step: how would you start?" : "What comes next?"}</span> <span class="src">Think it through, then press Show (or W). Clicking the step shows it too.</span>`;
+  }
+  // right under the part being read: where each of its numbers comes from (a row of an exhibit, a sentence of the case, the question,
+  // an earlier step, or this one), so the "where" is on the page next to the "how". The number being said is picked out.
+  function origins() {
+    const card = el("root");
+    if (card) card.querySelectorAll(".wk-from").forEach((x) => x.remove());
+    if (!W || !card || W.state === "done" || W.state === "think") return;
+    const seg = W.segs[W.i], part = card.querySelector(seg.sel), list = part ? sources(seg) : [];
+    if (!list.length) return;
+    const box = document.createElement("div");
+    box.className = "wk-from";
+    box.innerHTML = `<span class="wkfrom">Where the numbers come from</span>` + list.slice(0, 10).map((o) =>
+      `<span class="wksrc${o.id === W.now ? " cur" : ""}" data-tie="${o.id}"><mark class="${esc(o.cls.replace(/\btie-\d+\b/g, "").trim())}">${esc(o.raw)}</mark> <span class="src">${esc(o.where)}${o.quote ? ": " + esc(o.quote) : ""}</span></span>`).join("");
+    if (part.tagName === "LI") part.appendChild(box); else part.insertAdjacentElement("afterend", box);
   }
   const ICON = {
     play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.5v11l9-5.5z"/></svg>',
@@ -612,7 +624,7 @@
     const gear = `<button type="button" class="wkb" data-wk="menu" aria-expanded="${open}" title="Voice, speed and options" aria-label="Walkthrough settings">${ICON.gear}</button>`;
     const menuBox = `<div class="wkmenu" ${open ? "" : "hidden"}>${open ? menuHTML() : ""}</div>`;
     if (!W || W.id !== id) {
-      const what = P.mode === "learn" ? "From the first step: where each number comes from and how it is used, then the answer, the other choices and the trap." : "The question, the answer and each step, quickly.";
+      const what = P.mode === "learn" ? "Step by step: where each number comes from, how it is used, the answer and the trap." : "The question, the answer and each step, quickly.";
       return `<div class="wkrow"><button type="button" class="btn primary sm wkgo" data-wk="start">${ICON.play}<span>Walk me through it</span></button>${modeSwitch()}
         <span class="wkhint">${esc(what)} ${(canSpeak || natural()) && P.talk ? "Read aloud. " : ""}Key: W</span>${gear}</div>${menuBox}`;
     }
@@ -625,18 +637,18 @@
     return `<div class="wkrow" role="group" aria-label="Walkthrough controls">
         <button type="button" class="wkb" data-wk="prev" ${W.i && st !== "done" ? "" : "disabled"} aria-label="Previous part">${ICON.prev}</button>${main}
         <button type="button" class="wkb" data-wk="next" ${W.i < W.segs.length - 1 && st !== "done" ? "" : "disabled"} aria-label="Next part">${ICON.next}</button>
-        ${modeSwitch()}<span class="grow"></span>
+        <span class="wklab" aria-live="polite"><b>${st === "done" ? "Finished" : esc(seg.label)}</b>${st === "pause" ? ' <span class="muted">paused</span>' : ""}${W.silent && P.talk && st !== "done" ? ' <span class="muted">· silent</span>' : ""}</span>
+        <span class="grow"></span>
         <button type="button" class="wkb txt" data-wk="rate" title="Speed: click to change">${P.rate}×</button>
-        ${canSpeak || natural() ? `<button type="button" class="wkb" data-wk="talk" aria-pressed="${P.talk}" title="${P.talk ? "Turn the voice off (it keeps going silently)" : "Read it aloud"}" aria-label="Voice">${P.talk ? ICON.voice : ICON.mute}</button>` : ""}
         ${gear}<button type="button" class="wkb" data-wk="stop" aria-label="Close the walkthrough" title="Close (Esc)">✕</button></div>
-      <div class="wkrow2"><span class="wklab" aria-live="polite"><b>${st === "done" ? "Finished" : esc(seg.label)}</b>${st === "pause" ? ' <span class="muted">paused</span>' : ""}${W.silent && P.talk && st !== "done" ? ' <span class="muted">· silent: no voice here</span>' : ""}</span>
-        <span class="wkdots" aria-label="Part ${W.i + 1} of ${W.segs.length}">${dots}</span></div>
+      <div class="wkrow2"><span class="wkdots" aria-label="Part ${W.i + 1} of ${W.segs.length}">${dots}</span></div>
       <div class="wkcap" ${c ? "" : "hidden"}>${c}</div>${menuBox}`;
   }
   function menuHTML() {
     const opts = `<label><input type="checkbox" data-wk-set="think" ${P.think ? "checked" : ""}> Guide: stop before each step so I can think first</label>
       <label><input type="checkbox" data-wk-set="auto" ${P.auto ? "checked" : ""}> Start the walkthrough as soon as I answer</label>`;
-    const nat = NAT.on ? `<label><input type="checkbox" data-wk-set="natural" ${P.natural !== false ? "checked" : ""}> Natural voice, made by the study server (off: the browser's own voice)</label>` : "";
+    const mode = W ? `<div class="wkset"><span>Mode</span>${modeSwitch()}</div>` : "";
+    const nat = mode + (NAT.on ? `<label><input type="checkbox" data-wk-set="natural" ${P.natural !== false ? "checked" : ""}> Natural voice, made by the study server (off: the browser's own voice)</label>` : "");
     if (!canSpeak) return natural() ? `${nat}<label><input type="checkbox" data-wk-set="talk" ${P.talk ? "checked" : ""}> Read it aloud</label>${opts}` : `<p class="wkhint">This browser has no voice to read with, so the walkthrough runs silently at reading pace.</p>${opts}`;
     if (!voices.length) loadVoices();
     const v = voice();
@@ -657,8 +669,6 @@
     if (!box) return paintBar();
     const c = caption();
     box.innerHTML = c; box.hidden = !c;
-    const cur = box.querySelector(".wksrc.cur");
-    if (cur) box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - 24);
   }
   function paintMenu() {
     document.querySelectorAll(".wkbar").forEach((bar) => {
@@ -774,26 +784,30 @@
   .wkdot.cur { background: var(--accent); border-color: var(--accent); transform: scale(1.3); }
   .wkhint { font-size: 13.5px; color: var(--muted); margin: 0; flex: 1 1 220px; }
   .wkcap { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.5; }
-  .wkcap { max-height: 8.4em; overflow-y: auto; }
   .wkcap .src { color: var(--muted); }
-  .wkfrom { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
-  .wksrc { display: block; padding: 1px 6px; margin: 0 -6px; border-radius: 6px; }
+  .wkset { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+  .wk-from { min-width: 0; overflow-wrap: anywhere; margin: 8px 0 4px; padding: 6px 10px; border-left: 3px solid var(--accent); background: var(--card); border-radius: 0 8px 8px 0; font-size: 13.5px; line-height: 1.5; opacity: 1 !important; }
+  .wkfrom { display: block; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .wksrc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; padding: 1px 6px; margin: 0 -6px; border-radius: 6px; }
+  .wksrc .src { color: var(--muted); }
+  .wksrc mark { cursor: default; opacity: 1 !important; }
   .wksrc.cur { background: var(--accent-soft); }
   .wksrc.cur .src { color: var(--ink); }
-  @media (max-width: 640px) { .wkcap { max-height: 5.6em; } }
   .wkcap .tie { cursor: default; opacity: 1 !important; }
   .wkthink { font-weight: 700; }
   .wkmenu { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: 14px; }
   .wkmenu label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .wkmenu select { font: inherit; font-size: 14px; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); max-width: 100%; }
-  .wk-learn { display: grid; gap: 10px; margin: 14px 0; }
-  .wk-l { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 10px 14px; background: var(--card); font-size: 15px; line-height: 1.55; }
+  .wk-learn { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 14px 0; }   /* a wide formula scrolls in its own box; it never widens the page */
+  .wk-l { min-width: 0; overflow-wrap: anywhere; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 10px 14px; background: var(--card); font-size: 15px; line-height: 1.55; }
+  .wk-l .katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+  .wk-l table { display: block; max-width: 100%; overflow-x: auto; }
   .wk-l .eyebrow { display: block; margin-bottom: 4px; }
   .wk-l p { margin: 0 0 .5em; } .wk-l p:last-child { margin-bottom: 0; }
   .wk-l ul { margin: 0; padding-left: 1.2em; } .wk-l li { margin: 0 0 4px; }
   .wk-l dl { margin: 0; } .wk-l dt { font-weight: 700; } .wk-l dd { margin: 0 0 6px; }
   .wk-los { font-size: 13.5px; color: var(--muted); }
-  .wk-f { margin-top: 6px; }
+  .wk-f { margin-top: 6px; max-width: 100%; overflow-x: auto; }
   .wk-more { display: inline-block; margin-top: 6px; font-size: 13.5px; font-weight: 600; }
   .wk-veil { filter: blur(6px); user-select: none; }
   .wk-run [data-seg], .wk-run .opt, .wk-run .p-opt { transition: opacity .25s, background-color .25s, box-shadow .25s, filter .3s; }
@@ -806,7 +820,7 @@
   @keyframes wkpulse { from { transform: scale(1.18); } to { transform: scale(1); } }
   .katex .tie.wk-now { display: inline-block; }
   @media (prefers-reduced-motion: reduce) { .tie.wk-now { animation: none; } .wk-run [data-seg], .wk-run .opt, .wk-run .p-opt { transition: none; } }
-  @media (max-width: 520px) { .wkhint { display: none; } .wkrow .wkgo { flex: 1 1 auto; } }
+  @media (max-width: 520px) { .wkhint { display: none; } .wkrow .wkgo { flex: 1 1 auto; } .wkbar.on [data-wk="rate"] { display: none; } .wkrow { gap: 4px; } .wkbar.on { padding: 6px 8px; } .wkbar.on .wkb { min-width: 32px; padding: 0 6px; } .wkbar.on .wkb.main { min-width: 42px; } }   /* on a phone the controls stay on one line; the speed is in the settings */
   @media print { .wkbar, .wk-learn { display: none; } }`;
     document.head.appendChild(css);
   }

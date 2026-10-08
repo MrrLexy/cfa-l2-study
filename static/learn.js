@@ -27,7 +27,15 @@
       term: t.term, def: t.def,
       re: new RegExp("(?:^|[^A-Za-z])" + String(t.term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+") + "(?:s|es)?(?![A-Za-z])", "i"),
     }));
-    D = { path: path || {}, los: (los && los.modules) || {}, guide: (guide && guide.modules) || {}, terms };
+    // how rare each word is among a module's own paragraphs: a paragraph is about a question when it carries the question's rare words
+    const rare = {};
+    for (const [key, m] of Object.entries((los && los.modules) || {})) {
+      const df = new Map();
+      let n = 0;
+      for (const l of m.los || []) for (const a of l.answer || []) { n++; for (const w of bag(a.p)) df.set(w, (df.get(w) || 0) + 1); }
+      rare[key] = { n, df };
+    }
+    D = { path: path || {}, los: (los && los.modules) || {}, guide: (guide && guide.modules) || {}, terms, rare };
     return D;
   }
 
@@ -65,16 +73,19 @@
       if (!cands.length && topic) cands = (topic.los || []).map((i) => m.los.find((l) => l.i === i)).filter(Boolean);
       if (!cands.length) cands = m.los;
     }
-    const lo = (ranked(qb, cands, (l) => l.text + " " + (l.answer || []).map((a) => a.p).join(" "))[0] || [])[1] || null;
-    // the idea underneath: a paragraph of that outcome's answer
+    let lo = (ranked(qb, cands, (l) => l.text + " " + (l.answer || []).map((a) => a.p).join(" "))[0] || [])[1] || null;
+    // The idea underneath: the paragraph, among those outcomes' answers, that is about the question. "About" is judged by the question's
+    // key words: the rarest words of its stem and right answer among the module's own paragraphs ("preferred" in a module mostly about
+    // debt and equity). A paragraph that shares common words only ("cost", "rate") is not shown: better none than one beside the point.
     let idea = "";
-    if (lo && (lo.answer || []).length) {
-      const ps = lo.answer.map((a) => a.p).filter(Boolean), r = ranked(qb, ps);
-      const first = score(qb, ps[0]);
-      const best = first >= 0.9 * r[0][0] ? ps[0] : r[0][1];   // the paragraph closest to the question (an outcome's card often covers several things), the first when they tie
-      // shown only when it shares four words or more with the question: with three or fewer it was off the subject about half the time
-      if (shared(qb, best) >= 4) idea = trim(best, 720);
-    }
+    const R = D.rare[module] || { n: 0, df: new Map() };
+    const weight = (w) => (R.df.has(w) ? Math.log(1 + R.n / R.df.get(w)) : 0);
+    const sb = bag((q.stem || "") + " " + ((q.options || {})[q.answer] || ""));
+    const keys = [...sb].filter((w) => R.df.has(w)).sort((x, y) => weight(y) - weight(x)).slice(0, 3);
+    const about = (p) => { const b = bag(p); let sc = 0, n = 0, k = 0; for (const w of b) if (qb.has(w)) { sc += weight(w) * (sb.has(w) ? 2 : 1); n++; } for (const w of keys) if (b.has(w)) k++; return { sc, n, k, top: keys.length > 0 && b.has(keys[0]) }; };
+    const best = cands.flatMap((l) => (l.answer || []).filter((a) => a.p).map((a) => ({ l, p: a.p, ...about(a.p) }))).sort((x, y) => y.sc - x.sc)[0];
+    // (or it shares enough rare words to be about it anyway: a weighted score of 13, read against a spread of questions)
+    if (best && best.n >= 4 && (best.top || best.k >= 2 || best.sc >= 13)) { lo = best.l; idea = trim(best.p, 720); }
     const f = lo && (lo.formulas || []).length ? ranked(qb, lo.formulas, (x) => x.name + " " + x.latex)[0] : null;
     const formula = f && f[0] >= 1.2 ? { name: f[1].name, latex: f[1].latex } : null;
     // glossary terms: longest first, none that sits inside one already chosen
