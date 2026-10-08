@@ -30,7 +30,9 @@
   const PREF = "site-walk";
   const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const P = { rate: 1, voice: "", talk: true, auto: false, mode: "learn", predict: true };
+  const P = { rate: 1, voice: "", talk: true, auto: false, mode: "learn", think: false };
+  const BREATH = 180;   // characters said in one go: about twelve seconds at normal speed
+  const GAP = 280;      // the pause between two parts, in milliseconds
   try { Object.assign(P, JSON.parse(localStorage.getItem(PREF)) || {}); } catch { /* the defaults */ }
   if (!RATES.includes(+P.rate)) P.rate = 1;
   if (P.mode !== "exam") P.mode = "learn";
@@ -111,6 +113,7 @@
       .replace(/\\(bar|hat)\s*\{?([A-Za-z])\}?/g, "$2 $1").replace(/\\([A-Za-z]{2,})/g, " $1 ")      // TeX written into plain text: \bar x, \sigma
       .replace(/±/g, " plus or minus ").replace(/√/g, " the square root of ").replace(/·/g, " times ")
       .replace(/×/g, " times ").replace(/÷/g, " divided by ").replace(/≈/g, " about ").replace(/[→⇒]/g, ", which gives ")
+      .replace(/[⁰¹²³⁴-⁹]{2,}|[⁰¹⁴-⁹]/g, (m) => " to the power " + [...m].map((c) => "⁰¹²³⁴⁵⁶⁷⁸⁹".indexOf(c)).join(""))
       .replace(/²/g, " squared").replace(/³/g, " cubed").replace(/Δ\s?/g, "change in ")
       .replace(/≥/g, " at least ").replace(/≤/g, " at most ").replace(/≠/g, " not equal to ")
       .replace(/\\([%$&#])/g, "$1").replace(/\|([^|\n]{1,24})\|/g, " the absolute value of $1 ")           // "10.0\%" in plain text; |b1|
@@ -153,62 +156,99 @@
       marks.push({ id, s: text.length, e: text.length + raw.length, raw });
       text += raw; i = z;
     }
+    // Said a few sentences to a breath, not one sentence at a time: a voice that stops and starts at every full stop sounds like a
+    // machine reading a list. Only a sentence longer than a breath is cut, at a comma (some voices stop after fifteen seconds or so).
     const chunks = [];
-    let from = 0;
-    const cut = (to) => {
-      while (to - from > 230) {   // long sentences go in pieces: some voices stop after fifteen seconds or so
-        const at = text.lastIndexOf(", ", from + 220);
-        if (at <= from + 60) break;
-        chunks.push({ s: from, e: at + 1 }); from = at + 2;
+    let from = 0, last = 0;
+    const close = (to) => { if (text.slice(from, to).trim()) chunks.push({ s: from, e: to }); from = to; };
+    const fit = (to) => {
+      if (to - from > BREATH && last > from) close(last);
+      while (to - from > BREATH + 50) {
+        let at = -1;
+        for (const sep of ["; ", ": ", ", ", " and ", " or ", " "]) {   // after a punctuation mark, or before "and" / "or", or failing those at a space
+          at = text.lastIndexOf(sep, from + BREATH);
+          if (at > from + 60) { if (/^[;:,]/.test(sep)) at++; break; }
+          at = -1;
+        }
+        if (at < 0) break;
+        chunks.push({ s: from, e: at }); from = at + 1;
       }
-      if (text.slice(from, to).trim()) chunks.push({ s: from, e: to });
-      from = to;
+      last = to;
     };
-    const re = /[.!?;](?=\s)/g;
+    const re = /[.!?](?=\s)/g;
     let m;
-    while ((m = re.exec(text))) if (m.index + 1 - from >= 24) cut(m.index + 2);
-    cut(text.length);
+    while ((m = re.exec(text))) fit(m.index + 2);
+    fit(text.length); close(text.length);
     return { text, marks, chunks };
   }
   const REF = /\s*\((?:[^()]*\bLM\s*\d[^()]*)\)\s*$/;
-  // the parts read out, in order. Exam: the question, the answer, the steps, why, the trap. Learn: the question, the idea behind it,
-  // its key terms and how to think about it, then the steps (each one a moment to think first), the answer they lead to, why and
-  // why the other answers tempt, the trap, the idea to keep and how it connects.
+  // What is read out, in order.
+  //   Guide (the default): the question; the way in; then the working from its first step, each step led into ("First,", "Then,",
+  //   "Finally,") so it is told as one line of thought, and each step that takes numbers from the case first saying where they are
+  //   while the page shows them there (pointer(), below); the answer the steps lead to; the other choices; the trap; and only then
+  //   the idea underneath, the thing to keep and how it connects.
+  //   Exam: the question, the answer, the steps, why, the trap.
+  const OPTS = ".opt.right, .p-opt.right";
+  const NUMS = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+  const leads = (n) => (n === 1 ? ["Here is the working."] : n === 2 ? ["First,", "Then,"]
+    : ["First,", ...Array.from({ length: n - 2 }, (_, i) => ["Next,", "Then,", "After that,"][i % 3]), "Finally,"]);
+  // an explanation is its reasoning, then a line on each of the other choices
+  function reasons(x) {
+    const s = String(x || "").replace(REF, ""), at = s.search(/(?:^|\n)[ \t]*[-*][ \t]+\S/);
+    return at < 0 ? { why: s.trim(), others: "" } : { why: s.slice(0, at).trim(), others: s.slice(at).trim() };
+  }
+  // the opening sentences of a paragraph, up to about `max` characters
+  function opening(s, max) {
+    s = String(s || "").trim();
+    if (s.length <= max) return s;
+    const flat = s.replace(MATH, (x) => "x".repeat(x.length));   // a formula is never cut through, nor the text after the number of a list item ("4.")
+    const re = /[.!?](?=\s)/g;
+    let end = 0, m;
+    while ((m = re.exec(flat)) && m.index + 1 <= max) if (!/(?:^|\s)\d+$/.test(flat.slice(0, m.index))) end = m.index + 1;
+    return end ? s.slice(0, end) : s;
+  }
   function build(cfg, mode) {
-    const { q, t, n, got } = cfg, L = cfg.learn || null, learn = mode === "learn", segs = [];
+    const { q, t, n, got } = cfg, L = cfg.learn || null, guide = mode === "learn", segs = [];
     const add = (kind, label, sel, prefix, src, tt) => { const f = finish(prefix + " " + speech(src, tt === undefined ? t : tt)); if (f.text) segs.push({ kind, label, sel, ...f }); };
     const at = (k) => `[data-seg="${k}"]`;
-    const ans = () => add("ans", "The answer", ".opt.right, .p-opt.right",
-      (got && got !== "-" && got !== q.answer ? `You chose option ${got}. ` : "") + `${learn ? "So the answer is" : "The answer is"} option ${q.answer}:`, (q.options || {})[q.answer] || "");
-    add("ask", "The question", at("ask"), n ? `Question ${n}.` : "The question.", q.stem);
-    if (!learn) ans();
-    if (learn && L) {
-      if (L.idea) add("idea", "The idea", at("l-idea"), "The idea behind it.", L.idea + (L.formula ? `\n\nThe formula, ${L.formula.name}: \\[ ${L.formula.latex} \\]` : ""), null);
-      if (L.terms.length) add("terms", "Key terms", at("l-terms"), "Key terms.", L.terms.map((x) => `${x.term}: ${x.def}`).join("\n"), null);
-      if (L.think.length) add("think", "How to think", at("l-think"), "How to think about it.", L.think.join("\n"), null);
+    const steps = q.steps || [], lead = leads(steps.length), right = (q.options || {})[q.answer] || "";
+    const chose = got && got !== "-" && got !== q.answer ? `You chose option ${got}. ` : "";
+    if (!guide) {
+      add("ask", "The question", at("ask"), n ? `Question ${n}.` : "The question.", q.stem);
+      add("ans", "The answer", OPTS, chose + `The answer is option ${q.answer}:`, right);
+      steps.forEach((x, i) => add("step", `Step ${i + 1}`, at("s" + i), lead[i], x));
+      if (q.explanation) add("expl", "Why", at("expl"), "Why.", String(q.explanation).replace(REF, ""));
+      if (q.trap) add("trap", "The trap", at("trap"), "The trap.", q.trap + (q.avoid ? "\n\nHow to avoid it: " + q.avoid : ""));
+      return segs;
     }
-    (q.steps || []).forEach((x, i) => add("step", `Step ${i + 1}`, at("s" + i), `Step ${i + 1}.`, x));
-    if (learn) ans();
-    if (q.explanation) add("expl", learn ? "Why, and the traps" : "Why", at("expl"), learn ? "Why it works, and why the other answers are tempting." : "Why.", String(q.explanation).replace(REF, ""));
-    if (q.trap) add("trap", "The trap", at("trap"), "The trap.", q.trap + (q.avoid ? "\n\nHow to avoid it: " + q.avoid : ""));
-    if (learn && L && L.pitfall) add("keep", "The idea to keep", at("l-keep"), "The idea to keep.", L.pitfall, null);
-    if (learn && L && L.connect) add("connect", "How it connects", at("l-connect"), "How it connects.", L.connect, null);
+    add("ask", "The question", at("ask"), "Let's work through this one. It asks:", q.stem);
+    if (L && L.think.length && steps.length) add("think", "The way in", at("l-think"), "The way in.", L.think[0], null);   // a way in is for a working; without steps it is skipped
+    steps.forEach((x, i) => add("step", `Step ${i + 1}`, at("s" + i), lead[i], x));
+    add("ans", "The answer", OPTS, chose + (steps.length ? "That makes the answer" : "The answer is") + ` option ${q.answer}:`, right);
+    const e = reasons(q.explanation);
+    // the line about the choice that was made says so
+    if (chose) e.others = e.others.replace(new RegExp("^([ \\t]*[-*][ \\t]+)(?:\\*\\*)?(?:Option[ \\t]+)?" + got + "(?:\\*\\*)?(?=[ \\t]+(?:is|was)\\b|[ \\t]*:)", "m"), `$1Option ${got}, your choice,`);
+    if (steps.length && e.others) add("expl", "The other choices", at("expl"), "Now the other choices.", e.others);
+    else if (steps.length && e.why) add("expl", "Why", at("expl"), "Why that works.", e.why);
+    else if (e.why || e.others) add("expl", "Why", at("expl"), "Here is why.", [e.why, e.others].filter(Boolean).join("\n\n"));
+    if (q.trap) add("trap", "The trap", at("trap"), "Watch for the trap here.", q.trap + (q.avoid ? "\n\nThe way round it: " + q.avoid : ""));
+    if (L && L.idea) add("idea", "The idea underneath", at("l-idea"), "The idea underneath.", opening(L.idea, 320), null);
+    if (L && L.pitfall) add("keep", "To keep", at("l-keep"), "One thing to keep.", L.pitfall, null);
+    if (L && L.connect) add("connect", "How it connects", at("l-connect"), "And how it connects.", L.connect, null);
     return segs;
   }
-  // Learn mode's own material, shown in the card while the walkthrough runs: above the steps, and after the solution
+  // The guide's own material, shown in the card while the walkthrough runs: the way in above the steps, the rest after the solution
   const cap1 = (s) => String(s).charAt(0).toUpperCase() + String(s).slice(1);
   function guideHref(g) { return ((window.Site && Site.links && Site.links.map) || "app.html") + "#" + new URLSearchParams({ g: g.module, ...(g.at !== null && g.at !== undefined ? { at: "gw" + g.at } : {}) }).toString(); }
   function panels(cfg, L) {
     const r = (s) => (cfg.render ? cfg.render(s) : `<p>${esc(s)}</p>`);
-    const top = [
-      L.idea ? `<div class="wk-l" data-seg="l-idea"><span class="eyebrow">The idea</span>${L.los ? `<p class="wk-los">Learning outcome: ${esc(cap1(L.los))}</p>` : ""}${r(L.idea)}
+    const top = L.think.length && (cfg.q.steps || []).length ? `<div class="wk-l" data-seg="l-think"><span class="eyebrow">The way in</span><ul>${L.think.map((x) => `<li>${r(x)}</li>`).join("")}</ul></div>` : "";
+    const bottom = [
+      L.idea ? `<div class="wk-l" data-seg="l-idea"><span class="eyebrow">The idea underneath</span>${L.los ? `<p class="wk-los">Learning outcome: ${esc(cap1(L.los))}</p>` : ""}${r(L.idea)}
         ${L.formula ? `<div class="wk-f"><b>${esc(L.formula.name)}</b>${r("\\[ " + L.formula.latex + " \\]")}</div>` : ""}
         ${L.guide ? `<a class="wk-more" href="${esc(guideHref(L.guide))}">The full explanation, in the Guide ›</a>` : ""}</div>` : "",
       L.terms.length ? `<div class="wk-l" data-seg="l-terms"><span class="eyebrow">Key terms</span><dl>${L.terms.map((x) => `<dt>${esc(x.term)}</dt><dd>${r(x.def)}</dd>`).join("")}</dl></div>` : "",
-      L.think.length ? `<div class="wk-l" data-seg="l-think"><span class="eyebrow">How to think about it</span><ul>${L.think.map((x) => `<li>${r(x)}</li>`).join("")}</ul></div>` : "",
-    ].join("");
-    const bottom = [
-      L.pitfall ? `<div class="wk-l" data-seg="l-keep"><span class="eyebrow">The idea to keep</span>${r(L.pitfall)}</div>` : "",
+      L.pitfall ? `<div class="wk-l" data-seg="l-keep"><span class="eyebrow">To keep</span>${r(L.pitfall)}</div>` : "",
       L.connect ? `<div class="wk-l" data-seg="l-connect"><span class="eyebrow">How it connects</span>${r(L.connect)}</div>` : "",
     ].join("");
     return { top, bottom };
@@ -227,7 +267,22 @@
   }
   if (canSpeak) { loadVoices(); try { S.addEventListener("voiceschanged", () => { loadVoices(); if (menuId) paintMenu(); }); } catch { /* old browsers: the list is read when needed */ } }
 
-  const talking = () => P.talk && canSpeak && !(W && W.silent);
+  
+  // each stretch is fetched and played instead of being given to the browser's voice. Anything going wrong (no answer, sound the
+  // browser will not play) goes back to the browser's own voice, and after two failures in a row it stays there.
+  const NAT = { on: !isNode && !!(window.Site && Site.voice), fail: 0, clips: new Map(), el: null };
+  const SILENCE = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+  const natural = () => NAT.on && P.natural !== false;
+  function clip(text) {   // the sound for a stretch of speech; kept, so the next stretch can be fetched while this one plays
+    if (!NAT.clips.has(text)) {
+      NAT.clips.set(text, fetch("speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })
+        .then((r) => (r.ok && /audio/.test(r.headers.get("Content-Type") || "") ? r.blob() : null))
+        .then((b) => (b && b.size > 200 ? URL.createObjectURL(b) : null)).catch(() => null));
+      if (NAT.clips.size > 40) { const k = NAT.clips.keys().next().value; NAT.clips.get(k).then((u) => u && URL.revokeObjectURL(u)); NAT.clips.delete(k); }
+    }
+    return NAT.clips.get(text);
+  }
+  const talking = () => P.talk && (canSpeak || natural()) && !(W && W.silent);
   const el = (k) => (W && W.cfg[k] ? W.cfg[k]() : null);
   const cssId = (s) => (window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/["\\]/g, "\\$&"));
   const barOf = (id) => (id ? document.querySelector(`.wkbar[data-wk-id="${cssId(id)}"]`) : null);
@@ -236,8 +291,13 @@
     W.tok++;
     W.timers.forEach(clearTimeout); W.timers = [];
     if (canSpeak && (S.speaking || S.pending)) S.cancel();
+    if (NAT.el) { try { NAT.el.pause(); } catch { /* nothing playing */ } }
   }
-  function unlock() { if (talking()) { try { S.cancel(); const u = new SpeechSynthesisUtterance(" "); u.volume = 0; S.speak(u); } catch { /* lets iOS speak later */ } } }
+  function unlock() {   // while the click is still being handled: lets phones and tablets speak, or play, later on
+    if (!talking()) return;
+    if (canSpeak) { try { S.cancel(); const u = new SpeechSynthesisUtterance(" "); u.volume = 0; S.speak(u); } catch { /* lets iOS speak later */ } }
+    if (natural()) { try { const a = NAT.el || (NAT.el = new Audio()); a.src = SILENCE; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch { /* the browser's voice is used instead */ } }
+  }
   function start(id) {
     unlock();   // while the click that asked for it is still being handled
     if (P.mode === "learn" && window.Learn && !Learn.ready()) {
@@ -265,7 +325,7 @@
     unpaint(was);
     if (!quiet && was.cfg.redraw) was.cfg.redraw();
   }
-  const thinking = (k) => W.mode === "learn" && P.predict && W.segs[k].kind === "step" && !W.shown.has(k);
+  const thinking = (k) => W.mode === "learn" && P.think && W.segs[k].kind === "step" && !W.shown.has(k);
   function run(i, c, show) {
     clear();
     W.i = Math.max(0, Math.min(i, W.segs.length - 1)); W.c = c || 0; W.now = null;
@@ -273,59 +333,86 @@
       W.state = "think";
       paint(true);
       if (talking()) {
-        const first = !W.segs.slice(0, W.i).some((s) => s.kind === "step");
-        const u = new SpeechSynthesisUtterance(first ? "Before the first step: how would you start? Think it through, then show it." : "What comes next? Think it through, then show it.");
-        u.rate = P.rate; const v = voice(); if (v) { u.voice = v; u.lang = v.lang; }
-        const tok = W.tok;
-        W.timers.push(setTimeout(() => { if (W && tok === W.tok) { W.u = u; S.speak(u); } }, 80));
+        const first = !W.segs.slice(0, W.i).some((x) => x.kind === "step"), tok = W.tok;
+        W.timers.push(setTimeout(() => { if (W && tok === W.tok) utter(first ? "Before the first step: how would you start? Think it through, then show it." : "What comes next? Think it through, then show it.", [], () => {}); }, 80));
       }
       return;
     }
     W.shown.add(W.i);
     W.state = "play";
     paint(true);
-    const tok = W.tok;
-    W.timers.push(setTimeout(() => { if (W && tok === W.tok) chunk(); }, 80));
+    const tok = W.tok, seg = W.segs[W.i];
+    // a step that takes numbers from the case first says where they are, while the page shows them there
+    const pre = W.mode === "learn" && seg.kind === "step" && !W.c ? preface(seg) : null;
+    W.timers.push(setTimeout(() => { if (!W || tok !== W.tok) return; if (pre) utter(pre.text, pre.marks, chunk); else chunk(); }, 80));
+  }
+  // one stretch of speech; `marks` are the numbers in it ({ id, s, e } within the text), lit as the voice reaches each
+  function utter(text, marks, after) {
+    const tok = W.tok, cps = 14.5 * P.rate;
+    let real = false, done = false;
+    const guess = [];
+    marks.forEach((m) => guess.push(setTimeout(() => { if (W && tok === W.tok && !real) now(m.id); }, (m.s / cps) * 1000 + (talking() ? 250 : 0))));
+    W.timers.push(...guess);
+    const next = () => { if (done || !W || tok !== W.tok) return; done = true; after(); };
+    const quietly = () => W.timers.push(setTimeout(next, (text.length / cps) * 1000 + 300));
+    if (!talking()) return quietly();
+    const byBrowser = () => {
+      if (!canSpeak) return quietly();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = P.rate;
+      const v = voice();
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-US";
+      let began = false;
+      u.onstart = () => { began = true; };
+      u.onboundary = (e) => {
+        if (!W || tok !== W.tok || e.name === "sentence") return;
+        if (!real) { real = true; guess.forEach(clearTimeout); }
+        const m = marks.find((x) => e.charIndex >= x.s - 1 && e.charIndex < x.e);
+        if (m) now(m.id);
+      };
+      u.onend = next;
+      u.onerror = (e) => { if (W && tok === W.tok && e.error !== "interrupted" && e.error !== "canceled") { W.silent = true; paintBar(); quietly(); } };
+      W.u = u;   // held, or some browsers drop its events
+      if (S.paused) S.resume();
+      S.speak(u);
+      // no voice at all (some Linux browsers): carry on silently; and a voice that never says it finished does not stall the walk
+      W.timers.push(setTimeout(() => { if (W && tok === W.tok && !began && !done) { S.cancel(); W.silent = true; paintBar(); quietly(); } }, 3000));
+      W.timers.push(setTimeout(() => { if (W && tok === W.tok && !done) next(); }, (text.length / (cps * 0.4)) * 1000 + 6000));
+    };
+    if (!natural()) return byBrowser();
+    guess.forEach(clearTimeout); real = true;   // the numbers are timed against the clip's own length, once it is known
+    clip(text).then((url) => {
+      if (!W || tok !== W.tok || done) return;
+      if (!url) { NAT.clips.delete(text); if (++NAT.fail >= 2) NAT.on = false; real = false; return byBrowser(); }
+      NAT.fail = 0;
+      const a = NAT.el || (NAT.el = new Audio());
+      const light = () => {   // each number is lit when the voice should reach it: its place in the text, over the length of the clip
+        const secs = (a.duration && isFinite(a.duration) ? a.duration : text.length / 14.5) / P.rate;
+        marks.forEach((m) => W.timers.push(setTimeout(() => { if (W && tok === W.tok) now(m.id); }, (m.s / Math.max(1, text.length)) * secs * 1000)));
+        W.timers.push(setTimeout(() => { if (W && tok === W.tok && !done) next(); }, secs * 1000 + 4000));   // a clip that never says it ended
+      };
+      a.onloadedmetadata = light;
+      a.onended = next;
+      a.onerror = () => { if (W && tok === W.tok && !done) byBrowser(); };
+      a.src = url; a.playbackRate = P.rate;
+      const p = a.play();
+      // refused outright (no sound allowed here): the browser's voice from now on; anything else: the browser's voice for this stretch
+      if (p && p.catch) p.catch((err) => { if (!W || tok !== W.tok || done) return; if (err && err.name === "NotAllowedError") NAT.on = false; byBrowser(); });
+    });
   }
   function chunk() {
     if (!el("root")) return stop(true);   // the question is no longer on the page
     const tok = W.tok, seg = W.segs[W.i], ch = seg.chunks[W.c];
     if (!ch) return onward();
-    const cps = 14.5 * P.rate;
-    const marks = seg.marks.filter((m) => m.s >= ch.s && m.s < ch.e);
-    let real = false, done = false;
-    const guess = [];
-    marks.forEach((m) => guess.push(setTimeout(() => { if (W && tok === W.tok && !real) now(m.id); }, ((m.s - ch.s) / cps) * 1000 + (talking() ? 250 : 0))));
-    W.timers.push(...guess);
-    const next = () => {
-      if (done || !W || tok !== W.tok) return;
-      done = true;
+    if (natural() && talking()) {   // the stretch after this one is fetched while this one plays, so the voice does not wait
+      const ns = seg.chunks[W.c + 1] ? seg : W.segs[W.i + 1], nc = seg.chunks[W.c + 1] || (ns && ns.chunks[0]);
+      if (ns && nc) clip(ns.text.slice(nc.s, nc.e));
+    }
+    utter(seg.text.slice(ch.s, ch.e), seg.marks.filter((m) => m.s >= ch.s && m.s < ch.e).map((m) => ({ id: m.id, s: m.s - ch.s, e: m.e - ch.s })), () => {
       W.c++;
       if (W.c < seg.chunks.length) chunk();
-      else W.timers.push(setTimeout(() => { if (W && tok === W.tok) onward(); }, 500));
-    };
-    const quietly = () => W.timers.push(setTimeout(next, ((ch.e - ch.s) / cps) * 1000 + 300));
-    if (!talking()) return quietly();
-    const u = new SpeechSynthesisUtterance(seg.text.slice(ch.s, ch.e));
-    u.rate = P.rate;
-    const v = voice();
-    if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-US";
-    let began = false;
-    u.onstart = () => { began = true; };
-    u.onboundary = (e) => {
-      if (!W || tok !== W.tok || e.name === "sentence") return;
-      if (!real) { real = true; guess.forEach(clearTimeout); }
-      const at = ch.s + e.charIndex, m = seg.marks.find((x) => at >= x.s - 1 && at < x.e);
-      if (m) now(m.id);
-    };
-    u.onend = next;
-    u.onerror = (e) => { if (W && tok === W.tok && e.error !== "interrupted" && e.error !== "canceled") { W.silent = true; paintBar(); quietly(); } };
-    W.u = u;   // held, or some browsers drop its events
-    if (S.paused) S.resume();
-    S.speak(u);
-    // no voice at all (some Linux browsers): carry on silently; and a voice that never says it finished does not stall the walk
-    W.timers.push(setTimeout(() => { if (W && tok === W.tok && !began && !done) { S.cancel(); W.silent = true; paintBar(); quietly(); } }, 3000));
-    W.timers.push(setTimeout(() => { if (W && tok === W.tok && !done) next(); }, ((ch.e - ch.s) / (cps * 0.4)) * 1000 + 6000));
+      else W.timers.push(setTimeout(() => { if (W && tok === W.tok) onward(); }, GAP));
+    });
   }
   function onward() {
     if (W.i < W.segs.length - 1) return run(W.i + 1, 0);
@@ -360,7 +447,7 @@
       window.scrollBy({ top: r.top - Math.min(140, window.innerHeight * 0.25), behavior: "smooth" });
     }
   }
-  // Learn mode's panels go in above the steps (or the explanation) and just before the controls; a redraw of the card drops them,
+  // The guide's panels go in above the steps (or the explanation) and just before the controls; a redraw of the card drops them,
   // so they are put back whenever the walkthrough paints
   function ensurePanels(card) {
     if (!W.html) return;
@@ -395,7 +482,7 @@
     const part = live ? card.querySelector(seg.sel) : null;
     if (part) part.classList.add("wk-on");
     // think first: the steps not reached yet, and the explanation that would give them away, stay blurred
-    const veil = live && W.mode === "learn" && P.predict;
+    const veil = live && W.mode === "learn";
     W.segs.forEach((s, k) => {
       if (s.kind !== "step" && s.kind !== "expl") return;
       const x = card.querySelector(s.sel);
@@ -418,38 +505,94 @@
     for (const x of [card, vig]) if (x) x.querySelectorAll(".tie-" + W.now).forEach((y) => { y.classList.add("on", "wk-now"); });
     if (scroll && vig) { const v = vig.querySelector(".tie-" + W.now); if (v) into(v, el("pane"), false); }
   }
-  // under the controls: the prompt while you think, or where the number being read comes from (a row of an exhibit, a sentence
-  // of the case, the question, or an earlier step)
+  // where each number of a part comes from: a row of an exhibit, a sentence of the case, the question, an earlier step, or this one
+  function sources(seg) {
+    const card = el("root"), vig = el("vig"), out = [], seen = new Set(), here = W.segs.indexOf(seg);
+    for (const m of seg.marks) {
+      if (seen.has(m.id)) continue;
+      seen.add(m.id);
+      const inVig = vig && vig.querySelector(".tie-" + m.id), any = inVig || (card && card.querySelector(".tie-" + m.id));
+      if (!any) continue;
+      const o = { id: m.id, raw: any.textContent.trim(), cls: (any.getAttribute("class") || "").replace(/\b(?:on|wk-now)\b/g, "").trim(), kind: "", where: "", cap: "", label: "", quote: "" };
+      if (inVig) {
+        o.kind = "case";
+        const td = inVig.closest("td, th");
+        if (td) {
+          const tr = td.parentElement, table = td.closest("table"), head = table && table.tHead && table.tHead.rows[0];
+          const col = head && head.cells[td.cellIndex] ? head.cells[td.cellIndex].textContent.trim() : "";
+          const row = tr.cells[0] && tr.cells[0] !== td ? tr.cells[0].textContent.trim() : "";
+          const wrap = table.closest(".table-wrap");
+          o.cap = wrap && wrap.previousElementSibling && wrap.previousElementSibling.classList.contains("cap") ? wrap.previousElementSibling.textContent.trim() : "";
+          o.label = [row, col].filter(Boolean).join(" · ");
+          o.where = `in the case${o.cap ? ", " + o.cap : ""}: ${o.label || "a table"}`;
+        } else {
+          const blk = inVig.closest("li, p") || inVig.parentElement, txt = blk.textContent.replace(/\s+/g, " ").trim();
+          const at = Math.max(0, txt.indexOf(inVig.textContent));
+          let a = Math.max(0, at - 80), b = Math.min(txt.length, at + inVig.textContent.length + 80);
+          if (a > 0) a = txt.indexOf(" ", a) + 1;
+          if (b < txt.length) b = Math.max(at + inVig.textContent.length, txt.lastIndexOf(" ", b));
+          o.quote = `“${a > 0 ? "…" : ""}${txt.slice(a, b)}${b < txt.length ? "…" : ""}”`;
+          o.where = "in the case";
+        }
+      } else {
+        const k = W.segs.findIndex((x) => { const node = card && card.querySelector(x.sel); return node && node.querySelector(".tie-" + m.id); });
+        o.kind = k < 0 ? "" : W.segs[k].kind === "ask" ? "ask" : k < here ? "earlier" : k === here ? "here" : "";
+        o.where = o.kind === "ask" ? "given in the question" : o.kind === "earlier" ? `worked out in ${W.segs[k].label.toLowerCase()}` : o.kind === "here" ? "worked out here" : "";
+        if (!o.where) continue;
+      }
+      out.push(o);
+    }
+    return out;
+  }
+  // What a step says first when it takes figures from the case that no earlier step has used: where to look, and the figures, each
+  // one lit as it is named ("Start in the case, at Exhibit 1: find 3.30% and 4.21%."). The row and column of a table are left to the
+  // list under the controls: read aloud they sound like coordinates. A bare small whole number is not named either: a "4" in the
+  // case may be a year, a count or a coupon, and saying where it "comes from" would be a guess.
+  function pointer(seg) {
+    const here = W.segs.indexOf(seg), earlier = W.segs.slice(0, here).filter((x) => x.kind === "step");
+    const used = new Set(earlier.flatMap((x) => x.marks.map((m) => m.id)));
+    const figure = (o) => /[.,%$€£¥]|\d{3,}/.test(o.raw);
+    // nor is a figure this step works out itself (it follows "equals"), even when the case happens to show the same value
+    const made = new Set(seg.marks.filter((m) => /equals\s*$/.test(seg.text.slice(Math.max(0, m.s - 9), m.s))).map((m) => m.id));
+    const taken = new Set(seg.marks.filter((m) => !/equals\s*$/.test(seg.text.slice(Math.max(0, m.s - 9), m.s))).map((m) => m.id));
+    const all = sources(seg).filter((o) => o.kind === "case" && !used.has(o.id) && figure(o) && !(made.has(o.id) && !taken.has(o.id))), fresh = all.slice(0, 4);
+    if (!fresh.length) return null;
+    const plain = (x) => finish(speech(x, null)).text.replace(/[.\s]+$/, "");
+    const place = (o) => (!o.label && !o.cap ? "" : o.cap && o.cap.split(":")[0].trim().length <= 40 ? plain(o.cap.split(":")[0]) : "the table");
+    const groups = new Map();
+    for (const o of fresh) { const k = place(o); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(o); }
+    let text = "";
+    const marks = [];
+    for (const [k, list] of groups) {
+      text += text ? (k ? `; and at ${k}, ` : "; and in the text, ") : (earlier.length ? "Back to the case" : "Start in the case") + (k ? `, at ${k}` : "") + ": find ";
+      list.forEach((o, i) => {
+        if (i) text += i === list.length - 1 ? " and " : ", ";
+        const v = plain(o.raw);
+        marks.push({ id: o.id, s: text.length, e: text.length + v.length });
+        text += v;
+      });
+    }
+    text += all.length > fresh.length ? ", and the others lit there." : ".";
+    return { text, marks };
+  }
+  // what is said before a step begins: how many steps there are (before the first), then where its numbers are in the case
+  function preface(seg) {
+    const steps = W.segs.filter((x) => x.kind === "step"), first = steps[0] === seg && steps.length > 1;
+    const p = pointer(seg), count = first ? `It takes ${NUMS[steps.length] || steps.length} steps. ` : "";
+    if (!p) return count ? { text: count.trim(), marks: [] } : null;
+    return { text: count + p.text, marks: p.marks.map((m) => ({ id: m.id, s: m.s + count.length, e: m.e + count.length })) };
+  }
+  // under the controls: the prompt while you think, or where the numbers of the part being read come from, the one being said picked out
   function caption() {
     if (!W || W.state === "done") return "";
     if (W.state === "think") {
-      const first = !W.segs.slice(0, W.i).some((s) => s.kind === "step");
+      const first = !W.segs.slice(0, W.i).some((x) => x.kind === "step");
       return `<span class="wkthink">${first ? "Before the first step: how would you start?" : "What comes next?"}</span> <span class="src">Think it through, then press Show (or W). Clicking the step shows it too.</span>`;
     }
-    if (W.now === null) return "";
-    const card = el("root"), vig = el("vig"), id = W.now;
-    const inVig = vig && vig.querySelector(".tie-" + id), any = inVig || (card && card.querySelector(".tie-" + id));
-    if (!any) return "";
-    const chip = `<mark class="${esc((any.getAttribute("class") || "").replace(/\b(?:on|wk-now)\b/g, "").trim())}">${esc(any.textContent)}</mark>`;
-    if (inVig) {
-      const td = inVig.closest("td, th");
-      if (td) {
-        const tr = td.parentElement, table = td.closest("table"), head = table && table.tHead && table.tHead.rows[0];
-        const col = head && head.cells[td.cellIndex] ? head.cells[td.cellIndex].textContent.trim() : "";
-        const row = tr.cells[0] && tr.cells[0] !== td ? tr.cells[0].textContent.trim() : "";
-        const wrap = table.closest(".table-wrap"), cap = wrap && wrap.previousElementSibling && wrap.previousElementSibling.classList.contains("cap") ? wrap.previousElementSibling.textContent.trim() : "";
-        return `${chip} <span class="src">is in the case${cap ? `, ${esc(cap)}` : ""}: ${esc([row, col].filter(Boolean).join(" · ") || "a table")}</span>`;
-      }
-      const blk = inVig.closest("li, p") || inVig.parentElement, txt = blk.textContent.replace(/\s+/g, " ").trim();
-      const at = Math.max(0, txt.indexOf(inVig.textContent));
-      let a = Math.max(0, at - 80), b = Math.min(txt.length, at + inVig.textContent.length + 80);
-      if (a > 0) a = txt.indexOf(" ", a) + 1;
-      if (b < txt.length) b = Math.max(at + inVig.textContent.length, txt.lastIndexOf(" ", b));
-      return `${chip} <span class="src">is in the case: “${a > 0 ? "…" : ""}${esc(txt.slice(a, b))}${b < txt.length ? "…" : ""}”</span>`;
-    }
-    const k = W.segs.findIndex((s) => { const x = card && card.querySelector(s.sel); return x && x.querySelector(".tie-" + id); });
-    const what = k < 0 ? "" : W.segs[k].kind === "ask" ? "is given in the question" : k < W.i ? `was worked out in ${W.segs[k].label.toLowerCase()}` : k === W.i ? "is worked out here" : "";
-    return what ? `${chip} <span class="src">${esc(what)}</span>` : "";
+    const list = sources(W.segs[W.i]);
+    if (!list.length) return "";
+    return `<span class="wkfrom">Where the numbers come from</span>` + list.slice(0, 10).map((o) =>
+      `<span class="wksrc${o.id === W.now ? " cur" : ""}"><mark class="${esc(o.cls)}">${esc(o.raw)}</mark> <span class="src">${esc(o.where)}${o.quote && o.id === W.now ? ": " + esc(o.quote) : ""}</span></span>`).join("");
   }
   const ICON = {
     play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.5v11l9-5.5z"/></svg>',
@@ -462,16 +605,16 @@
     again: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5a5.5 5.5 0 1 1-5.2 3.7l1.9.6A3.5 3.5 0 1 0 8 4.5v2L4.5 3.5 8 .5z"/></svg>',
   };
   const modeSwitch = () => `<span class="wkmode" role="group" aria-label="Walkthrough mode">
-      <button type="button" data-wk="mode" data-m="learn" aria-pressed="${P.mode === "learn"}" title="The idea behind the question, then each step with a moment to think first, the traps and how it connects">Learn</button>
+      <button type="button" data-wk="mode" data-m="learn" aria-pressed="${P.mode === "learn"}" title="From the first step: where each number comes from and how it is used, then the answer, the other choices, the trap and the idea underneath">Guide</button>
       <button type="button" data-wk="mode" data-m="exam" aria-pressed="${P.mode === "exam"}" title="The question, the answer and the steps, quickly">Exam</button></span>`;
   function inner(id) {
     const open = menuId === id;
     const gear = `<button type="button" class="wkb" data-wk="menu" aria-expanded="${open}" title="Voice, speed and options" aria-label="Walkthrough settings">${ICON.gear}</button>`;
     const menuBox = `<div class="wkmenu" ${open ? "" : "hidden"}>${open ? menuHTML() : ""}</div>`;
     if (!W || W.id !== id) {
-      const what = P.mode === "learn" ? "The idea behind it first, then each step with a moment to think, the traps and how it connects." : "The question, the answer and each step, with every number traced to where it comes from.";
+      const what = P.mode === "learn" ? "From the first step: where each number comes from and how it is used, then the answer, the other choices and the trap." : "The question, the answer and each step, quickly.";
       return `<div class="wkrow"><button type="button" class="btn primary sm wkgo" data-wk="start">${ICON.play}<span>Walk me through it</span></button>${modeSwitch()}
-        <span class="wkhint">${esc(what)} ${canSpeak && P.talk ? "Read aloud. " : ""}Key: W</span>${gear}</div>${menuBox}`;
+        <span class="wkhint">${esc(what)} ${(canSpeak || natural()) && P.talk ? "Read aloud. " : ""}Key: W</span>${gear}</div>${menuBox}`;
     }
     const st = W.state, seg = W.segs[W.i];
     const dots = W.segs.map((s, k) => `<button type="button" class="wkdot${k < W.i || st === "done" ? " past" : ""}${k === W.i && st !== "done" ? " cur" : ""}" data-wk="go" data-i="${k}" title="${esc(s.label)}" aria-label="Go to: ${esc(s.label)}"></button>`).join("");
@@ -484,20 +627,21 @@
         <button type="button" class="wkb" data-wk="next" ${W.i < W.segs.length - 1 && st !== "done" ? "" : "disabled"} aria-label="Next part">${ICON.next}</button>
         ${modeSwitch()}<span class="grow"></span>
         <button type="button" class="wkb txt" data-wk="rate" title="Speed: click to change">${P.rate}×</button>
-        ${canSpeak ? `<button type="button" class="wkb" data-wk="talk" aria-pressed="${P.talk}" title="${P.talk ? "Turn the voice off (it keeps going silently)" : "Read it aloud"}" aria-label="Voice">${P.talk ? ICON.voice : ICON.mute}</button>` : ""}
+        ${canSpeak || natural() ? `<button type="button" class="wkb" data-wk="talk" aria-pressed="${P.talk}" title="${P.talk ? "Turn the voice off (it keeps going silently)" : "Read it aloud"}" aria-label="Voice">${P.talk ? ICON.voice : ICON.mute}</button>` : ""}
         ${gear}<button type="button" class="wkb" data-wk="stop" aria-label="Close the walkthrough" title="Close (Esc)">✕</button></div>
       <div class="wkrow2"><span class="wklab" aria-live="polite"><b>${st === "done" ? "Finished" : esc(seg.label)}</b>${st === "pause" ? ' <span class="muted">paused</span>' : ""}${W.silent && P.talk && st !== "done" ? ' <span class="muted">· silent: no voice here</span>' : ""}</span>
         <span class="wkdots" aria-label="Part ${W.i + 1} of ${W.segs.length}">${dots}</span></div>
       <div class="wkcap" ${c ? "" : "hidden"}>${c}</div>${menuBox}`;
   }
   function menuHTML() {
-    const opts = `<label><input type="checkbox" data-wk-set="predict" ${P.predict ? "checked" : ""}> Learn mode: think first (each step stays hidden until you ask for it)</label>
+    const opts = `<label><input type="checkbox" data-wk-set="think" ${P.think ? "checked" : ""}> Guide: stop before each step so I can think first</label>
       <label><input type="checkbox" data-wk-set="auto" ${P.auto ? "checked" : ""}> Start the walkthrough as soon as I answer</label>`;
-    if (!canSpeak) return `<p class="wkhint">This browser has no voice to read with, so the walkthrough runs silently at reading pace.</p>${opts}`;
+    const nat = NAT.on ? `<label><input type="checkbox" data-wk-set="natural" ${P.natural !== false ? "checked" : ""}> Natural voice, made by the study server (off: the browser's own voice)</label>` : "";
+    if (!canSpeak) return natural() ? `${nat}<label><input type="checkbox" data-wk-set="talk" ${P.talk ? "checked" : ""}> Read it aloud</label>${opts}` : `<p class="wkhint">This browser has no voice to read with, so the walkthrough runs silently at reading pace.</p>${opts}`;
     if (!voices.length) loadVoices();
     const v = voice();
     const list = voices.slice().sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name));
-    return `<label>Voice <select data-wk-set="voice">${list.map((x) => `<option value="${esc(x.voiceURI)}" ${v && x.voiceURI === v.voiceURI ? "selected" : ""}>${esc(x.name)} (${esc(x.lang)})</option>`).join("") || "<option>The browser's default</option>"}</select>
+    return `${nat}<label>${NAT.on ? "The browser's voice" : "Voice"} <select data-wk-set="voice">${list.map((x) => `<option value="${esc(x.voiceURI)}" ${v && x.voiceURI === v.voiceURI ? "selected" : ""}>${esc(x.name)} (${esc(x.lang)})</option>`).join("") || "<option>The browser's default</option>"}</select>
         <button type="button" class="wkb txt" data-wk="test">Try it</button></label>
       <label>Speed <select data-wk-set="rate">${RATES.map((r) => `<option value="${r}" ${r === +P.rate ? "selected" : ""}>${r}×</option>`).join("")}</select></label>
       <label><input type="checkbox" data-wk-set="talk" ${P.talk ? "checked" : ""}> Read it aloud (off: the same walkthrough, silently)</label>${opts}
@@ -513,6 +657,8 @@
     if (!box) return paintBar();
     const c = caption();
     box.innerHTML = c; box.hidden = !c;
+    const cur = box.querySelector(".wksrc.cur");
+    if (cur) box.scrollTop = Math.max(0, cur.offsetTop - box.offsetTop - 24);
   }
   function paintMenu() {
     document.querySelectorAll(".wkbar").forEach((bar) => {
@@ -533,9 +679,12 @@
       return paintAll();
     }
     if (what === "test") {
+      const sample = "First, compare the two contracts: the near one is at 82.40 and the far one at 80.10. That makes the roll return 2.79 percent.";
+      if (W && W.state === "play") pause();
+      if (natural()) return clip(sample).then((url) => { if (!url) return; const a = NAT.el || (NAT.el = new Audio()); a.onended = a.onloadedmetadata = a.onerror = null; a.src = url; a.playbackRate = P.rate; const p = a.play(); if (p && p.catch) p.catch(() => {}); });
       if (!canSpeak) return;
       S.cancel();
-      const u = new SpeechSynthesisUtterance("The roll return is 2.79 percent, from the near contract at 82.40.");
+      const u = new SpeechSynthesisUtterance(sample);
       const v = voice(); if (v) { u.voice = v; u.lang = v.lang; } u.rate = P.rate;
       if (W && W.state === "play") pause();
       return S.speak(u);
@@ -578,7 +727,7 @@
       save();
       if (!W) return;
       W.silent = false;
-      if (k === "predict") return paint(false);
+      if (k === "think") return paint(false);
       if (W.state === "play" && k !== "auto") run(W.i, W.c, true); else paintBar();
     }, true);
     document.addEventListener("keydown", (e) => {
@@ -625,7 +774,13 @@
   .wkdot.cur { background: var(--accent); border-color: var(--accent); transform: scale(1.3); }
   .wkhint { font-size: 13.5px; color: var(--muted); margin: 0; flex: 1 1 220px; }
   .wkcap { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.5; }
+  .wkcap { max-height: 8.4em; overflow-y: auto; }
   .wkcap .src { color: var(--muted); }
+  .wkfrom { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .wksrc { display: block; padding: 1px 6px; margin: 0 -6px; border-radius: 6px; }
+  .wksrc.cur { background: var(--accent-soft); }
+  .wksrc.cur .src { color: var(--ink); }
+  @media (max-width: 640px) { .wkcap { max-height: 5.6em; } }
   .wkcap .tie { cursor: default; opacity: 1 !important; }
   .wkthink { font-weight: 700; }
   .wkmenu { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: 14px; }

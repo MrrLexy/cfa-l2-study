@@ -66,12 +66,14 @@
       if (!cands.length) cands = m.los;
     }
     const lo = (ranked(qb, cands, (l) => l.text + " " + (l.answer || []).map((a) => a.p).join(" "))[0] || [])[1] || null;
-    // its answer opens with the idea; another paragraph only when it is clearly closer to the question
+    // the idea underneath: a paragraph of that outcome's answer
     let idea = "";
     if (lo && (lo.answer || []).length) {
       const ps = lo.answer.map((a) => a.p).filter(Boolean), r = ranked(qb, ps);
       const first = score(qb, ps[0]);
-      idea = trim(first >= 0.6 * r[0][0] ? ps[0] : r[0][1], 720);
+      const best = first >= 0.9 * r[0][0] ? ps[0] : r[0][1];   // the paragraph closest to the question (an outcome's card often covers several things), the first when they tie
+      // shown only when it shares four words or more with the question: with three or fewer it was off the subject about half the time
+      if (shared(qb, best) >= 4) idea = trim(best, 720);
     }
     const f = lo && (lo.formulas || []).length ? ranked(qb, lo.formulas, (x) => x.name + " " + x.latex)[0] : null;
     const formula = f && f[0] >= 1.2 ? { name: f[1].name, latex: f[1].latex } : null;
@@ -82,9 +84,10 @@
       if (terms.some((x) => x.term.toLowerCase().includes(t.term.toLowerCase()))) continue;
       terms.push({ term: t.term, def: trim(t.def, 320) });
     }
-    // a point, a pitfall or a connection is shown only when it clearly shares the question's subject (three or more of its words):
-    // read against a spread of questions, weaker matches were off the subject about half the time, and none is better than one that misleads
-    const close = (x) => x[0] >= 0.8 && shared(qb, x[1]) >= 3;
+    // a point, a pitfall or a connection is shown only when it clearly shares the question's subject (three or more of its words and a
+    // score of 1): read against a spread of questions, weaker matches were off the subject about half the time, the guide says these
+    // aloud ("the way in", "one thing to keep"), and none is better than one that misleads
+    const close = (x) => x[0] >= 1 && shared(qb, x[1]) >= 3;
     const think = ranked(qb, (g.how_to_think || []).map(String)).filter(close).slice(0, 2).map((x) => x[1]);
     // a pitfall that only repeats the question's own trap adds nothing
     const own = bag((q.trap || "") + " " + (q.avoid || ""));
