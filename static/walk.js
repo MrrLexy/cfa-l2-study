@@ -56,6 +56,10 @@
     if (/^[+−-]+$/.test(v)) return " " + [...v].map((c) => (c === "+" ? "plus" : "minus")).join(" ") + " ";   // p^{+-}: up then down
     return ` to the power ${x}, `;
   }
+  // "(a − b) × c" heard as "a minus b times c" means something else: a bracketed sum is read "a minus b, all times c", and
+  // "c × (a − b)" as "c times the quantity a minus b"
+  const GROUP_AFTER = /\b(times|divided by)\s*\(\s*([^()]*?\b(?:plus|minus)\b[^()]*?)\s*\)/g;
+  const GROUP_BEFORE = /\(\s*([^()]*?\b(?:plus|minus)\b[^()]*?)\s*\)\s*(times|divided by)\b/g;
   function texSpeech(tx) {
     let s = String(tx).replace(/\{,\}/g, ",");
     s = s.replace(/\{\\htmlClass\{([^{}]*)\}\{([^{}]*)\}\}/g, (m, c, raw) => sentinel(c, raw));
@@ -96,11 +100,55 @@
       .replace(/\+/g, " plus ").replace(/\//g, " divided by ")
       .replace(/(^|[\s\d()[\]\uE012])[-−](?=\s|[\d(.[\uE010]|$)/g, "$1 minus ")
       .replace(/^\s*[-−]/, " minus ")
+      .replace(GROUP_AFTER, "$1 the quantity $2,").replace(GROUP_BEFORE, "$1, all $2")   // a bracketed sum keeps its grouping when heard
       .replace(/[()[\]{}|]/g, " ");
     return " " + s + " ";
   }
+  // RATINGS-BEGIN: credit ratings said as analysts say them ("single A", "double A minus", "triple B plus", Moody's "B double A two"),
+  // the rule of app/pronounce.py, checked on the same cases (standalone/rating_cases.json: app/test_pronounce.py and
+  // standalone/test_walk_ratings.js). A single letter is a rating only in a sentence about ratings, and never a name ("Bond A") or the
+  // article ("A downgrade ..."); what is already said is left as it is.
+  const R_SAY = { AAA: "triple A", AA: "double A", A: "single A", BBB: "triple B", BB: "double B", B: "single B", CCC: "triple C", CC: "double C", C: "single C" };
+  const R_NUM = { 1: "one", 2: "two", 3: "three" };
+  const R_MOODY = { Aaa: "triple A", Aa: "double A", Baa: "B double A", Ba: "B A", Caa: "C double A", Ca: "C A" };
+  const R_LABEL = new RegExp("(?:choice|option|answer|strategy|strategies|company|country|bond|bonds|portfolio|fund|division|group|sector|insurer|model|exhibit|method|scenario|condition|decision|initiative|policy|firm|client|account|investor|manager|point|statement|comment|hypothesis|step|question|year|stage|plan|mock|session|vignette|part|section|standard|level|class|tranche|series|segment|index|project|type|table|figure|panel|case|tier|warrant|share|shares|unit|units|swap|dealer|trader|analyst|issuer|entity|loan|pool|note|bank|counterparty|asset|security|securities|stock|candidate|alternative|approach|structure|property|region|regression|equation|currency|contract|position|deal|trade|factor|column|item|program|scheme|plant|subsidiary|business|product|team|member|partner|market|economy|broker|line)\\s+$", "i");                                          // a name before the letter
+  // no look-behind anywhere (older Safari cannot read one, and walk.js would fail whole): the character before a rating is captured
+  // and written back instead; what is already said is held aside first, so "single A" is never said again
+  const R_CONTEXT = /(?:^|[^A-Za-z])(?:AAA|AA|BBB|BB|CCC|CC)(?![A-Za-z])|\brat(?:ed|ing|ings)\b|grade|downgrad|upgrad|migrat|spread|speculative|default|transition/i;
+  const R_MULTI = /(^|[^A-Za-z0-9])(AAA|AA|BBB|BB|CCC|CC)(\+|[−-](?![A-Za-z0-9]))?(?![A-Za-z0-9])/g;
+  const R_MOODYS = /(^|[^A-Za-z0-9])(Aaa|Aa|Baa|Ba|Caa|Ca)([123])?(?![A-Za-z0-9])/g;
+  const R_MOODY1 = /(^|[^A-Za-z0-9])([AB])([123])(?![A-Za-z0-9%])/g;                 // Moody's A1, A2, B3 (in a sentence about ratings)
+  const R_SHORT = /(^|[^A-Za-z0-9])([AP])-([123])(\+)?(?![A-Za-z0-9])/g;              // short-term: S&P A-1+, Moody's P-1
+  const R_NR = /(^|[^A-Za-z0-9])NR(?![A-Za-z0-9])/g;
+  const R_SAID = /\b(?:single|double|triple) [ABC](?: (?:plus|minus))?\b|\b[BC] (?:double )?A(?: (?:one|two|three))?\b|\b[ABP] (?:one|two|three)(?: plus)?\b/g;
+  const R_SINGLE = /(^|[^A-Za-z0-9'’])([ABC])(\+|[−-](?![A-Za-z0-9]))?(?![A-Za-z0-9'’])/g;
+  const rMod = (m) => ({ "+": " plus", "-": " minus", "−": " minus" })[m || ""] || "";
+  // a comma after a rating that labels a calculation ("AAA −4.5 × (−0.50%)"), so it is not heard as "triple A minus"
+  const rPause = (md, rest) => !md && /^\s+(?:[−-]|minus )\s?\d/.test(rest) ? "," : "";
+  function ratings(text) {
+    return String(text ?? "").replace(/([.!?])\s+/g, "$1\u0003").split("\u0003").map((s) => {
+      const about = R_CONTEXT.test(s) || s.search(R_MOODYS) >= 0 || s.search(R_SHORT) >= 0 || /\b(?:single|double|triple) [ABC]\b|moody|fitch|s&p/i.test(s);
+      const held = [], hold = (x) => (held.push(x), `${held.length - 1}`);   // what is already said, out of the single letters' reach
+      s = s.replace(R_SAID, (m) => hold(m))
+        .replace(R_SHORT, (m, pre, a, n, p) => pre + hold(`${a} ${R_NUM[n]}` + (p ? " plus" : "")))
+        .replace(R_MULTI, (m, pre, r, md, at, all) => pre + hold(R_SAY[r] + rMod(md) + rPause(md, all.slice(at + m.length))))
+        .replace(R_MOODYS, (m, pre, r, n) => pre + hold(R_MOODY[r] + (n ? " " + R_NUM[n] : "")));
+      if (about) {
+        const t = s.replace(R_MOODY1, (m, pre, a, n) => pre + hold(`${a} ${R_NUM[n]}`)).replace(R_NR, (m, pre) => pre + hold("not rated"));
+        s = t.replace(R_SINGLE, (m, pre, r, md, at) => {
+          const before = t.slice(0, at + pre.length), after = t.slice(at + m.length);
+          if (R_LABEL.test(before)) return m;                                                       // "Bond A", "Choice B": a name
+          if (r === "A" && !md && /(?:^|[.!?:;]\s+|^\W*)$/.test(before) && /^\s+(?:[a-z]|)/.test(after)) return m;   // the article
+          if (/(?:is|was|answer is|choose|chose|pick|picked)\s+$/i.test(before) && /^\s*(?:[,.;:]|$)/.test(after)) return m;   // "the answer is A,"
+          return pre + R_SAY[r] + rMod(md) + rPause(md, after);
+        });
+      }
+      return s.replace(/(\d+)/g, (m, k) => held[+k]).replace(/\b([Aa])n (single|double|triple|not rated)\b/g, "$1 $2");
+    }).join(" ");
+  }
+  // RATINGS-END
   function textSpeech(s) {
-    return String(s).split("\n").map((l) => {
+    return ratings(String(s).split("\n").map((l) => {
       if (/^\s*\|?[\s:|-]+\|?\s*$/.test(l) && l.includes("-")) return "";                                 // a table's rule
       if (/^\s*\|/.test(l)) return l.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim()).filter(Boolean).join(", ") + ".";
       l = l.replace(/^\s*#{1,6}\s+/, "").replace(/^\s*(?:[-*+]|\d+[.)])\s+/, "").trim();
@@ -126,9 +174,11 @@
       .replace(/([\p{L}\p{N})])_([\p{L}\p{N},+−-]+?)(?=[^\p{L}\p{N}]|[\p{Lu}]|$)/gu, "$1 $2 ").replace(/([\p{L}\p{N})])_([\p{L}\p{N},+−-]+)/gu, "$1 $2").replace(/\^\(([^()]*)\)/g, (m, x) => power(x))
       .replace(/\^\(((?:[^()]|\([^()]*\))*)\)/g, (m, x) => power(x))                                    // one bracket inside the power: e^((r_f − r_d) × T)
       .replace(/\^\*/g, " star")
+      .replace(/\^([+−-]?)(\uE010\d+\uE011[^\uE012]*\uE012)/g, (m, sg, x) => (sg && sg !== "+" ? " to the power minus " : " to the power ") + x)   // an exponent the value tracing has marked (e^0.588)
       .replace(/\^([+−-]?[\p{L}\p{N}.]+|[+−-])/gu, (m, x) => power(x.replace(/^[−-](?=.)/, "minus ")))
       .replace(/(^|\s)=\s/g, "$1equals ").replace(/\s\+\s/g, " plus ").replace(/\s−\s/g, " minus ").replace(/\s\/\s|([\d)\]\uE012])\/(?=[\d([\uE010])/g, "$1 divided by ")
-      .replace(/[{}]/g, " ");
+      .replace(GROUP_AFTER, "$1 the quantity $2,").replace(GROUP_BEFORE, "$1, all $2")
+      .replace(/[{}]/g, " "));
   }
   const OPT = /^(\*\*|__)?([ABC])\1?(?=\s*[:.)]|\s+(?:is|was|would|gets|uses|confuses|ignores|forgets|treats|takes|divides|multiplies|adds|subtracts|applies|reverses|omits|misses|assumes|mixes|leaves|counts|computes|reads|states|has|picks|chooses|doubles|halves|annualizes|discounts|compounds|includes|excludes|drops|swaps|stops|subtracts|nets|scales|rounds|misreads|misapplies|overstates|understates)\b)/;
   const MATH = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$/g;
@@ -507,16 +557,51 @@
     if (scroll && vig) { const v = vig.querySelector(".tie-" + W.now); if (v) into(v, el("pane"), false); }
   }
   // where each number of a part comes from: a row of an exhibit, a sentence of the case, the question, an earlier step, or this one
+  // the same value can sit in several cells of the case (900 as one segment's capital spending and another's depreciation): the cell
+  // meant is the one whose row, column and exhibit share the most words with what is being said; on a tie, the first
+  const words = (t) => new Set(String(t).toLowerCase().match(/[a-z][a-z&]{2,}/g) || []);
+  const clause = (txt, at) => {   // the sentence of what is said that holds position at ("Beta: … = 20.6%. Gamma: …")
+    txt = String(txt || ""); at = Math.max(0, Math.min(txt.length, at || 0));
+    const a = Math.max(txt.lastIndexOf(". ", at), txt.lastIndexOf("; ", at)), b = [txt.indexOf(". ", at), txt.indexOf("; ", at)].filter((x) => x >= 0);
+    return txt.slice(a + 1, b.length ? Math.min(...b) : txt.length);
+  };
+  function bestMark(vig, id, said, at, before) {
+    const all = [...vig.querySelectorAll(".tie-" + id)];
+    if (all.length < 2) return all[0] || null;
+    const stem = (w) => w.replace(/(?:ies|es|s)$/, ""), want = new Set([...words(at === undefined ? said : clause(said, at))].map(stem));
+    const hits = (t) => { let n = 0; for (const w of words(t)) if (want.has(stem(w))) n++; return n; };
+    const score = (mk) => {
+      const td = mk.closest("td, th");
+      if (!td) { const blk = mk.closest("li, p"); return hits(blk ? blk.textContent : ""); }
+      const tr = td.parentElement, table = td.closest("table"), head = table && table.tHead && table.tHead.rows[0], wrap = table && table.closest(".table-wrap");
+      const cap = wrap && wrap.previousElementSibling && wrap.previousElementSibling.classList.contains("cap") ? wrap.previousElementSibling.textContent : "";
+      // a sum down a column is about that column, so the column counts double; then the row, then the exhibit
+      return 2 * hits(head && head.cells[td.cellIndex] ? head.cells[td.cellIndex].textContent : "") + hits(tr.cells[0] && tr.cells[0] !== td ? tr.cells[0].textContent : "") + hits(cap);
+    };
+    let best = all[0], top = score(best);
+    for (const mk of all.slice(1)) { const sc = score(mk); if (sc > top) { best = mk; top = sc; } }
+    // a sentence that names nothing ("NOI = 1,450,000 − 420,000 − 50,000") takes its words from the step before ("… the maintenance allowance")
+    if (!top && before) return bestMark(vig, id, before);
+    return best;
+  }
   function sources(seg) {
     const card = el("root"), vig = el("vig"), out = [], seen = new Set(), here = W.segs.indexOf(seg);
     // a figure the part works out itself (it only ever follows "equals") is its own, even when the case shows the same value
     const after = (m) => /equals\s*$/.test(seg.text.slice(Math.max(0, m.s - 9), m.s));
     const made = new Set(seg.marks.filter(after).map((m) => m.id));
     seg.marks.filter((m) => !after(m)).forEach((m) => made.delete(m.id));
+    // a value an earlier step worked out (it followed "equals" there) comes from that step, even when the case shows the same figure
+    const madeIn = (id) => W.segs.slice(0, Math.max(0, here)).findIndex((x) => x.kind === "step" && x.marks.some((mm) => mm.id === id && /equals\s*$/.test(x.text.slice(Math.max(0, mm.s - 9), mm.s))));
     for (const m of seg.marks) {
       if (seen.has(m.id)) continue;
       seen.add(m.id);
-      const inVig = vig && vig.querySelector(".tie-" + m.id), any = inVig || (card && card.querySelector(".tie-" + m.id));
+      const was = made.has(m.id) ? -1 : madeIn(m.id);
+      if (was >= 0) {
+        const mk = card && card.querySelector(".tie-" + m.id) || (vig && vig.querySelector(".tie-" + m.id));
+        if (mk) out.push({ id: m.id, raw: mk.textContent.trim(), cls: (mk.getAttribute("class") || "").replace(/\b(?:on|wk-now)\b/g, "").trim(), kind: "earlier", where: `worked out in ${W.segs[was].label.toLowerCase()}`, cap: "", label: "", quote: "" });
+        continue;
+      }
+      const inVig = vig && bestMark(vig, m.id, seg.text, m.s, here > 0 ? W.segs[here - 1].text : ""), any = inVig || (card && card.querySelector(".tie-" + m.id));
       if (!any) continue;
       const o = { id: m.id, raw: any.textContent.trim(), cls: (any.getAttribute("class") || "").replace(/\b(?:on|wk-now)\b/g, "").trim(), kind: "", where: "", cap: "", label: "", quote: "" };
       if (inVig) {
@@ -828,13 +913,15 @@
   const api = {
     supported: canSpeak,
     provide(fn) { provider = fn; },
+    question(id) { return provider && id ? provider(id) : null; },   // what the page knows about that question (for anything else that explains it)
     bar(id) { return provider && id ? `<div class="wkbar${W && W.id === id ? " on" : ""}" data-wk-id="${esc(id)}">${inner(id)}</div>` : ""; },
     active(id) { return !!(W && W.id === id); },
     sync(id) { if (!W) return; if (W.id !== id) return stop(true); paint(false); },
     after(id) { lastId = id; if (P.auto && id) start(id); },
     refresh() { if (W) paint(false); },
     stop() { stop(false); },
-    _build: build, _speech: speech, _finish: finish,
+    bestMark,
+    _build: build, _speech: speech, _finish: finish, _ratings: ratings,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Walk = api;
