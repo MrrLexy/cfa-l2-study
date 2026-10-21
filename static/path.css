@@ -64,7 +64,7 @@
 .p-step i { font-style: normal; width: 24px; height: 24px; border-radius: 50%; background: var(--sunk); display: grid; place-items: center; font-size: 12px; }
 .p-step.seen i { background: var(--good-soft); color: var(--good); }
 .p-step.now { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.p-step.now i { background: rgba(255, 255, 255, .25); color: var(--on-accent); }
+.p-step.now i { background: color-mix(in srgb, var(--on-accent) 25%, transparent); color: var(--on-accent); }
 
 /* plan */
 .p-intro .lede { margin-top: 0; }
@@ -96,9 +96,9 @@
 .p-opt:disabled { cursor: default; }
 .p-opt .ol { width: 26px; height: 26px; border-radius: 50%; background: var(--sunk); display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--muted); }
 .p-opt.right { border-color: var(--good); background: var(--good-soft); }
-.p-opt.right .ol { background: var(--good); color: #fff; }
+.p-opt.right .ol { background: var(--good); color: var(--on-accent); }
 .p-opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
-.p-opt.wrong .ol { background: var(--bad); color: #fff; }
+.p-opt.wrong .ol { background: var(--bad); color: var(--on-accent); }
 .p-expl { margin-top: 12px; padding: 12px 14px; background: var(--sunk); border-radius: 12px; font-size: 15px; }
 .p-walk { margin: 8px 0 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); font-size: 15px; }
 .p-walk ol { margin: 6px 0 0; padding-left: 22px; } .p-walk li { margin: 0 0 6px; } .p-walk li:last-child { margin: 0; }

@@ -20,10 +20,10 @@
 <script defer src="static/katex/contrib/auto-render.min.js"></script>
 <style>
   /* colours come from static/site.css; only the diagram's edge colour and the pop-up shadow are page-specific */
-  :root { --page-max: 1720px; --edge: #b9b5ab; --header-bg: var(--bar-bg); --stick: 64px;
-          --pop-shadow: 0 14px 36px rgba(29, 29, 27, .18), 0 2px 6px rgba(29, 29, 27, .08); }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --edge: #57544e; --pop-shadow: 0 14px 40px rgba(0, 0, 0, .6); } }
-  :root[data-theme="dark"] { --edge: #57544e; --pop-shadow: 0 14px 40px rgba(0, 0, 0, .6); }
+  :root { --page-max: 1720px; --edge: var(--line-strong); --header-bg: var(--bar-bg); --stick: 64px;
+          --pop-shadow: 0 14px 36px color-mix(in srgb, var(--shade) 18%, transparent), 0 2px 6px color-mix(in srgb, var(--shade) 8%, transparent); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --edge: var(--line-strong); --pop-shadow: 0 14px 40px color-mix(in srgb, var(--shade) 60%, transparent); } }
+  :root[data-theme="dark"] { --edge: var(--line-strong); --pop-shadow: 0 14px 40px color-mix(in srgb, var(--shade) 60%, transparent); }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }  /* chips and buttons set their own display; hidden must still win */
   html { overflow-x: hidden; }  /* on the root only: on body too it would make body the scroller */
@@ -42,7 +42,7 @@
   .seg a { display: inline-flex; align-items: center; min-height: 30px; padding: 3px 14px; border-radius: 999px; font-size: 14px; font-weight: 600;
            color: var(--muted); text-decoration: none; }
   .seg a:hover { color: var(--ink); }
-  .seg a[aria-current="page"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .14); }
+  .seg a[aria-current="page"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px color-mix(in srgb, var(--shade) 14%, transparent); }
   .whereami { font-size: 13px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .whereami:empty { display: none; }
   .search { position: relative; flex: 1 1 240px; max-width: 520px; min-width: 0; }
@@ -51,7 +51,7 @@
   .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .search::before { content: "⌕"; position: absolute; left: 13px; top: 50%; transform: translateY(-52%); color: var(--muted); font-size: 18px; pointer-events: none; }
   .results { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-             box-shadow: 0 10px 30px rgba(0,0,0,.18); max-height: 60vh; overflow-y: auto; display: none; padding: 6px; z-index: 30; }
+             box-shadow: 0 10px 30px color-mix(in srgb, var(--shade) 18%, transparent); max-height: 60vh; overflow-y: auto; display: none; padding: 6px; z-index: 30; }
   .results.show { display: block; }
   .results a { display: flex; gap: 10px; align-items: baseline; padding: 7px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; font-size: 14px; }
   .results a:hover, .results a.sel { background: var(--accent-soft); }
@@ -1923,7 +1923,7 @@ async function load() {
       if ($("q").value.trim()) { hits = search($("q").value); drawResults(); }
     }
     live.className = "live";
-    live.innerHTML = "<i></i>Copy from 2026-10-18";
+    live.innerHTML = "<i></i>Copy from 2026-10-21";
   } catch {
     live.className = "live stale"; live.innerHTML = "<i></i>Couldn't load the data";
     if (!DATA) $("content").innerHTML = `<p class="offline">Can't load the Study Map data.</p>`;

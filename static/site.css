@@ -1,27 +1,59 @@
 
-
 :root {
   color-scheme: light;
-  /* colour */
-  --bg: #f6f5f1;
-  --card: #ffffff;
+  --bg: #f6f5f1;            /* page background */
+  --card: #ffffff;          /* surface: cards, panels, inputs, menus */
   --sunk: #efede7;          /* quiet fill inside a card: stat tiles, tracks, code */
-  --ink: #1d1d1b;
-  --muted: #6b6a66;
-  --line: #e4e2dc;
+  --raise: #e9e7e0;         /* raised fill: selected row, button face on a card */
+  --ink: #1d1d1b;           /* text */
+  --muted: #6b6a66;         /* quiet text, labels */
+  --faint: #8f8d87;         /* faintest text: hints, placeholders */
+  --line: #e4e2dc;          /* borders */
   --line-strong: #cfccc4;
   --accent: #2f5bd3;        
   --accent-soft: #e8eefc;
-  --on-accent: #ffffff;
+  --on-accent: #ffffff;     /* text on the accent */
+  --link: var(--accent);
+  --btn: var(--accent);     /* primary button, and its text */
+  --btn-ink: var(--on-accent);
+  --focus: var(--accent);   /* focus outline */
   --pc: #8a4fd6;            
   --pc-soft: #f1e9fb;
   --good: #1f7a4a; --good-soft: #e3f4ea;
   --warn: #9a6a00; --warn-soft: #fbf1d9;
   --bad: #b3261e;  --bad-soft: #fbe7e5;
+  --dm: #a8502a; --dm-soft: #f7e9df;   /* the Dungeon Master's ember: that room's identity colour */
+  --lib: #1f7a4a;                      /* the Library */
   --track: #e2dfd7;
+  --shade: #1d1d1b;         /* shadow and overlay colour */
   --bar-bg: rgba(246, 245, 241, .92);
   --shadow: 0 1px 2px rgba(29, 29, 27, .04), 0 6px 20px rgba(29, 29, 27, .05);
+}
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #131312; --card: #1d1d1b; --sunk: #262624; --raise: #2c2c29; --ink: #f1f0ec; --muted: #a3a19b; --faint: #7b7973;
+    --line: #302f2c; --line-strong: #47453f;
+    --accent: #8aa8ff; --accent-soft: #212a45; --on-accent: #10131d;
+    --pc: #c9a2ff; --pc-soft: #2c2240;
+    --good: #6fd29b; --good-soft: #15291d; --warn: #f0c060; --warn-soft: #332910; --bad: #ff8a80; --bad-soft: #381b19;
+    --dm: #f0a674; --dm-soft: #33241a; --lib: #6fd29b;
+    --track: #34332f; --shade: #000000; --bar-bg: rgba(19, 19, 18, .92); --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #131312; --card: #1d1d1b; --sunk: #262624; --raise: #2c2c29; --ink: #f1f0ec; --muted: #a3a19b; --faint: #7b7973;
+  --line: #302f2c; --line-strong: #47453f;
+  --accent: #8aa8ff; --accent-soft: #212a45; --on-accent: #10131d;
+  --pc: #c9a2ff; --pc-soft: #2c2240;
+  --good: #6fd29b; --good-soft: #15291d; --warn: #f0c060; --warn-soft: #332910; --bad: #ff8a80; --bad-soft: #381b19;
+  --dm: #f0a674; --dm-soft: #33241a; --lib: #6fd29b;
+  --track: #34332f; --shade: #000000; --bar-bg: rgba(19, 19, 18, .92); --shadow: none;
+}
+
+:root {
   /* type */
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
@@ -40,26 +72,6 @@
   --page-max: 1100px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #131312; --card: #1d1d1b; --sunk: #262624; --ink: #f1f0ec; --muted: #a3a19b;
-    --line: #302f2c; --line-strong: #47453f;
-    --accent: #8aa8ff; --accent-soft: #212a45; --on-accent: #10131d;
-    --pc: #c9a2ff; --pc-soft: #2c2240;
-    --good: #6fd29b; --good-soft: #15291d; --warn: #f0c060; --warn-soft: #332910; --bad: #ff8a80; --bad-soft: #381b19;
-    --track: #34332f; --bar-bg: rgba(19, 19, 18, .92); --shadow: none;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #131312; --card: #1d1d1b; --sunk: #262624; --ink: #f1f0ec; --muted: #a3a19b;
-  --line: #302f2c; --line-strong: #47453f;
-  --accent: #8aa8ff; --accent-soft: #212a45; --on-accent: #10131d;
-  --pc: #c9a2ff; --pc-soft: #2c2240;
-  --good: #6fd29b; --good-soft: #15291d; --warn: #f0c060; --warn-soft: #332910; --bad: #ff8a80; --bad-soft: #381b19;
-  --track: #34332f; --bar-bg: rgba(19, 19, 18, .92); --shadow: none;
-}
 
 /* base */
 * { box-sizing: border-box; }
