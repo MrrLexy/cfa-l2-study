@@ -296,7 +296,7 @@ function stepHTML(s) {
     return `<p class="gl-kicker">Check yourself</p>${s.case ? `<details class="gl-case"><summary>The case: ${esc(s.case.title)}</summary>${md(s.case.vignette)}</details>` : ""}
       <div class="gl-stem">${md(s.stem)}</div><div class="gl-opts">${Object.entries(s.options).map(([l, t]) =>
         `<button type="button" class="gl-opt ${got ? (l === s.answer ? "right" : l === got ? "wrong" : "") : ""}" data-l="${l}"${got ? " disabled" : ""}><span class="l">${l}</span><span>${md(t).replace(/^<p>|<\/p>$/g, "")}</span></button>`).join("")}</div>
-      ${got ? `<div class="gl-verdict"><p class="v">${got === s.answer ? "Correct." : got === "-" ? `The answer is ${s.answer}.` : `Not quite: the answer is ${s.answer}.`}</p>${s.steps && s.steps.length ? `<ol class="gl-steps">${s.steps.map((x) => `<li>${md(x).replace(/^<p>|<\/p>$/g, "")}</li>`).join("")}</ol>` : ""}${md(s.explanation)}</div>` : ""}`;
+      ${got ? `<div class="gl-verdict"><p class="v">${got === s.answer ? "Correct." : got === "-" ? `The answer is ${s.answer}.` : `Not quite: the answer is ${s.answer}.`}</p>${s.steps && s.steps.length ? `<ol class="gl-steps">${s.steps.map((x) => `<li>${md(x).replace(/^<p>|<\/p>$/g, "")}</li>`).join("")}</ol>` : ""}${s.tests ? `<p class="gl-tests"><b>What it tests${s.title ? ` (${md(s.title).replace(/^<p>|<\/p>$/g, "")})` : ""}:</b> ${md(s.tests).replace(/^<p>|<\/p>$/g, "")}</p>` : ""}${md(s.explanation)}${s.trap ? `<div class="gl-trap"><b>The trap: ${md(s.trap).replace(/^<p>|<\/p>$/g, "")}</b>${s.avoid ? `<span class="a">How to avoid it: ${md(s.avoid).replace(/^<p>|<\/p>$/g, "")}</span>` : ""}</div>` : ""}</div>` : ""}`;
   }
   if (s.kind === "traps") return `<p class="gl-kicker">Before you finish</p><h2>The traps in this module</h2>${s.traps.map((t) => `<div class="gl-trap"><b>${esc(t.trap)}</b><span class="a">${esc(t.avoid)}</span></div>`).join("")}`;
   if (s.kind === "end") {
@@ -326,7 +326,7 @@ function say() {   // speak the step on screen; afterwards carry on, except at a
   const got = s.kind === "check" ? MEM.ans[s.qid] : null, walk = got && s.say_steps && s.say_steps.length > 1 ? s.say_steps : null;
   const text = !got ? s.say : !walk ? (got === s.answer ? s.say_right : s.say_wrong)   // a working of several steps is said one step at a time
     : [{ say: (got === s.answer ? "Correct." : "Not quite. " + s.say_answer) + ` Here is the working, in ${["", "one", "two", "three", "four", "five", "six", "seven", "eight"][walk.length] || walk.length} steps.` }]
-      .concat(walk.map((t, k) => ({ say: `${leads(walk.length)[k]} ${t}`, mark: k })));
+      .concat(walk.map((t, k) => ({ say: `${leads(walk.length)[k]} ${t}`, mark: k })), s.say_trap ? [{ say: s.say_trap }] : []);
   speakAll(text, () => {
     if ($("#s-auto").checked && !asked && I < LES.steps.length - 1) setTimeout(() => { if (!speaking && !paused) show(I + 1, true); }, 650);
   });
