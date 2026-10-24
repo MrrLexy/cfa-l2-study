@@ -136,7 +136,7 @@
   .strike { width: 38px; border: 1.5px solid var(--line); border-radius: var(--r); background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
   .strike:hover, .strike[aria-pressed="true"] { border-color: var(--line-strong); color: var(--ink); }
   .opt.struck { opacity: .55; } .opt.struck .v { text-decoration: line-through; }
-  @media (min-width: 961px) {
+  @media (min-width: 761px) {
     body.inset main { padding-top: var(--sp-3); padding-bottom: var(--sp-3); }
     body.inset .site-head, body.inset h1.site-title, body.inset .sethead .src { display: none; }
     body.inset .crumbs { margin-top: 0; }
@@ -146,6 +146,34 @@
     .case.one { height: var(--ws-h, 72vh); grid-template-rows: minmax(0, 1fr); }
     .case.one .lpane, .case.one .rpane { min-height: 0; }
     .case.one .lpane, .case.one .rscroll { overflow-y: auto; overscroll-behavior: contain; }
+    /* the whole question on one screen (the owner, 24 October 2026): the workspace takes the window's width and the vignette the
+       larger share; fitPanes() then sets the vignette compact (tighter exhibit rows and spacing, .fit-tight) and the type a little
+       smaller (--fit, down to 80%) until nothing scrolls. Only what still cannot fit scrolls, as before. (Two text columns were
+       tried: exhibit rows wrapped and the vignette grew taller.) */
+    body.inset main { max-width: none; }
+    /* (the split starts at 761 px, not 961, since 24 October 2026: an iPad upright gets the vignette beside the question, in a tall pane) */
+    .case.one { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); }   /* three short choices need less width than the vignette */
+    .case.one .rscroll { overflow-x: hidden; }
+    .case.one .q .qh { flex-wrap: wrap; row-gap: 4px; }
+  }
+  @media (min-width: 761px) and (max-width: 1100px) {
+    .case.one .qbar > .muted { display: none; }   /* a narrow question pane: the tabs above already say which question this is */
+    .case.one .lpane > *, .case.one .rscroll > * { zoom: var(--fit, 1); }
+    .case.one.fit-tight .vig .body .md { line-height: 1.45; }
+    .case.one.fit-tight .vig .body p { margin: 0 0 .55em; }
+    .case.one.fit-tight .vig .body td, .case.one.fit-tight .vig .body th { padding-top: 3px; padding-bottom: 3px; line-height: 1.35; }
+    .case.one.fit-tight .vig .body h3, .case.one.fit-tight .vig .body h4 { margin: .6em 0 .3em; }
+    .case.one.fit-tight .vig .body .table-wrap { margin: .3em 0 .6em; }
+    /* the rows above the workspace share one line, so the panes get the height (the breadcrumb text repeats the title) */
+    body.inset #view:has(> #ws) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
+    body.inset #view:has(> #ws) > * { margin-top: 0; margin-bottom: 0; }
+    body.inset #view:has(> #ws) > .crumbs { order: 1; flex: 0 0 auto; }
+    body.inset #view:has(> #ws) > .crumbs > span { display: none; }
+    body.inset #view:has(> #ws) > .sethead { order: 2; flex: 1 1 320px; }
+    body.inset #view:has(> #ws) > .sethead h2 { font-size: var(--fs-md, 18px); }
+    body.inset #view:has(> #ws) > .varbar { order: 3; flex: 0 0 auto; }
+    body.inset #view:has(> #ws) > .varbar .vnote { display: none; }
+    body.inset #view:has(> #ws) > #ws { order: 4; flex: 0 0 100%; }
   }
   .jump { display: none; }
   .qbtns { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
@@ -170,7 +198,7 @@
   .katex-display { margin: .5em 0; padding: .4em .6em; background: var(--sunk); border-radius: var(--r-sm); overflow-x: auto; overflow-y: hidden; }
   .expl .katex-display { background: var(--card); }
 
-  @media (max-width: 960px) {
+  @media (max-width: 760px) {
     .case { grid-template-columns: minmax(0, 1fr); }
     .vig { position: static; max-height: none; overflow: visible; }
     .vig > summary { cursor: pointer; padding-bottom: var(--sp-4); }
@@ -419,10 +447,24 @@ const inset = (on) => document.body.classList.toggle("inset", on);
 function fitWs() {
   const ws = $("ws");
   if (!ws) return;
-  if (matchMedia("(max-width: 960px)").matches) return void ws.style.removeProperty("--ws-h");
+  if (matchMedia("(max-width: 760px)").matches) return void ws.style.removeProperty("--ws-h");
   ws.style.setProperty("--ws-h", Math.max(440, window.innerHeight - (ws.getBoundingClientRect().top + window.scrollY) - 14) + "px");
+  fitPanes();
 }
-const paneTop = () => { const r = $("rscroll"); if (r) r.scrollTop = 0; if (matchMedia("(max-width: 960px)").matches) { const w = document.querySelector(".rpane"); if (w) w.scrollIntoView({ block: "start" }); } };
+// fit each pane to its height so nothing scrolls: the vignette compact first (tighter exhibit rows and spacing), then the type a
+// little smaller, down to 80%; the question's pane only smaller, down to 85%. What still cannot fit scrolls, at 90%, as before
+function fitPanes() {
+  const ws = $("ws"), lp = $("lpane"), rs = $("rscroll");
+  if (!ws) return;
+  ws.classList.remove("fit-tight");
+  for (const el of [lp, rs]) if (el) el.style.removeProperty("--fit");
+  if (matchMedia("(max-width: 760px)").matches) return;
+  const over = (el) => el.scrollHeight > el.clientHeight + 1;
+  const shrink = (el, steps) => { for (const z of steps) { el.style.setProperty("--fit", z); if (!over(el)) return true; } el.style.setProperty("--fit", 0.9); return false; };
+  if (lp && over(lp)) { ws.classList.add("fit-tight"); if (over(lp)) shrink(lp, [0.95, 0.9, 0.85, 0.8]); }
+  if (rs && over(rs)) shrink(rs, [0.95, 0.9, 0.85]);
+}
+const paneTop = () => { const r = $("rscroll"); if (r) r.scrollTop = 0; if (matchMedia("(max-width: 760px)").matches) { const w = document.querySelector(".rpane"); if (w) w.scrollIntoView({ block: "start" }); } };
 // the numbered tabs over the question: state(q) is "ok", "bad", "done" or ""
 function qTabs(Q, at, state, attr) {
   const cur = Q[at] ? Q[at].id : "";
@@ -457,7 +499,7 @@ function drawSet({ v, set }) {
   const howOpen = document.querySelector(".how") ? document.querySelector(".how").open : false;
   const how = !(set.approach || []).length ? "" : `<details class="card look how" ${howOpen ? "open" : ""}><summary><span class="eyebrow">How to work this case</span><span class="chip tog">Show / hide</span></summary>
     <div class="body"><ol>${set.approach.map((x) => `<li>${md(x).replace(/^<div class="md"><p>|<\/p><\/div>$/g, "")}</li>`).join("")}</ol></div></details>`;
-  const narrow = matchMedia("(max-width: 960px)").matches;
+  const narrow = matchMedia("(max-width: 760px)").matches;
   const vigOpen = !narrow || !document.querySelector(".vig") || document.querySelector(".vig").open;
   const Q = set.questions || [], sk = key(v, set), same = qSet === sk;
   const old = same ? { l: ($("lpane") || {}).scrollTop || 0, r: ($("rscroll") || {}).scrollTop || 0, q: qAt } : null;
@@ -496,7 +538,7 @@ function drawSet({ v, set }) {
         <div class="qbar"><button type="button" class="btn" data-qat="${qAt - 1}" data-prev ${qAt ? "" : "disabled"}>‹ Previous</button><span class="muted">Question ${qAt + 1} of ${Q.length}</span>${onward}</div></section>
     </div>`;
   const vig = $("vig");
-  vig.querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 960px)").matches) e.preventDefault(); });
+  vig.querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 760px)").matches) e.preventDefault(); });
   fitWs();
   if (old) { $("lpane").scrollTop = old.l; if (old.q === qAt) $("rscroll").scrollTop = old.r; }
   if (window.Walk) Walk.sync(answered ? q.id : null);
@@ -553,7 +595,7 @@ function drawExam() {
         <div class="qbar"><button type="button" class="btn" data-xstep="-1" data-prev ${first ? "disabled" : ""}>‹ Previous</button><span class="muted">Set ${exam.at + 1} of ${items.length} · question ${exam.qat + 1} of ${Q.length}</span>
           ${end ? `<button type="button" class="btn primary" data-xdone>Finish and mark</button>` : `<button type="button" class="btn primary" data-xstep="1" data-next>Next ›</button>`}</div></section>
     </div>`;
-  $("vig").querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 960px)").matches) e.preventDefault(); });
+  $("vig").querySelector("summary").addEventListener("click", (e) => { if (!matchMedia("(max-width: 760px)").matches) e.preventDefault(); });
   fitWs();
   if (old) { $("lpane").scrollTop = old.l; if (was === q.id) $("rscroll").scrollTop = old.r; }
   if (!clock) clock = setInterval(tick, 1000);
@@ -661,7 +703,7 @@ $("view").addEventListener("click", (e) => {
       const id = hb.dataset.hint;
       if (hinted.has(id)) { hinted.delete(id); if (tieQ === id) tieQ = null; return redraw(); }
       hinted.add(id); tieQ = id; redraw();
-      if (matchMedia("(max-width: 960px)").matches) { const v = $("vig"); v.open = true; v.scrollIntoView({ behavior: "smooth", block: "start" }); }
+      if (matchMedia("(max-width: 760px)").matches) { const v = $("vig"); v.open = true; v.scrollIntoView({ behavior: "smooth", block: "start" }); }
       return;
     }
     const card = t.closest('article.q[data-t="1"]'), mark = t.closest(".tie"), inVig = t.closest("#vig");
@@ -696,6 +738,8 @@ document.addEventListener("keydown", (e) => {
   if (b && !b.disabled) { e.preventDefault(); b.click(); }
 });
 window.addEventListener("resize", fitWs);
+document.addEventListener("toggle", (e) => { if (e.target.closest && e.target.closest("#lpane")) fitPanes(); }, true);   // "key details" or the vignette opened or closed
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitWs);
 window.addEventListener("storage", (e) => { if (e.key === STORE) { answers = loadJSON(STORE, {}); draw(true); } });
 function fromHash() {
   const m = location.hash.match(/set=([^&]+)/);
