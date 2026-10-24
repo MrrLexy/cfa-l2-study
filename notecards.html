@@ -626,13 +626,12 @@ function pick(ph, m) {
 // Not the card read back: the guided lesson's own explanation of what the card is about (static/lessons/<module>.json, checked
 // material, the spoken text each step already carries), its worked example where the lesson has one, and the traps the exam sets on
 
-const LS = { idx: null, got: new Map() };
+const LS = { got: new Map() };
 const nrm = (x) => String(x || "").toLowerCase().replace(/<[^>]+>/g, " ").replace(/\\[a-z]+/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+// a lesson's file is its module's name ("Fixed Income 3" -> fixed-income-3.json, as every lesson is named), asked for directly: the
+// stand-alone copy answers that address from its own data, though not the lessons' index
 async function lessonFor(k) {
-  if (!LS.idx) LS.idx = fetch("static/lessons/index.json").then((r) => r.json()).catch(() => null);
-  const idx = await LS.idx, m = idx && (idx.phases || []).flatMap((p) => p.modules || []).find((x) => x.key === k);
-  if (!m) return null;
-  if (!LS.got.has(k)) LS.got.set(k, fetch(`static/lessons/${m.slug}.json`).then((r) => r.json()).catch(() => null));
+  if (!LS.got.has(k)) LS.got.set(k, fetch(`static/lessons/${k.toLowerCase().replace(/\s+/g, "-")}.json`).then((r) => (r.ok ? r.json() : null)).then((d) => (d && d.steps ? d : null)).catch(() => null));
   return LS.got.get(k);
 }
 const plainSay = (t) => String(t || "").replace(/^You should be able to[^.]*\.\s*/i, "").replace(/\s+/g, " ").trim();
