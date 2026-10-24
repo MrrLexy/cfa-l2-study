@@ -115,13 +115,14 @@
   /* the card explained out loud, and what is said, to read along */
   .flip-audio { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: center; margin: 6px 0 10px; }
   .flip-audio .note { color: var(--muted); font-size: 13px; }
+  .flip [hidden] { display: none !important; }   /* .btn sets display, which would show a hidden button (Stop with nothing playing) */
   .flip-said { margin: 0 auto 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); font-size: 14.5px; line-height: 1.55; }
   .flip-said .sh { margin: 0 0 2px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
   .flip-said p { margin: 0 0 10px; color: var(--muted); }
   .flip-said .seg.on p { color: var(--ink); }
   .flip-said .seg.on .sh { color: var(--accent); }
   .flip-said .src { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
-  /* the subjects and modules in a menu on the left; the layout and the kinds of card stay on top (24 October 2026) */
+  /* the subjects and modules in a menu on the left, its top in line with the cards; the layout and the kinds of card above both (24 October 2026) */
   main.nc-wide { max-width: 1180px; }
   .nc-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
   .nc-main { min-width: 0; }
@@ -199,7 +200,6 @@
   <h1 class="site-title">Note cards</h1>
   <p class="lede">Four kinds of card, all made the same way, with the question on one side and the answer on the other: a summary of each module, a card for every learning outcome, an equation card that says when to use each formula and what to pull from the case, and a case study card with the details to look for. Read them as sheets, print them as cards to cut and fold, or flip through them on screen. Print them, save them as a PDF, or print a self-test copy with the answers left blank.</p>
   <div class="offline" id="offline">The note cards couldn't be loaded.</div>
-  <div class="nc-wrap"><nav class="nc-menu" id="menu" aria-label="Subjects and modules"></nav><div class="nc-main">
   <div class="nc-controls" id="controls" hidden>
     <div class="row"><span class="eyebrow">Layout</span>
       <select id="layout" aria-label="Layout"><option value="sheets">Sheets to read or print</option><option value="cut">Cards to print, cut and fold</option><option value="flip">Flip through on screen</option></select>
@@ -217,6 +217,7 @@
       <span class="nc-count" id="count"></span></div>
     <p class="nc-hint" id="hint">In the print window choose your printer, or "Save as PDF" to keep a copy. Two cards fit side by side on Letter or A4 paper.</p>
   </div>
+  <div class="nc-wrap"><nav class="nc-menu" id="menu" aria-label="Subjects and modules"></nav><div class="nc-main">
   <div class="sheet" id="sheet" hidden></div>
   <div class="flip" id="flip">
     <div class="flip-bar"><b id="f-pos"></b><span><label><input type="checkbox" id="f-left"> Only the cards I'm still learning</label> <button type="button" class="btn sm" id="f-shuffle" title="Shuffle the cards (S)">Shuffle</button></span></div>
@@ -430,6 +431,7 @@ function draw() {
   if (view === "cut") u.set("cs", $("cardsize").value);
   history.replaceState(null, "", location.pathname + "?" + u);
   if (view === "sheets") fit();
+  alignMenu();
 }
 // a formula wider than its card is scaled down to fit (measured at the card's real width, the same on paper)
 function fit(root, floor) {
@@ -545,6 +547,7 @@ function flipDraw(turning) {
   $("f-know").classList.toggle("on", MARK[c.id] === 1);
   $("f-again").classList.toggle("on", MARK[c.id] === 0);
   fit($("flip"));
+  alignMenu();
 }
 const flipTurn = () => { if (FL.cards[FL.at]) { FL.turned = !FL.turned; flipDraw(true); } };
 const flipGo = (d) => { const to = FL.at + d; if (to >= 0 && to < FL.cards.length) { FL.at = to; FL.turned = false; flipDraw(); } };
@@ -613,6 +616,14 @@ function paintMenu() {
     + subs.map((p) => `<button type="button" class="nc-mi${cur === p.id && !curM ? " on" : ""}" data-ph="${esc(p.id)}" data-m="" aria-expanded="${cur === p.id}">${esc(p.title)} <small>${mods(p).length}</small></button>`
       + (cur === p.id ? mods(p).map((k) => `<button type="button" class="nc-mi nc-mod${curM === k ? " on" : ""}" data-ph="${esc(p.id)}" data-m="${esc(k)}">${esc(k.replace(/^.*\s(\d+)$/, "$1"))}. ${esc(P.modules[k].title)}</button>`).join("") : "")).join("")
     + `</div></details>`;
+}
+function alignMenu() {
+  const menu = $("menu"), card = $("f-card");
+  if (!menu) return;
+  menu.style.marginTop = "";
+  if (document.body.dataset.view !== "flip" || !matchMedia("(min-width: 900px)").matches || !card) return;
+  const gap = card.getBoundingClientRect().top - menu.getBoundingClientRect().top;
+  if (gap > 0) menu.style.marginTop = Math.round(gap) + "px";
 }
 function pick(ph, m) {
   $("phase").value = ph;
@@ -749,7 +760,7 @@ function start() {
   $("phase").addEventListener("change", () => { fillModules(); draw(); paintMenu(); });
   $("module").addEventListener("change", paintMenu);
   $("menu").addEventListener("click", (e) => { const b = e.target.closest("[data-ph]"); if (b) pick(b.dataset.ph, b.dataset.m); });
-  window.addEventListener("resize", () => { const wide = matchMedia("(min-width: 900px)").matches; if (wide !== paintMenu.wide) { paintMenu.wide = wide; paintMenu(); } });
+  window.addEventListener("resize", () => { const wide = matchMedia("(min-width: 900px)").matches; if (wide !== paintMenu.wide) { paintMenu.wide = wide; paintMenu(); } alignMenu(); });
   $("o-all").addEventListener("click", () => { for (const id of ["o-sum", "o-los", "o-for", "o-case"]) $(id).checked = true; draw(); });
   $("f-explain").addEventListener("click", explainCard);
   $("f-stop").addEventListener("click", () => stopTalk(true));
