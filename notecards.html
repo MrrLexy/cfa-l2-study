@@ -106,7 +106,42 @@
   .cuthow { max-width: 190mm; margin: 0 auto 4mm; font-size: .92em; color: #454b57; }
 
   /* flip through on screen: one card at a time, question first */
-  .flip { --ink: #14161c; --rule: #9aa1ad; --soft: #eef1f6; --tag: #2b4a8b; max-width: 720px; margin: 0 auto var(--sp-5); }
+  .flip { max-width: 720px; margin: 0 auto var(--sp-5); }
+  /* the card's dark ink is for the white card only: set on .flip it reached the buttons too, dark labels on dark buttons (24 October 2026) */
+  .flip-card { --ink: #14161c; --rule: #9aa1ad; --soft: #eef1f6; --tag: #2b4a8b; }
+  .flip-nav .btn, .flip-mark .btn, .flip-bar .btn, .flip-audio .btn { color: var(--ink); }
+  .flip-nav .btn.primary { color: var(--on-accent); }
+  .flip .btn:disabled { opacity: .45; cursor: default; }
+  /* the card explained out loud, and what is said, to read along */
+  .flip-audio { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: center; margin: 6px 0 10px; }
+  .flip-audio .note { color: var(--muted); font-size: 13px; }
+  .flip-said { margin: 0 auto 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); font-size: 14.5px; line-height: 1.55; }
+  .flip-said .sh { margin: 0 0 2px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .flip-said p { margin: 0 0 10px; color: var(--muted); }
+  .flip-said .seg.on p { color: var(--ink); }
+  .flip-said .seg.on .sh { color: var(--accent); }
+  .flip-said .src { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+  /* the subjects and modules in a menu on the left; the layout and the kinds of card stay on top (24 October 2026) */
+  main.nc-wide { max-width: 1180px; }
+  .nc-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
+  .nc-main { min-width: 0; }
+  .nc-menu-box { border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+  .nc-menu-box > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; list-style-position: inside; }
+  .nc-menu-list { display: flex; flex-direction: column; padding: 0 6px 8px; }
+  .nc-mi { display: block; width: 100%; text-align: left; border: 0; background: none; color: var(--ink); font: inherit; font-size: 14px; line-height: 1.35; padding: 7px 10px; border-radius: 8px; cursor: pointer; }
+  .nc-mi small { color: var(--muted); font-size: 12px; margin-left: 4px; }
+  .nc-mi:hover { background: var(--accent-soft); }
+  .nc-mi.on { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; }
+  .nc-mi.nc-mod { padding-left: 22px; font-size: 13px; color: var(--muted); }
+  .nc-mi.nc-mod.on { color: var(--ink); }
+  .nc-controls .row.subj { display: none; }
+  .nc-controls .kinds-all { min-height: 34px; }
+  @media (min-width: 900px) {
+    .nc-wrap { grid-template-columns: 250px minmax(0, 1fr); align-items: start; }
+    .nc-menu { position: sticky; top: var(--sp-3); max-height: calc(100vh - 24px); overflow-y: auto; }
+    .nc-menu-box > summary { pointer-events: none; list-style: none; }
+    .nc-menu-box > summary::-webkit-details-marker { display: none; }
+  }
   .flip-bar, .flip-nav, .flip-mark { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; margin: 10px 0; }
   .flip-nav { justify-content: center; }
   .flip-mark { justify-content: center; }
@@ -138,7 +173,8 @@
   @page { margin: 10mm 10mm 13mm; }
   @media print {
     html, body { background: #fff !important; }
-    header, .site-head, .site-title, .lede, .nc-controls, .offline, #userbar { display: none !important; }
+    header, .site-head, .site-title, .lede, .nc-controls, .offline, #userbar, .nc-menu { display: none !important; }
+    .nc-wrap { display: block !important; }
     main { max-width: none; margin: 0; padding: 0; }
     .sheet { max-width: none; margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
     .mod { break-before: page; margin-top: 0; }
@@ -158,21 +194,23 @@
   <div class="site-nav" role="navigation" aria-label="Pages"><a href="app.html" aria-label="Study Map"><span class="nav-long">Study Map</span><span class="nav-short">Map</span></a><a href="lesson.html">Lessons</a><a href="cases.html" aria-label="Case studies"><span class="nav-long">Case studies</span><span class="nav-short">Cases</span></a><a href="rapid.html" aria-label="Rapid fire"><span class="nav-long">Rapid fire</span><span class="nav-short">Rapid</span></a><a href="notecards.html" aria-label="Note cards"><span class="nav-long">Note cards</span><span class="nav-short">Cards</span></a></div>
   <div id="userbar"></div>
 </div></header>
-<main>
+<main class="nc-wide">
   <div class="site-head"><span class="eyebrow">Read, print or flip through</span></div>
   <h1 class="site-title">Note cards</h1>
   <p class="lede">Four kinds of card, all made the same way, with the question on one side and the answer on the other: a summary of each module, a card for every learning outcome, an equation card that says when to use each formula and what to pull from the case, and a case study card with the details to look for. Read them as sheets, print them as cards to cut and fold, or flip through them on screen. Print them, save them as a PDF, or print a self-test copy with the answers left blank.</p>
   <div class="offline" id="offline">The note cards couldn't be loaded.</div>
+  <div class="nc-wrap"><nav class="nc-menu" id="menu" aria-label="Subjects and modules"></nav><div class="nc-main">
   <div class="nc-controls" id="controls" hidden>
     <div class="row"><span class="eyebrow">Layout</span>
       <select id="layout" aria-label="Layout"><option value="sheets">Sheets to read or print</option><option value="cut">Cards to print, cut and fold</option><option value="flip">Flip through on screen</option></select>
       <select id="cardsize" aria-label="Card size"><option value="index">3 × 5 in index cards (2 to a page)</option><option value="large">Taller cards, more on each (2 to a page)</option></select></div>
-    <div class="row"><span class="eyebrow">Subject</span><select id="phase" aria-label="Subject"></select><select id="module" aria-label="Module"></select></div>
+    <div class="row subj"><span class="eyebrow">Subject</span><select id="phase" aria-label="Subject"></select><select id="module" aria-label="Module"></select></div>
     <div class="row"><span class="eyebrow">On the cards</span>
       <label class="opt"><input type="checkbox" id="o-sum" checked> Module summaries</label>
       <label class="opt"><input type="checkbox" id="o-los" checked> Outcome cards</label>
       <label class="opt"><input type="checkbox" id="o-for"> Equation cards</label>
       <label class="opt"><input type="checkbox" id="o-case"> Case study cards</label>
+      <button type="button" class="btn sm kinds-all" id="o-all" title="Tick all four kinds of card">All kinds</button>
       <label class="opt selfopt"><input type="checkbox" id="o-self"> Self-test (answers left blank)</label>
       <select id="size" aria-label="Text size"><option value="9">Small text</option><option value="10" selected>Standard text</option><option value="11.5">Large text</option></select></div>
     <div class="row"><button type="button" class="btn primary" id="print">Print or save as PDF</button><a class="btn" id="pdf" hidden download>Download the PDF</a>
@@ -181,12 +219,15 @@
   </div>
   <div class="sheet" id="sheet" hidden></div>
   <div class="flip" id="flip">
-    <div class="flip-bar"><b id="f-pos"></b><span><label><input type="checkbox" id="f-left"> Only the cards I'm still learning</label> <button type="button" class="btn sm" id="f-shuffle">Shuffle</button></span></div>
+    <div class="flip-bar"><b id="f-pos"></b><span><label><input type="checkbox" id="f-left"> Only the cards I'm still learning</label> <button type="button" class="btn sm" id="f-shuffle" title="Shuffle the cards (S)">Shuffle</button></span></div>
     <div class="flip-card" id="f-card" tabindex="0" role="button" aria-label="Card. Press Space to turn it over."></div>
-    <div class="flip-nav"><button type="button" class="btn" id="f-prev">‹ Previous</button><button type="button" class="btn primary" id="f-turn">Show the answer</button><button type="button" class="btn" id="f-next">Next ›</button></div>
-    <div class="flip-mark"><button type="button" class="btn sm" id="f-again">Still learning</button><button type="button" class="btn sm" id="f-know">I know this</button></div>
+    <div class="flip-nav"><button type="button" class="btn" id="f-prev" title="Previous card (←)">‹ Previous</button><button type="button" class="btn primary" id="f-turn">Show the answer</button><button type="button" class="btn" id="f-next" title="Next card (→)">Next ›</button></div>
+    <div class="flip-mark"><button type="button" class="btn sm" id="f-again" title="Mark this card as still learning (L)">Still learning</button><button type="button" class="btn sm" id="f-know" title="Mark this card as known (K)">I know this</button></div>
+    <div class="flip-audio"><button type="button" class="btn" id="f-explain" title="Explains this card out loud, from your guided lesson (E)">🔊 Explain it</button><button type="button" class="btn" id="f-stop" hidden title="Stop the explanation (E)">■ Stop</button><span class="note" id="f-anote">Not the card read back: the lesson's explanation, an example where it has one, and the traps</span></div>
+    <div class="flip-said" id="f-said" hidden aria-live="polite"></div>
     <div class="flip-score" id="f-score"></div>
   </div>
+  </div></div>
 </main>
 <script src="static/data/study-path.js"></script>
 <script src="static/data/los-cards.js"></script>
@@ -254,7 +295,8 @@ const one = (s) => md(s).replace(/^<div class="md"><p>([\s\S]*)<\/p><\/div>$/, "
 let P = null, L = null, N = null, F = {}, C = {}, PDFS = null;
 const q = new URLSearchParams(location.search);
 const cap = (s) => s ? s[0].toUpperCase() + s.slice(1) : s;
-const phaseOf = (id) => P.phases.find((p) => p.id === id) || P.phases[0];
+const ALLP = () => ({ id: "all", title: "All subjects", modules: P.phases.flatMap((p) => p.modules) });   // every module, subject by subject
+const phaseOf = (id) => id === "all" ? ALLP() : P.phases.find((p) => p.id === id) || P.phases[0];
 const mods = (p) => p.modules.filter((k) => L[k]);
 const nLos = (k) => (L[k] && L[k].los.length) || 0;
 
@@ -484,8 +526,9 @@ function flipStart(deck) {
 }
 function flipDraw(turning) {
   const c = FL.cards[FL.at], el = $("f-card"), known = DECK.filter((x) => MARK[x.id] === 1).length;
+  if (AU.card && (!c || c.id !== AU.card)) { stopTalk(); AU.card = null; $("f-anote").textContent = "Not the card read back: the lesson's explanation, an example where it has one, and the traps"; }
   $("f-score").textContent = DECK.length ? `${known} of ${plural(DECK.length, "card")} marked as known` : "";
-  for (const id of ["f-prev", "f-next", "f-turn", "f-again", "f-know", "f-shuffle"]) $(id).disabled = !c;
+  for (const id of ["f-prev", "f-next", "f-turn", "f-again", "f-know", "f-shuffle", "f-explain"]) $(id).disabled = !c;
   if (!c) {
     el.className = "flip-card";
     el.innerHTML = `<div class="ff"><div class="fmsg">${DECK.length ? "Every card here is marked as known. Untick the box above to see them all again." : "No cards with these choices. Tick at least one kind of card."}</div></div>`;
@@ -542,9 +585,9 @@ async function load() {
     try { PDFS = await get("static/notecards/index.json"); } catch { PDFS = null; }
     const phases = P.phases.filter((p) => mods(p).some(nLos) || mods(p).length);
     if (!phases.length) throw new Error("empty");
-    $("phase").innerHTML = phases.map((p) => `<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("");
+    $("phase").innerHTML = `<option value="all">All subjects</option>` + phases.map((p) => `<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("");
     const m = q.get("m"), viaModule = m && P.phases.find((p) => p.modules.includes(m));
-    $("phase").value = (viaModule || phaseOf(q.get("p"))).id;
+    $("phase").value = q.get("p") === "all" && !m ? "all" : (viaModule || phaseOf(q.get("p"))).id;
     $("module").dataset.want = m || "";
     fillModules();
     if (q.get("show") !== null) { const want = q.get("show").split(","); for (const [id, key] of [["o-sum", "sum"], ["o-los", "los"], ["o-for", "eq"], ["o-case", "case"]]) $(id).checked = want.includes(key); }
@@ -553,13 +596,164 @@ async function load() {
     if (CARD_SIZES[q.get("cs")]) $("cardsize").value = q.get("cs");
     $("controls").hidden = $("sheet").hidden = false;
     draw();
+    paintMenu.wide = matchMedia("(min-width: 900px)").matches;
+    paintMenu();
     document.documentElement.dataset.ready = "1";
   } catch (e) {
     $("offline").style.display = "block";
   }
 }
+// ------------------------------------------------------------------ the menu on the left: every subject, the open one's modules
+function paintMenu() {
+  if (!P) return;
+  const cur = $("phase").value, curM = $("module").value, subs = P.phases.filter((p) => mods(p).length), all = subs.reduce((n, p) => n + mods(p).length, 0);
+  const wide = matchMedia("(min-width: 900px)").matches, box = $("menu").querySelector("details"), open = wide || (box ? box.open : false);
+  $("menu").innerHTML = `<details class="nc-menu-box"${open ? " open" : ""}><summary>${wide ? "Subjects and modules" : `Showing: ${esc(curM ? curM : phaseOf(cur).title.replace(/^\d+\.\s*/, ""))}`}</summary><div class="nc-menu-list">`
+    + `<button type="button" class="nc-mi${cur === "all" ? " on" : ""}" data-ph="all" data-m="">All subjects <small>${all} modules</small></button>`
+    + subs.map((p) => `<button type="button" class="nc-mi${cur === p.id && !curM ? " on" : ""}" data-ph="${esc(p.id)}" data-m="" aria-expanded="${cur === p.id}">${esc(p.title)} <small>${mods(p).length}</small></button>`
+      + (cur === p.id ? mods(p).map((k) => `<button type="button" class="nc-mi nc-mod${curM === k ? " on" : ""}" data-ph="${esc(p.id)}" data-m="${esc(k)}">${esc(k.replace(/^.*\s(\d+)$/, "$1"))}. ${esc(P.modules[k].title)}</button>`).join("") : "")).join("")
+    + `</div></details>`;
+}
+function pick(ph, m) {
+  $("phase").value = ph;
+  $("module").dataset.want = m || "";
+  fillModules();
+  draw();
+  paintMenu();
+}
+
+// ------------------------------------------------------------------ the card explained out loud (the owner, 24 October 2026)
+// Not the card read back: the guided lesson's own explanation of what the card is about (static/lessons/<module>.json, checked
+// material, the spoken text each step already carries), its worked example where the lesson has one, and the traps the exam sets on
+
+const LS = { idx: null, got: new Map() };
+const nrm = (x) => String(x || "").toLowerCase().replace(/<[^>]+>/g, " ").replace(/\\[a-z]+/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+async function lessonFor(k) {
+  if (!LS.idx) LS.idx = fetch("static/lessons/index.json").then((r) => r.json()).catch(() => null);
+  const idx = await LS.idx, m = idx && (idx.phases || []).flatMap((p) => p.modules || []).find((x) => x.key === k);
+  if (!m) return null;
+  if (!LS.got.has(k)) LS.got.set(k, fetch(`static/lessons/${m.slug}.json`).then((r) => r.json()).catch(() => null));
+  return LS.got.get(k);
+}
+const plainSay = (t) => String(t || "").replace(/^You should be able to[^.]*\.\s*/i, "").replace(/\s+/g, " ").trim();
+const wordsOf = (t) => new Set(nrm(t).split(" ").filter((w) => w.length > 4));
+function trapsFor(lesson, about, n) {
+  const t = (lesson.steps || []).find((x) => x.kind === "traps"), w = wordsOf(about);
+  if (!t || !(t.traps || []).length) return [];
+  const scored = t.traps.map((x) => ({ x, s: [...wordsOf(x.trap + " " + x.avoid)].filter((y) => w.has(y)).length }));
+  return (about ? scored.filter((y) => y.s > 0).sort((a, b) => b.s - a.s) : scored).slice(0, n).map(({ x }) => `${x.trap} The way round it: ${x.avoid}`);
+}
+async function scriptFor(c) {
+  const [kind, k, rest] = c.id.split("|"), lesson = await lessonFor(k), out = [];
+  if (!lesson) return out;
+  const S = lesson.steps || [], add = (h, t) => { t = plainSay(t); if (t && !out.some((o) => o.t === t)) out.push({ h, t }); };
+  if (kind === "eq") {
+    const fs = (F[k] && F[k].formulas) || [], f = fs.find((x, i) => String(x.id || i) === rest) || {};
+    const fi = S.findIndex((x) => x.kind === "formula" && nrm(x.name) === nrm(f.name));
+    if (fi >= 0) {
+      const before = [];
+      for (let i = fi - 1; i >= 0 && before.length < 2 && S[i].kind === "explain"; i--) before.unshift(S[i]);
+      before.forEach((x) => add("The idea", x.say));
+      for (let i = fi + 1; i < S.length && !["part", "formula", "traps", "end"].includes(S[i].kind); i++)
+        if (S[i].kind === "explain" && /\d/.test(S[i].say || "")) { add("Worked through", S[i].say); break; }
+    }
+    trapsFor(lesson, `${f.name} ${f.use || ""} ${f.pitfall || ""}`, 2).forEach((t) => add("A trap the exam sets", t));
+  } else if (kind === "los") {
+    const n = +rest + 1;
+    S.filter((x) => x.kind === "explain" && +x.outcome === n).slice(0, 4).forEach((x, j) => add(j ? "Then" : "The idea", x.say));
+    trapsFor(lesson, (P.modules[k].los || [])[+rest] || "", 2).forEach((t) => add("A trap the exam sets", t));
+  } else if (kind === "sum") {
+    const intro = S.find((x) => x.kind === "intro");
+    if (intro) add("Why this module matters", intro.why || intro.say);
+    trapsFor(lesson, "", 3).forEach((t) => add("A trap the exam sets", t));
+  } else if (kind === "case") {
+    const fam = C[k] && C[k].get(rest), st = fam && fam[0], about = st ? (st.questions || []).map((x) => `${x.trap || ""} ${x.los || ""}`).join(" ") : "";
+    trapsFor(lesson, about, 3).forEach((t) => add("A trap these questions set", t));
+    const intro = S.find((x) => x.kind === "intro");
+    if (!out.length && intro) add("What the module asks of you", intro.why || intro.say);
+  }
+  return out;
+}
+const SILENCE = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+const AU = { tok: 0, el: null, card: null, nat: !!(window.Site && Site.voice) };
+const canSpeak = "speechSynthesis" in window;
+function chunks(t) {   // stretches of a sentence or a few, under ~320 characters, for the voice
+  const out = [];
+  for (const s of String(t).match(/[^.!?]+[.!?]+["')]*\s*|[^.!?]+$/g) || [t]) {
+    if (out.length && (out[out.length - 1] + s).length < 320) out[out.length - 1] += s; else out.push(s);
+  }
+  return out.map((x) => x.trim()).filter(Boolean);
+}
+function clipOf(text) {
+  return fetch("speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })
+    .then((r) => (r.ok && /audio/.test(r.headers.get("Content-Type") || "") ? r.blob() : null))
+    .then((b) => (b && b.size > 200 ? URL.createObjectURL(b) : null)).catch(() => null);
+}
+function playUrl(url, tok) {
+  return new Promise((res) => {
+    if (tok !== AU.tok) return res();
+    const a = AU.el; a.onended = a.onerror = () => { URL.revokeObjectURL(url); res(); }; a.src = url;
+    const p = a.play(); if (p && p.catch) p.catch(() => res());
+  });
+}
+function sayBrowser(text, tok) {
+  return new Promise((res) => {
+    if (!canSpeak || tok !== AU.tok) return res();
+    const u = new SpeechSynthesisUtterance(text), vs = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang));
+    const v = vs.find((x) => /natural|neural|premium|enhanced|siri/i.test(x.name)) || vs.find((x) => /samantha|daniel|karen|ava|allison|aria|jenny/i.test(x.name)) || vs[0];
+    if (v) u.voice = v;
+    u.rate = 1; u.onend = u.onerror = () => res();
+    speechSynthesis.speak(u);
+  });
+}
+function stopTalk(keepText) {
+  AU.tok++;
+  try { if (canSpeak) speechSynthesis.cancel(); } catch { /* nothing speaking */ }
+  if (AU.el) { try { AU.el.pause(); } catch { /* nothing playing */ } }
+  $("f-explain").hidden = false; $("f-stop").hidden = true;
+  if (!keepText) { $("f-said").hidden = true; $("f-said").innerHTML = ""; }
+  else $("f-said").querySelectorAll(".seg.on").forEach((x) => x.classList.remove("on"));
+}
+async function explainCard() {
+  const c = FL.cards[FL.at];
+  if (!c) return;
+  if (!$("f-stop").hidden) return stopTalk(true);
+  const tok = ++AU.tok;
+  AU.card = c.id;
+  if (AU.nat) { try { AU.el = AU.el || new Audio(); AU.el.src = SILENCE; const p = AU.el.play(); if (p && p.catch) p.catch(() => {}); } catch { AU.nat = false; } }   // while the tap is still being handled: lets an iPad play later
+  else if (canSpeak) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch { /* speaks later anyway */ } }
+  $("f-explain").hidden = true; $("f-stop").hidden = false; $("f-anote").textContent = "Getting the explanation from your lesson…";
+  const segs = await scriptFor(c);
+  if (tok !== AU.tok) return;
+  if (!segs.length) { stopTalk(); $("f-anote").textContent = "Your guided lesson has no explanation for this card yet."; return; }
+  $("f-anote").textContent = AU.nat ? "Explaining" : "Explaining (your browser's voice)";
+  $("f-said").innerHTML = segs.map((x, i) => `<div class="seg" data-i="${i}"><div class="sh">${esc(x.h)}</div><p>${esc(x.t)}</p></div>`).join("")
+    + `<p class="src">From your guided lesson for ${esc(c.k)}.</p>`;
+  $("f-said").hidden = false;
+  const parts = segs.flatMap((x, i) => chunks(x.t).map((t) => ({ i, t })));
+  
+  // busy answer is tried again once before the browser's voice stands in for that stretch
+  const fetchClip = (t) => clipOf(t).then((u) => u || new Promise((r) => setTimeout(r, 1200)).then(() => clipOf(t)));
+  let next = AU.nat && parts.length ? fetchClip(parts[0].t) : null;
+  for (let j = 0; j < parts.length; j++) {
+    if (tok !== AU.tok) return;
+    $("f-said").querySelectorAll(".seg").forEach((x) => x.classList.toggle("on", +x.dataset.i === parts[j].i));
+    const url = next ? await next : null;
+    if (tok !== AU.tok) return;
+    next = AU.nat && parts[j + 1] ? fetchClip(parts[j + 1].t) : null;
+    if (url) await playUrl(url, tok); else await sayBrowser(parts[j].t, tok);
+  }
+  if (tok === AU.tok) { stopTalk(true); $("f-anote").textContent = "Done. Tap Explain it to hear it again."; }
+}
+
 function start() {
-  $("phase").addEventListener("change", () => { fillModules(); draw(); });
+  $("phase").addEventListener("change", () => { fillModules(); draw(); paintMenu(); });
+  $("module").addEventListener("change", paintMenu);
+  $("menu").addEventListener("click", (e) => { const b = e.target.closest("[data-ph]"); if (b) pick(b.dataset.ph, b.dataset.m); });
+  window.addEventListener("resize", () => { const wide = matchMedia("(min-width: 900px)").matches; if (wide !== paintMenu.wide) { paintMenu.wide = wide; paintMenu(); } });
+  $("o-all").addEventListener("click", () => { for (const id of ["o-sum", "o-los", "o-for", "o-case"]) $(id).checked = true; draw(); });
+  $("f-explain").addEventListener("click", explainCard);
+  $("f-stop").addEventListener("click", () => stopTalk(true));
   for (const id of ["module", "o-sum", "o-los", "o-for", "o-case", "o-self", "size", "layout", "cardsize"]) $(id).addEventListener("change", draw);
   $("f-left").addEventListener("change", () => flipStart(DECK));
   $("f-card").addEventListener("click", (e) => { if (!e.target.closest("a")) flipTurn(); });
@@ -580,6 +774,7 @@ function start() {
     else if (k === "k") flipMark(1);
     else if (k === "l") flipMark(0);
     else if (k === "s") flipShuffle();
+    else if (k === "e") explainCard();
     else return;
     e.preventDefault();
   });
