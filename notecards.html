@@ -689,10 +689,10 @@ const AU = { tok: 0, el: null, card: null, nat: !!(window.Site && Site.voice) };
 const canSpeak = "speechSynthesis" in window;
 function chunks(t) {   // stretches of a sentence or a few, under ~320 characters, for the voice
   const out = [];
-  for (const s of String(t).match(/[^.!?]+[.!?]+["')]*\s*|[^.!?]+$/g) || [t]) {
+  for (const s of String(t).replace(/(\d)\.(\d)/g, "$1\u2024$2").match(/[^.!?]+[.!?]+["')]*\s*|[^.!?]+$/g) || [t]) {   // not at a decimal point
     if (out.length && (out[out.length - 1] + s).length < 320) out[out.length - 1] += s; else out.push(s);
   }
-  return out.map((x) => x.trim()).filter(Boolean);
+  return out.map((x) => x.replace(/\u2024/g, ".").trim()).filter(Boolean);
 }
 function clipOf(text) {
   return fetch("speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })

@@ -5,8 +5,9 @@
   "use strict";
   const DATA = (window.__STUDY_DATA = window.__STUDY_DATA || {});
   const cache = {}, pending = {}, loading = {};
-  // a guided lesson's data file is fetched only when that lesson is opened
-  const lazy = (u) => { const m = u.match(/^static\/lessons\/([a-z0-9-]+)\.json$/); return m ? `static/data/lesson-${m[1]}.js` : null; };
+  // a guided lesson's data file is fetched only when that lesson is opened, a video walkthrough's when it is played
+  const lazy = (u) => { const m = u.match(/^static\/lessons\/([a-z0-9-]+)\.json$/), v = u.match(/^static\/videos\/([a-z0-9-]+)\.json$/);
+    return m ? `static/data/lesson-${m[1]}.js` : v ? `static/data/video-${v[1]}.js` : null; };
   const script = (src) => loading[src] || (loading[src] = new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }));
   const realFetch = window.fetch.bind(window);
   const reply = (body, status) => new Response(body, { status: status || 200, headers: { "Content-Type": "application/json" } });

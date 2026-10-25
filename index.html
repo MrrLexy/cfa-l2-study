@@ -71,7 +71,7 @@
   const P = window.StudyProfile, L = window.StudyLock, $ = (id) => document.getElementById(id);
   const next = (() => {
     const n = new URLSearchParams(location.search).get("next") || "";
-    return /^(app|cases)\.html(#.*)?$/.test(n) ? n : "app.html#path";
+    return /^(app|cases|video)\.html(#.*)?$/.test(n) ? n : "app.html#path";   // video.html#q=<question>: a case question's walkthrough
   })();
   const go = () => { const u = P.user(); location.href = u ? next.replace(/^([^#]*)/, "$1?as=" + encodeURIComponent(u.name)) : next; };
   const needs = () => !!(L && L.locked && !L.hasKey());   // a locked copy asks for the passcode until this device is unlocked
