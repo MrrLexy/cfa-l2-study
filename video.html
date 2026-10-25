@@ -21,11 +21,10 @@
 <div class="pv">
   <div class="pv-top"><a href="cases.html" id="back">‹ Case studies</a><div class="pv-title"><h1 id="title">Video walkthrough</h1><span class="sub" id="sub"></span></div></div>
   <div class="pv-main">
-  <aside class="pv-side" id="side" aria-label="The case, the question, what it covers and tips">
+  <aside class="pv-side" id="side" aria-label="The case, the question and what it covers">
     <section class="pv-card pv-case" id="side-case" hidden aria-label="The case"><div class="pv-card-h" id="case-h">The case</div><div class="pv-vt" id="vt"></div><div class="pv-sheet" id="case-b"></div></section>
     <section class="pv-card pv-q" id="side-q" hidden aria-label="The question"><div class="pv-qhead"><div class="pv-card-h" id="q-h">The question</div><nav class="pv-qnav" id="qnav" aria-label="The questions on this case"></nav></div><div id="side-stem"></div><ol class="pv-opts" id="side-opts"></ol></section>
     <section class="pv-card pv-cov" id="side-cov" hidden aria-label="What this question covers"><div class="pv-card-h">This question covers</div><div id="side-cov-b"></div></section>
-    <div class="pv-tip" id="tip" hidden role="note" aria-live="polite"><div class="pv-tip-h" id="tip-h">Tip</div><div id="tip-t"></div><button type="button" id="tip-x" aria-label="Close the tip">✕</button></div>
   </aside>
   <div class="pv-split" id="split" role="separator" aria-orientation="vertical" aria-label="Drag to give the case or the board more room" aria-valuemin="25" aria-valuemax="65" tabindex="0"></div>
   <div class="pv-video">
@@ -51,7 +50,7 @@
       <button type="button" id="next" title="Forward one step (→)">Step ›</button>
       <button type="button" id="restart" title="Start again">⟲ Restart</button>
       <span class="grow"></span>
-      <label title="Speed"><span class="lbl">Speed</span> <select id="speed" aria-label="Speed"><option value="0.85">0.85×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>
+      <span class="pv-speed" role="group" aria-label="Speed"><span class="lbl">Speed</span><button type="button" id="slower" title="Slower by 0.15 (−)" aria-label="Slower">−</button><output id="speed" aria-live="polite">1.00×</output><button type="button" id="faster" title="Faster by 0.15 (+)" aria-label="Faster">+</button></span>
       <button type="button" class="tog" id="voice" aria-pressed="true" title="Voice">🔊 Voice</button>
       <button type="button" class="tog" id="caps" aria-pressed="true" title="Captions">CC</button>
       <a class="tog" id="nextq" hidden>Next question ›</a>
@@ -59,6 +58,7 @@
     </div>
   </div>
   <div class="pv-cap" id="cap" aria-live="polite"></div>
+  <div class="pv-tip" id="tip" hidden role="note" aria-live="polite"><div class="pv-tip-h" id="tip-h">Tip</div><div id="tip-t"></div><button type="button" id="tip-x" aria-label="Close the tip">✕</button></div>   
   <div class="pv-steps" id="steps" hidden></div>
   </div>
   </div>

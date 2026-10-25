@@ -207,3 +207,6 @@
 
 .los .katex-display, .los .los-f { max-width: 100%; }
 .los-ans-p, .los-ans-p .rich, .los .rich { min-width: 0; max-width: 100%; }
+
+/* a Path question's video walkthrough, once it is answered (24 October 2026) */
+.p-vid { display: inline-block; margin: 6px 0 2px; font-weight: 600; text-decoration: none; }

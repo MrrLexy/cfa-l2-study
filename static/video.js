@@ -133,7 +133,7 @@
     },
     async tip(o, t) {   
       if (t === "instant") return;
-      
+      // under the captions, below the board (the owner, 24 October 2026): never over the working
       // in short bullets (o.points), so a tip reads at a glance (the owner, 24 October 2026); a plain o.text still works
       const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
       $("tip-h").textContent = o.title || "Tip";
@@ -290,7 +290,7 @@
     $("side-q").hidden = false;
   }
   function sideCase(C, qs, n) {   // a typed case: its name, its text and tables
-    sideHead(`<b>${esc(C.title || "The case")}</b>`, qs || [], n, (x) => S.id.replace(/q\d+$/, `q${x}`));
+    sideHead(`<b>${esc(C.title || "The case")}</b>`, qs || [], n, (x) => (C.ids ? C.ids[x - 1] : S.id.replace(/q\d+$/, `q${x}`)));
     $("case-b").innerHTML = mdLite(C.md || ""); $("case-b").classList.add("typed"); $("side-case").hidden = false;
   }
   function sideQuestion(o, head) {   // the question's text, its choices stacked as on the exam
@@ -327,8 +327,8 @@
     return out.join("");
   }
   function seeInSide(el, middle) {   // brings a part of the left column into its view, without moving the page
-    const sd = $("side"), a = sd.getBoundingClientRect(), b = el.getBoundingClientRect(), tip = $("tip").hidden ? 0 : $("tip").offsetHeight;
-    if (b.top >= a.top && b.bottom <= a.bottom - tip) return;
+    const sd = $("side"), a = sd.getBoundingClientRect(), b = el.getBoundingClientRect();
+    if (b.top >= a.top && b.bottom <= a.bottom) return;
     sd.scrollBy({ top: b.top - a.top - (middle ? a.height / 3 : 8), behavior: "smooth" });
   }
   function splitter() {   // the line between the columns: drag it (or ← → on it) to give the case or the board more room; kept in this browser
@@ -485,11 +485,21 @@
     $("restart").addEventListener("click", () => { unlock(); playing = true; $("play").textContent = "⏸ Pause"; scene(0, true); });
     for (const id of ["steps", "parts"]) $(id).addEventListener("click", (e) => { const b = e.target.closest("[data-i]"); if (b) { unlock(); scene(+b.dataset.i, true); } });
     for (const id of ["voice", "caps", "steps-t"]) $(id).addEventListener("click", () => { tog(id, !on(id)); if (id === "voice" && !on(id)) hush(); });
-    $("speed").addEventListener("change", () => { speed = +$("speed").value; });
+    // the speed: − and + in steps of 0.15, from 0.55× to 2.05× (the owner, 24 October 2026), the voice changing at once; kept in this browser
+    const setSpeed = (v) => {
+      speed = Math.round(Math.min(2.05, Math.max(0.55, v)) * 100) / 100;
+      $("speed").textContent = `${speed.toFixed(2)}×`; $("slower").disabled = speed <= 0.55; $("faster").disabled = speed >= 2.05;
+      if (AU.el) { try { AU.el.playbackRate = speed; } catch { /* the next sentence takes it */ } }
+      try { localStorage.setItem("pv-speed", String(speed)); } catch { /* not kept */ }
+    };
+    try { const v = parseFloat(localStorage.getItem("pv-speed")); setSpeed(v > 0 ? v : 1); } catch { setSpeed(1); }
+    $("slower").addEventListener("click", () => setSpeed(speed - 0.15));
+    $("faster").addEventListener("click", () => setSpeed(speed + 0.15));
     document.addEventListener("keydown", (e) => {
       if (e.target.closest("select, input") || (e.key === " " && e.target.closest("button"))) return;   // a focused button takes its own Space
       if (e.key === " ") { e.preventDefault(); play(); }
       else if (e.key === "ArrowRight") step(1); else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "-" || e.key === "_") $("slower").click(); else if (e.key === "+" || e.key === "=") $("faster").click();
     });
   }
   load();

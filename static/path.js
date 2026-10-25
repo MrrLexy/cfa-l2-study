@@ -2,6 +2,7 @@
 (() => {
   "use strict";
   let PATH = null;
+  const VIDEO = "video.html#q=";   // each question's video walkthrough (24 October 2026; video.html#q= in the public copy)
   const RN = { A: "Round A", B: "Round B" };
   const STAGES = [["intro", "Plan"], ["A", "Round A"], ["review", "Review"], ["B", "Round B"], ["done", "Done"]];
   const ORDERP = [];
@@ -268,7 +269,7 @@
       ${hint ? `<p class="tienote">Hint: the highlighted ${T.given === 1 ? "value is the one" : "values are the ones"} this question uses${x.set ? ", here and in the case above" : ""}.</p>` : ""}
       ${window.LosView ? LosView.tag(k, id) : ""}
       <div class="p-opts">${["A", "B", "C"].map((l) => optHTML(id, l, rec, tt)).join("")}</div>
-      ${rec ? `<div class="p-expl"><div class="p-verdict">${rec[0] === "-" ? "Skipped" : rec[1] ? "Correct" : `Not quite: the answer is ${x.answer}`}</div>${any ? tieKey(live) : ""}${(x.steps || []).length ? `<div class="p-walk"><span class="eyebrow">Walkthrough</span><ol>${x.steps.map((w, i) => `<li data-seg="s${i}">${RT(w, tt, false, true)}</li>`).join("")}</ol></div>` : ""}<div class="rich" data-seg="expl">${RT(x.explanation, tt)}</div>${window.Walk ? Walk.bar(id) : ""}</div>`
+      ${rec ? `<div class="p-expl"><div class="p-verdict">${rec[0] === "-" ? "Skipped" : rec[1] ? "Correct" : `Not quite: the answer is ${x.answer}`}</div><a class="p-vid" href="${VIDEO}${encodeURIComponent("path-" + id)}">▶ Video walkthrough of this question ›</a>${any ? tieKey(live) : ""}${(x.steps || []).length ? `<div class="p-walk"><span class="eyebrow">Walkthrough</span><ol>${x.steps.map((w, i) => `<li data-seg="s${i}">${RT(w, tt, false, true)}</li>`).join("")}</ol></div>` : ""}<div class="rich" data-seg="expl">${RT(x.explanation, tt)}</div>${window.Walk ? Walk.bar(id) : ""}</div>`
              : `<div class="p-skip">${T && T.given > 0 ? `<button type="button" class="btn ghost sm" data-act="hint" data-id="${E(id)}" aria-pressed="${hint}">Hint: which numbers?</button>` : ""}<button type="button" class="btn ghost sm" data-act="skip" data-id="${E(id)}">Skip</button></div>`}
     </article>`;
   }

@@ -65,12 +65,14 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -appl
   .pv-split { display: block; align-self: stretch; position: relative; cursor: col-resize; touch-action: none; }
   .pv-split::before { content: ""; position: absolute; left: 5px; top: 30%; width: 4px; height: 40%; border-radius: 2px; background: var(--line-strong); transition: background .2s; }
   .pv-split:hover::before, .pv-split:focus-visible::before, .pv-split.drag::before { background: var(--accent); }
-  .pv-stage { max-height: calc(100vh - 238px); max-height: calc(100dvh - 238px); }   /* the board shrinks before the page scrolls */
+  .pv-stage { max-height: calc(100vh - 400px); max-height: calc(100dvh - 400px); }   /* the board shrinks before the page scrolls, with room for a tip */
+  .pv-cap { min-height: 0; font-size: 16px; line-height: 1.4; max-height: 2.8em; overflow-y: auto; padding-bottom: 0; border-bottom: 8px solid #141414; }   
+  .pv-video .pv-tip { padding: 7px 30px 7px 12px; font-size: 13.5px; line-height: 1.35; }
+  .pv-video .pv-tip li { margin-bottom: 1px; }
+  .pv-video .pv-tip-h { margin-bottom: 2px; }
   .pv-title { flex-wrap: nowrap; width: 100%; }
   .pv-title .sub { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
-.pv-side .pv-tip { position: sticky; bottom: 0; z-index: 1; }   /* held at the foot of the column */
-@media (min-width: 960px) and (orientation: landscape) { .pv-side .pv-tip { margin-right: 11px; } }   /* room for its tail, pointing to the board */
 /* the case's name and its questions: this one lit, the others with a video as links */
 .pv-vt { margin: -2px 0 8px; font-size: 13px; color: var(--muted); }   /* the case's name, under "The case · Q17–Q20" */
 .pv-vt:empty { display: none; }
@@ -106,8 +108,7 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -appl
 .pv-tip { box-sizing: border-box; position: relative; flex: none; padding: 10px 30px 10px 12px; border-radius: 12px; background: #fff; color: #14161c;
   border: 2px solid #5b7cfa; box-shadow: 0 8px 26px rgba(0, 0, 0, .2); font-size: 14px; line-height: 1.45; }
 .pv-tip[hidden] { display: none; }
-.pv-tip::before { content: ""; position: absolute; top: -11px; right: 40px; border: 11px solid transparent; border-top: 0; border-bottom-color: #5b7cfa; }
-@media (min-width: 960px) and (orientation: landscape) { .pv-tip::before { top: 22px; right: -11px; left: auto; border: 11px solid transparent; border-right: 0; border-left-color: #5b7cfa; } }   
+.pv-tip::before { content: ""; position: absolute; top: -11px; left: 40px; border: 11px solid transparent; border-top: 0; border-bottom-color: #5b7cfa; }
 .pv-tip:not([hidden]) { animation: pv-pop .35s ease-out; }
 @keyframes pv-pop { from { opacity: 0; transform: translateY(8px); } }
 .pv-q { transition: border-color .3s, box-shadow .3s; }
@@ -138,3 +139,8 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -appl
 .pv-opts li.wrong { text-decoration: line-through; text-decoration-color: #c62828; text-decoration-thickness: 2px; opacity: .7; }
 .pv-cov-m { font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { .pv-opts li, .pv-q { transition: none; } .pv-tip:not([hidden]) { animation: none; } }
+/* the speed: − 1.00× +, in steps of 0.15 */
+.pv-speed { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 14px; }
+.pv-speed .lbl { margin-right: 2px; }
+.pv-bar .pv-speed button { min-width: 38px; padding: 6px 0; font-size: 17px; line-height: 1; }
+.pv-speed output { min-width: 3.4em; text-align: center; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
