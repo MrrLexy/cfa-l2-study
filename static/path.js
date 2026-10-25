@@ -264,12 +264,12 @@
     const x = q(id), t = mod(k).topics[x.t], rec = peek(k)[r][id];
     const T = tiesOf(id), any = !!(T && T.groups.length), live = any && (tiesOn() || walking(id)), tt = live && rec ? T : null, hint = !rec && live && T.given > 0 && hintedQ.has(id);
     return `<article class="p-q ${rec ? (rec[1] ? "ok" : rec[0] === "-" ? "skipped" : "bad") : ""}" id="pq-${id}" data-id="${E(id)}"${tt || hint ? ' data-t="1"' : ""}>
-      <div class="p-qh"><span class="qn">Q${n}</span><span class="chip plain" title="Topic">${R(t.title, true)}</span></div>
+      <div class="p-qh"><span class="qn">Q${n}</span><span class="chip plain" title="Topic">${R(t.title, true)}</span><a class="p-vid" href="${VIDEO}${encodeURIComponent("path-" + id)}" title="This question worked on a board, narrated">▶ Video</a></div>
       <div class="p-stem" data-seg="ask">${RT(x.stem, tt || (hint ? T : null), true)}</div>
       ${hint ? `<p class="tienote">Hint: the highlighted ${T.given === 1 ? "value is the one" : "values are the ones"} this question uses${x.set ? ", here and in the case above" : ""}.</p>` : ""}
       ${window.LosView ? LosView.tag(k, id) : ""}
       <div class="p-opts">${["A", "B", "C"].map((l) => optHTML(id, l, rec, tt)).join("")}</div>
-      ${rec ? `<div class="p-expl"><div class="p-verdict">${rec[0] === "-" ? "Skipped" : rec[1] ? "Correct" : `Not quite: the answer is ${x.answer}`}</div><a class="p-vid" href="${VIDEO}${encodeURIComponent("path-" + id)}">▶ Video walkthrough of this question ›</a>${any ? tieKey(live) : ""}${(x.steps || []).length ? `<div class="p-walk"><span class="eyebrow">Walkthrough</span><ol>${x.steps.map((w, i) => `<li data-seg="s${i}">${RT(w, tt, false, true)}</li>`).join("")}</ol></div>` : ""}<div class="rich" data-seg="expl">${RT(x.explanation, tt)}</div>${window.Walk ? Walk.bar(id) : ""}</div>`
+      ${rec ? `<div class="p-expl"><div class="p-verdict">${rec[0] === "-" ? "Skipped" : rec[1] ? "Correct" : `Not quite: the answer is ${x.answer}`}</div>${any ? tieKey(live) : ""}${(x.steps || []).length ? `<div class="p-walk"><span class="eyebrow">Walkthrough</span><ol>${x.steps.map((w, i) => `<li data-seg="s${i}">${RT(w, tt, false, true)}</li>`).join("")}</ol></div>` : ""}<div class="rich" data-seg="expl">${RT(x.explanation, tt)}</div>${window.Walk ? Walk.bar(id) : ""}</div>`
              : `<div class="p-skip">${T && T.given > 0 ? `<button type="button" class="btn ghost sm" data-act="hint" data-id="${E(id)}" aria-pressed="${hint}">Hint: which numbers?</button>` : ""}<button type="button" class="btn ghost sm" data-act="skip" data-id="${E(id)}">Skip</button></div>`}
     </article>`;
   }

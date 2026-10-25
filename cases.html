@@ -85,7 +85,6 @@
   .opt.dim { opacity: .62; }
   .verdict { margin-top: var(--sp-4); font-weight: 700; display: flex; align-items: center; gap: 8px; }
   .verdict.good { color: var(--good); } .verdict.bad { color: var(--bad); }
-  .vidlink { display: inline-block; margin-top: var(--sp-2); font-weight: 600; text-decoration: none; }   /* after answering: the question worked on a board, narrated */
   .expl { margin-top: var(--sp-2); background: var(--sunk); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); font-size: 15px; }
   .expl p { margin: 0 0 .6em; } .expl p:last-child { margin-bottom: 0; }
   .los { font-size: 13px; color: var(--muted); margin-top: var(--sp-2); }
@@ -511,11 +510,11 @@ function drawSet({ v, set }) {
   const t = tiesFor(set, q), live = !!((tiesOn || walking(q.id)) && t && t.groups.length), tt = live && answered ? t : null, hint = !answered && live && t.given > 0 && hinted.has(q.id);
   tieQ = tt || hint ? q.id : null;   // the vignette shows the values of the question on screen
   const card = `<article class="q" id="q-${esc(q.id)}"${tt || hint ? ' data-t="1"' : ""}><div class="qh"><span class="eyebrow">Question ${qAt + 1} of ${Q.length}</span>
-        <span class="qbtns">${!answered && t && t.given > 0 ? `<button type="button" class="btn ghost sm" data-hint="${esc(q.id)}" aria-pressed="${hint}">Hint: which numbers?</button>` : ""}<button type="button" class="btn ghost sm jump" data-jump>Vignette ↑</button></span></div>
+        <span class="qbtns"><a class="btn ghost sm" href="${VIDEO}${encodeURIComponent(q.id)}" title="This question worked on a board, narrated">▶ Video</a>${!answered && t && t.given > 0 ? `<button type="button" class="btn ghost sm" data-hint="${esc(q.id)}" aria-pressed="${hint}">Hint: which numbers?</button>` : ""}<button type="button" class="btn ghost sm jump" data-jump>Vignette ↑</button></span></div>
       <div class="stem" data-seg="ask">${mdT(q.stem, tt || (hint ? t : null), true)}</div>${hint ? `<p class="tienote">Hint: the ${plural(t.given, "value")} this question takes from the case ${t.given === 1 ? "is" : "are"} highlighted in the vignette.</p>` : ""}
       ${optRows(q, (L) => !answered ? "" : L === q.answer ? "right" : L === got ? "wrong" : "dim", (L) => `data-q="${esc(q.id)}" data-opt="${esc(L)}" ${answered ? "disabled" : ""}`, !answered, (x) => mdT(x, tt))}
       ${answered ? `<div class="verdict ${got === q.answer ? "good" : "bad"}">${got === q.answer ? "✓ Correct" : `✗ Incorrect: you chose ${esc(got)}, the answer is ${esc(q.answer)}`}</div>
-        <a class="vidlink" href="${VIDEO}${encodeURIComponent(q.id)}">▶ Video walkthrough of this question ›</a>
+
         ${t && t.groups.length ? tieKey(live) : ""}${(q.steps || []).length ? `<div class="walk"><span class="eyebrow">Walkthrough</span><ol>${q.steps.map((x, i) => `<li data-seg="s${i}">${mdT(x, tt)}</li>`).join("")}</ol></div>` : ""}
         <div class="expl" data-seg="expl">${mdT(q.explanation, tt)}</div>${q.trap ? `<div class="trap" data-seg="trap">${mdT("**The trap.** " + q.trap + (q.avoid ? "\n\n**How to avoid it.** " + q.avoid : ""), tt)}</div>` : ""}
         ${q.los ? `<div class="los">LOS: ${esc(q.los)}</div>` : ""}${window.Walk ? Walk.bar(q.id) : ""}` : ""}</article>`;
