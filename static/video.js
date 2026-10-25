@@ -362,7 +362,7 @@
     .replace(/\s?\+\s?/g, " plus ").replace(/²/g, " squared").replace(/³/g, " cubed").replace(/√/g, "square root of ")
     .replace(/θ/g, "theta").replace(/α/g, "alpha").replace(/β/g, "beta").replace(/σ/g, "sigma").replace(/μ/g, "mu").replace(/Δ/g, "change in ")
     .replace(/(\d)\s?bps?\b/g, "$1 basis points").replace(/\^\(([^)]*)\)/g, " to the power $1").replace(/\^([\w.]+)/g, " to the power $1")
-    .replace(/π/g, "pi").replace(/γ/g, "gamma").replace(/(\w)_(\w)/g, "$1 $2").replace(/[\u0302\u0304]/g, " hat").replace(/\s{2,}/g, " ");
+    .replace(/π/g, "pi").replace(/γ/g, "gamma").replace(/(\w)_(\w)/g, "$1 $2").replace(/_/g, " ").replace(/[\u0302\u0304]/g, " hat").replace(/\s{2,}/g, " ");
   const clipOf = (text) => fetch("speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })
     .then((r) => (r.ok && /audio/.test(r.headers.get("Content-Type") || "") ? r.blob() : null)).then((b) => (b && b.size > 200 ? URL.createObjectURL(b) : null)).catch(() => null);
   const clipRetry = (t) => clipOf(t).then((u) => u || sleep(1200).then(() => clipOf(t)));
