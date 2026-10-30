@@ -105,6 +105,7 @@
   .gl-voice { margin: 0 0 var(--sp-4); padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--accent-soft); font-size: 15.5px; }
   /* follow mode (?follow=1): a display only, inside a page that says which step to show and does the talking */
   body.follow .site-bar, body.follow .gl-foot, body.follow #tolist, body.follow .gl-links { display: none; }
+  @media (any-pointer: coarse) { #tolist { display: inline-flex; align-items: center; min-height: 44px; } }   /* "All lessons" a finger tall on a phone or an iPad */
   body.follow main { padding-top: 14px; padding-bottom: 24px; }
 </style>
 </head>

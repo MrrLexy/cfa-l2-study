@@ -166,6 +166,12 @@
   .flip-score { text-align: center; color: var(--muted); font-size: 13.5px; }
   body[data-view="flip"] #sheet, body[data-view="flip"] #print, body[data-view="flip"] #pdf, body[data-view="flip"] #size, body[data-view="flip"] .opt.selfopt { display: none !important; }
   body:not([data-view="flip"]) #flip { display: none; }
+  /* flipping through on a phone or an iPad upright: the card near the top, not under the introduction and the module list (the Subject
+     and Module menus above do the list's job); Previous and Next a finger wide (30 Oct 2026) */
+  @media (max-width: 899px) {
+    body[data-view="flip"] .lede, body[data-view="flip"] #hint, body[data-view="flip"] .nc-menu { display: none; }
+    body[data-view="flip"] .flip-nav .btn { min-height: 44px; min-width: 120px; }
+  }
   body:not([data-view="cut"]) #cardsize { display: none; }
   .nc-controls [hidden] { display: none !important; }
 
@@ -406,7 +412,9 @@ function draw() {
       <p class="how">Each card carries the material itself. An outcome or summary card ends with the curriculum reading it comes from, so you can read the full text in your own copy.${self ? " This is a self-test copy: write your answer in the ruled space, then check it against the full cards." : ""}</p></div>`;
   const none = `<div class="empty">Nothing to show with these choices. Tick at least one kind of card.</div>`;
   DECK = deck;
+  const toFlip = view === "flip" && document.body.dataset.view !== "flip";
   document.body.dataset.view = view;
+  if (toFlip && matchMedia("(max-width: 899px)").matches) requestAnimationFrame(() => $("flip").scrollIntoView({ block: "start" }));   // on a phone: straight to the card
   $("sheet").classList.toggle("cut", view === "cut");
   $("hint").textContent = HINTS[view];
   if (view === "cut") layCut(deck, none);
