@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFA Level II Study · Formula finder</title>
+
+<link rel="stylesheet" href="static/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-180.png">
+<link rel="icon" href="static/icon-192.png">
+<meta name="theme-color" content="#16181f">
+<script src="static/lock-config.js"></script>
+<script src="static/lock.js"></script>
+<script src="static/profile.js"></script>
+<script>StudyProfile.guard();</script>
+<style>
+  /* under the site's bar: on a wide screen the finder fills the screen and its panes scroll on their own; on a phone, one after another */
+  @media (min-width: 1101px) { html, body { height: 100%; } body { display: flex; flex-direction: column; } .fx { flex: 1; min-height: 0; } }
+  .fx { padding: 12px 16px 16px; box-sizing: border-box; }
+</style>
+<link rel="stylesheet" href="static/katex/katex.min.css">
+<script defer src="static/katex/katex.min.js"></script>
+<style>
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.55 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+  .k-top .k-tabs { flex: 0 1 auto; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .k-top .k-tabs::-webkit-scrollbar { display: none; }
+  .k-shell .k-page { grid-template-columns: minmax(0, 1fr); box-sizing: border-box; }   /* its padding inside the screen's height, so the panes' bottoms show */
+  @media (min-width: 801px) { .k-shell .k-top { flex-wrap: nowrap; } }
+  @media (max-width: 800px) { .k-top .k-tabs { flex: 1 1 100%; max-width: 100%; } }
+  .k-content > div:has(> .fx) { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .fx { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(290px, 350px) minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; }
+  .right { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, auto); gap: 12px; }
+  .pane { min-height: 0; overflow: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 12px 14px; }
+  #formula { max-height: 44vh; }
+  #aview:not(:empty) { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .row[hidden] { display: none; }
+  .chip { font: inherit; font-size: 12.5px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--raise); color: var(--ink); cursor: pointer; text-decoration: none; white-space: nowrap; }
+  .chip.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .chip.ghost { background: none; }
+  #fview .chip, #sview .chip { white-space: normal; text-align: left; max-width: 100%; }   /* a long formula name wraps instead of widening the page */
+  .chip small { color: var(--muted); }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden; margin: 10px 0; }
+  .tabs button { font: inherit; font-weight: 600; font-size: 13px; padding: 7px; border: 0; background: none; color: var(--muted); cursor: pointer; }
+  .tabs button.on { background: var(--accent-soft); color: var(--accent); }
+  input[type=search] { width: 100%; box-sizing: border-box; font: inherit; padding: 7px 11px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--sunk); color: var(--ink); margin: 10px 0 4px; }
+  label.only { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; margin: 4px 0; }
+  details.mod { border-top: 1px solid var(--line); }
+  details.mod > summary { cursor: pointer; padding: 8px 0; font-weight: 600; font-size: 13px; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+  details.mod > summary::-webkit-details-marker { display: none; }
+  details.mod > summary span small { display: block; color: var(--muted); font-weight: 400; font-size: 12px; }
+  .it { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; width: 100%; padding: 6px 6px 6px 8px; font-size: 13px; color: var(--ink); border-radius: 7px; }
+  .it:hover, .it.on { background: var(--accent-soft); }
+  .it.none { color: var(--faint); }
+  .it .lo { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; white-space: nowrap; }
+  .losh { font-size: 11.5px; color: var(--muted); padding: 8px 6px 2px; line-height: 1.35; }
+  .losh b { color: var(--accent); font-weight: 600; }
+  .n { font-size: 11px; padding: 0 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); align-self: center; flex: none; }
+  .n.zero { background: none; color: var(--faint); }
+  /* By formula: one card per formula, its title and the formula itself, tagged with its module and LOS (the owner, 10 Nov 2026) */
+  .fcard { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; padding: 10px 12px 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--raise); }
+  .fcard:hover, .fcard.on { border-color: var(--accent); }
+  .fcard.none { opacity: .55; }
+  .fcard b { display: block; font-size: 14px; margin-bottom: 4px; }
+  .fcard .ftex { overflow-x: auto; overflow-y: hidden; font-size: 13px; padding: 4px 0; }   /* fit() makes each formula small enough to show whole */
+  .fcard .ftex { text-align: center; line-height: 1.9; }
+  .fcard .fp { display: inline-block; margin: 3px 7px; max-width: 100%; }
+  .fcard .ftag { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; font-size: 11px; color: var(--muted); }
+  .fcard .ftag em { font-style: normal; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line-strong); white-space: nowrap; }
+  .head { margin: 6px 0 8px; }
+  .secn { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin: 12px 0 6px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .secn:first-of-type { border-top: 0; padding-top: 0; }
+  .typed { background: #fff; color: #1d1d1b; border-radius: 6px; padding: 10px 12px; margin: 6px 0 10px; font-size: 14.5px; line-height: 1.5; }
+  .typed p { margin: 0 0 8px; } .typed h4 { margin: 8px 0 4px; }
+  .typed table { border-collapse: collapse; margin: 6px 0 10px; font-size: 13px; } .typed th, .typed td { border: 1px solid #c9ced8; padding: 3px 7px; } .typed td.r { text-align: right; }
+  .typed .tw { overflow-x: auto; }
+  .opt .typed { flex: 1; margin: 3px 0; padding: 7px 10px; }
+  /* formula mastery (10 Nov 2026): the formula's questions in order, a result on each, Next after each check; the panel folds to a strip */
+  .lbar { display: none; }
+  .mastery { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 10px; margin: 0 0 10px; border-radius: 10px; background: var(--accent-soft); border: 1px solid var(--accent); font-size: 12.5px; }
+  .mastery b { color: var(--accent); }
+  .q .num { color: var(--accent); font-weight: 700; margin-right: 4px; }
+  .q .mk { float: right; font-weight: 700; font-style: normal; } .q .mk.ok { color: var(--good); } .q .mk.no { color: var(--bad); }
+  .rail { display: none; }
+  @media (min-width: 1101px) {
+    .lbar { display: flex; justify-content: flex-end; margin: -4px -6px 2px 0; }
+    .fold { font: inherit; font-size: 13px; padding: 3px 9px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--raise); color: var(--muted); cursor: pointer; }
+    .fold:hover { color: var(--ink); border-color: var(--accent); }
+    body.folded .fx { grid-template-columns: 52px minmax(0, 1.15fr) minmax(0, 1fr); }
+    body.folded #list { padding: 8px 4px; overflow: hidden; }
+    body.folded #list > :not(.rail) { display: none; }
+    body.folded #list > .rail { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; height: 100%; padding: 6px 0; border: 0; background: none; color: var(--ink); cursor: pointer; font: inherit; }
+    .rail .ar { font-size: 16px; color: var(--accent); }
+    .rail .vt { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+    .rail .vt b { color: var(--accent); }
+  }
+  .head b { display: block; font-size: 14px; }
+  .head small { color: var(--muted); }
+  .q { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; padding: 8px; border-radius: 9px; border: 1px solid var(--line); margin-bottom: 6px; }
+  .q:hover, .q.on { border-color: var(--accent); background: var(--accent-soft); }
+  .q small { display: block; color: var(--muted); font-size: 11.5px; }
+  .q span { display: block; font-size: 13px; font-weight: 600; }
+  .q i { font-style: normal; font-size: 11px; color: var(--accent); }
+  h1 { font-size: 18px; margin: 0 0 2px; }
+  h2 { font-size: 15px; margin: 14px 0 6px; }
+  .mod-line { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .tex { overflow-x: auto; overflow-y: hidden; padding: 10px 12px; background: var(--sunk); border-radius: 10px; border: 1px solid var(--line); margin: 8px 0; }
+  .note { margin: 8px 0; }
+  .note > b { color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; display: block; }
+  .trap { border-left: 3px solid var(--warn); padding: 3px 0 3px 10px; }
+  .cue { border-left: 3px solid var(--accent); padding: 3px 0 3px 10px; }
+  details.vars { margin: 6px 0; font-size: 13px; }
+  details.vars li { margin: 3px 0; }
+  .muted { color: var(--muted); }
+  .sheet { background: #fff; border-radius: 6px; padding: 8px 10px; margin: 6px 0 10px; }
+  .crop { position: relative; overflow: hidden; background: #eef1f6; max-width: 100%; }
+  .crop + .crop { margin-top: 5px; }
+  .crop.pg { border-top: 1px dashed #d4d9e3; margin-top: 7px; }
+  .crop img { position: absolute; max-width: none; display: block; user-select: none; -webkit-user-drag: none; }
+  details.vig > summary { cursor: pointer; color: var(--muted); font-size: 13px; margin: 6px 0 4px; }
+  .opt { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; padding: 3px; border-radius: 8px; border: 2px solid transparent; }
+  .opt .ol { font-weight: 700; width: 1.4em; flex: none; text-align: center; }
+  .opt .sheet { flex: 1; margin: 3px 0; }
+  .opt.on { border-color: var(--accent); }
+  .opt.right { border-color: var(--good); }
+  .opt.wrong { border-color: var(--bad); }
+  .acts { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; align-items: center; }
+  .btn { font: inherit; font-weight: 600; padding: 8px 14px; border-radius: 9px; border: 0; background: var(--btn); color: var(--btn-ink); cursor: pointer; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .verdict { font-weight: 600; }
+  .verdict.ok { color: var(--good); } .verdict.no { color: var(--bad); }
+  ol.steps { padding-left: 1.5em; margin: 6px 0; } ol.steps li { margin: 6px 0; }
+  .back { display: none; margin-bottom: 8px; }
+  /* the Quick Guide card in the solution area: its rules, traps and working */
+  #sview { --tie-0: #7fb3ff; --tie-1: #ffa65c; --tie-2: #d09cff; --tie-3: #5fd6e0; --tie-4: #d4cf5a; --tie-5: #d1a68f; --tie-6: #ff8fbf; --tie-7: #b0c0c8; --tie-8: #a8b4ff; --ans: #6fd29b; }
+  .qg-seg { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; margin: 0 0 14px; }
+  .qg-seg.trap { border-left-color: var(--bad); }
+  .qg-n { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .qg-seg.trap .qg-n { color: var(--bad); }
+  .qg-seg .lbl2 { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 6px 0 2px; }
+  #sview ul.fb { margin: 2px 0; padding-left: 18px; } #sview ul.fb li { margin: 2px 0; } #sview ul.fb li.t { font-weight: 600; list-style: "⇒ "; }
+  #sview .k { background: var(--accent-soft); color: var(--accent); border-radius: 4px; padding: 0 3px; font-weight: 600; }
+  #sview .tl { overflow-x: auto; overflow-y: hidden; padding: 2px 0; } #sview .tl-text { overflow: visible; }
+  #sview .no { position: relative; display: inline-block; padding: 2px 8px; color: var(--bad); }
+  #sview .no svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #sview .cid { display: none; }
+  .qg-ans { font-size: 16px; font-weight: 700; color: var(--good); margin: 2px 0 12px; }
+  details.walk { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+  details.walk > summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+  .empty { color: var(--muted); padding: 6px 0; }
+  @media (max-width: 1100px) {
+    .fx { display: block; } .right { display: block; } .pane { overflow: visible; margin-bottom: 12px; } #formula { max-height: none; }
+    body.qmode #list { display: none; } body.qmode .back { display: inline-block; } body:not(.qmode) #question, body:not(.qmode) #solution { display: none; }
+    body:not(.qmode):not(.fmode) #formula { display: none; }
+  }
+</style>
+</head>
+<body>
+<header class="site-bar"><div class="site-bar-in">
+  <a class="site-brand" href="app.html#path">CFA Level II Study</a>
+  <div class="site-nav" role="navigation" aria-label="Pages"><a href="app.html" aria-label="Study Map"><span class="nav-long">Study Map</span><span class="nav-short">Map</span></a><a href="lesson.html">Lessons</a><a href="cases.html" aria-label="Case studies"><span class="nav-long">Case studies</span><span class="nav-short">Cases</span></a><a href="formulas.html" aria-label="Formula finder"><span class="nav-long">Formula finder</span><span class="nav-short">Formulas</span></a><a href="rapid.html" aria-label="Rapid fire"><span class="nav-long">Rapid fire</span><span class="nav-short">Rapid</span></a><a href="notecards.html" aria-label="Note cards"><span class="nav-long">Note cards</span><span class="nav-short">Cards</span></a></div>
+  <div id="userbar"></div>
+</div></header>
+<div class="fx">
+  <section class="pane" id="list" aria-label="Topics, LOS and formulas">
+    <button type="button" class="rail" data-unfold title="Show the list again" aria-label="Show the list again"><span class="ar">›</span><span class="vt" id="railtext">Show the list</span></button>
+    <div class="lbar"><button type="button" class="fold" data-fold title="Fold this panel to the side for more room" aria-label="Fold the list to the side">‹ Hide</button></div>
+    <div class="row" id="src"></div>
+    <div class="tabs" role="tablist"><button type="button" data-tab="los" role="tab">By LOS</button><button type="button" data-tab="formula" role="tab">By formula</button></div>
+    <div class="row" id="topics"></div>
+    <div id="tools"></div>
+    <div id="nav"><p class="empty">Loading the formula sheets…</p></div>
+  </section>
+  <section class="pane" id="question" aria-label="The question" aria-live="polite">
+    <button type="button" class="chip ghost back" data-back>‹ Back to the list</button>
+    <div id="qview"><p class="empty">Pick an LOS or a formula on the left, then a question: its case shows here.</p></div>
+  </section>
+  <div class="right">
+    <section class="pane" id="solution" aria-label="Your answer and the solution"><div id="aview"></div><div id="sview"><p class="empty">Pick a question: the question and its choices show here, then the solution once you check.</p></div></section>
+    <section class="pane" id="formula" aria-label="The formula you are mastering"><div id="fview"><p class="empty">The formula you're mastering shows here: pick one under By formula, or open a question to see the formula it needs.</p></div></section>
+  </div>
+</div>
+<script src="static/data/formulas-index.js"></script>
+<script src="static/data/formulas-case-tags.js"></script>
+<script src="static/standalone.js"></script>
+<script>
+"use strict";
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const tex = (s, block) => { try { return window.katex ? katex.renderToString(String(s || ""), { displayMode: !!block, throwOnError: false }) : esc(s); } catch { return esc(s); } };
+  const text = (s) => String(s || "").replace(/\s+/g, " ").trim().split(/(\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/)   // the walkthrough's **bold** and TeX
+    .map((x, i) => (i % 2 ? tex(x.slice(2, -2), x[1] === "[") : esc(x).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>"))).join("");
+  const cap = (s) => String(s || "").charAt(0).toUpperCase() + String(s || "").slice(1);
+  const short = (s, n) => (String(s).length > n ? String(s).slice(0, n - 1).replace(/\s+\S*$/, "") + "…" : String(s));
+  const get = (u) => fetch(u, { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const [IX, CT] = await Promise.all(["index", "case-tags"].map((n) => get(`static/formulas/${n}.json`))), MT = null, PT = null;
+  if (!IX || !IX.formulas) { $("nav").innerHTML = `<p class="empty">The formula index can't be read from here just now.</p>`; return; }
+  const F = IX.formulas, Q = Object.assign({}, (MT && MT.questions) || {}, (CT && CT.questions) || {}, (PT && PT.questions) || {});
+  const SRCS = [["case", "Case studies", "Case studies"]];
+  Object.keys(Q).forEach((id) => { Q[id].id = id; Q[id].src = id.startsWith("mock-") ? "mock" : id.startsWith("pq-") ? "pq" : "case"; });
+  const BYS = { mock: (MT && MT.byFormula) || {}, pq: (PT && PT.byFormula) || {}, case: (CT && CT.byFormula) || {} };
+  const ST = { src: SRCS[0][0], tab: "formula", topic: IX.topics[0].name, los: null, f: null, q: null, chosen: null, checked: false, find: "", only: true };
+  const inSrc = (q) => ST.src === "all" || q.src === ST.src;
+  const byF = (fid) => (ST.src === "all" ? SRCS.flatMap(([k]) => BYS[k][fid] || []) : BYS[ST.src][fid] || []);
+  const byL = new Map();   // "module|i" -> question ids, by each question's first LOS
+  for (const q of Object.values(Q)) for (const l of (q.los || []).slice(0, 1)) { const k = l[0] + "|" + l[1]; if (!byL.has(k)) byL.set(k, []); byL.get(k).push(q.id); }
+  const KORD = { mock: 0, case: 1, pq: 2 };
+  const qsOfLos = (k) => (byL.get(k) || []).filter((id) => inSrc(Q[id])).sort((a, b) => KORD[Q[a].src] - KORD[Q[b].src]);
+  const losText = (m, i) => { for (const t of IX.topics) for (const md of t.modules) if (md.module === m) return (md.los[i] || {}).text || ""; return ""; };
+  // a card's formula: full size but free to wrap, at its = and + and between the parts the sheet sets apart with \quad (several
+  // ratios side by side), each part kept whole; drawn once and kept
+  const parts = (t) => { const out = []; let d = 0, cur = "";
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i]; if (c === "{") d++; else if (c === "}") d--;
+      const m = d === 0 && t.slice(i).match(/^,?\s*\\q?quad\b\s*/);
+      if (m) { out.push(cur); cur = ""; i += m[0].length - 1; continue; }
+      cur += c;
+    }
+    return out.concat(cur).map((x) => x.trim()).filter(Boolean); };
+  const TEXC = new Map(), ftex = (fid) => TEXC.get(fid) || (window.katex ? (TEXC.set(fid, parts(F[fid].latex).map((x) => `<span class="fp">${tex("\\displaystyle " + x, false)}</span>`).join("")), TEXC.get(fid)) : esc(F[fid].latex));
+  // the result of each question checked here (this browser only, "site-formula-results": question id -> 1 right, 0 not), for mastery
+  let RES = {}; try { RES = JSON.parse(localStorage.getItem("site-formula-results") || "{}") || {}; } catch { RES = {}; }
+  const keepRes = () => { try { localStorage.setItem("site-formula-results", JSON.stringify(RES)); } catch { /* not kept */ } };
+  const rightOf = (ids) => ids.filter((id) => RES[id] === 1).length;
+  // each formula drawn to fit its box: the font is made smaller until the whole formula shows (down to 60%, past which it
+  // scrolls); a card's formula also wraps at its = and + first, so a card never needs a sideways scroll
+  function fit() {
+    document.querySelectorAll(".ftex, #fview .tex").forEach((el) => {
+      el.style.fontSize = "";
+      if (!el.clientWidth || !el.querySelector(".katex")) return;
+      const base = parseFloat(getComputedStyle(el).fontSize), min = base * (el.classList.contains("ftex") ? 0.6 : 0.6);
+      for (let i = 0; i < 8 && el.scrollWidth > el.clientWidth + 1; i++) el.style.fontSize = Math.max(min, parseFloat(getComputedStyle(el).fontSize) * (el.clientWidth - 2) / el.scrollWidth) + "px";
+    });
+  }
+  let fitT = 0; addEventListener("resize", () => { clearTimeout(fitT); fitT = setTimeout(fit, 120); });
+  if (document.fonts) { document.fonts.ready.then(fit); document.fonts.addEventListener("loadingdone", () => { clearTimeout(fitT); fitT = setTimeout(fit, 60); }); }   // KaTeX's fonts arrive after the first drawing
+  let LISTTOP = 0;   // where the formula browser was scrolled, to come back to it after a mastery
+  const losOf = (k) => { const j = k.lastIndexOf("|"); return [k.slice(0, j), +k.slice(j + 1)]; };
+
+  // ------------------------------------------------------------ the left column: source, tabs, topics, then LOS or formulas
+  function paintLeft() {
+    $("src").hidden = true;
+    document.querySelectorAll("[data-tab]").forEach((b) => b.classList.toggle("on", b.dataset.tab === ST.tab));
+    const tN = (t) => t.modules.reduce((a, md) => a + md.los.reduce((b, l) => b + qsOfLos(md.module + "|" + l.i).length, 0), 0);
+    $("topics").hidden = ST.tab === "formula";
+    $("topics").innerHTML = IX.topics.map((t) => `<button type="button" class="chip${t.name === ST.topic ? " on" : ""}" data-topic="${esc(t.name)}">${esc(t.name.replace("Ethical and Professional Standards", "Ethics").replace("Financial Statement Analysis", "FSA").replace("Quantitative Methods", "Quant"))} <small>${tN(t)}</small></button>`).join("");
+    $("tools").innerHTML = ST.tab === "formula" && !ST.f ? `<input type="search" id="find" placeholder="Find a formula (duration, FCFE, VaR)…" value="${esc(ST.find)}" aria-label="Find a formula" autocomplete="off"><label class="only"><input type="checkbox" id="only" ${ST.only ? "checked" : ""}> Only formulas with questions</label>` : "";
+    const t = IX.topics.find((x) => x.name === ST.topic) || IX.topics[0];
+    let h = "";
+    if (ST.tab === "los" && ST.los) { const [m, i] = losOf(ST.los); h = questionList(qsOfLos(ST.los), `<button type="button" class="chip ghost" data-uplos>‹ ${esc(m)}</button>`, `${m} · LOS ${i + 1}`, cap(losText(m, i))); }
+    else if (ST.tab === "formula" && ST.f) h = questionList(byF(ST.f), `<button type="button" class="chip ghost" data-exit>‹ Exit to the formula browser</button>`, "Mastering", F[ST.f].name);
+    else if (ST.tab === "los") h = t.modules.map((md) => {
+      const n = md.los.reduce((a, l) => a + qsOfLos(md.module + "|" + l.i).length, 0);
+      return `<details class="mod"><summary><span>${esc(md.module)}<small>${esc(md.title)}</small></span><span class="n${n ? "" : " zero"}">${n}</span></summary>` +
+        md.los.map((l) => { const k = md.module + "|" + l.i, c = qsOfLos(k).length; return `<button type="button" class="it${c ? "" : " none"}" data-los="${esc(k)}"><span><span class="lo">LOS ${l.i + 1}</span> ${esc(short(cap(l.text), 110))}</span><span class="n${c ? "" : " zero"}">${c}</span></button>`; }).join("") + `</details>`;
+    }).join("") || `<p class="empty">No modules here.</p>`;
+    else {   // every formula as a card, in the curriculum's order (topic, module, LOS, then the module's other formulas)
+      const term = ST.find.trim().toLowerCase(), ok = (fid) => (!ST.only || byF(fid).length) && (!term || (F[fid].name + " " + fid + " " + F[fid].module).toLowerCase().includes(term));
+      const ids = IX.topics.flatMap((x) => x.modules.flatMap((md) => md.los.flatMap((l) => l.f).concat(md.other))).filter(ok);
+      h = ids.map((fid) => { const f = F[fid], c = byF(fid).length;
+        return `<button type="button" class="fcard${c ? "" : " none"}${ST.f === fid ? " on" : ""}" data-f="${fid}"><b>${esc(f.name)}</b><div class="ftex">${ftex(fid)}</div>` +
+          `<div class="ftag"><span>${c ? c + " question" + (c === 1 ? "" : "s") : "no questions"}</span><em>${esc(f.module)}${f.los ? " · LOS " + (f.los[1] + 1) : ""}</em></div></button>`; }).join("")
+        || `<p class="empty">${ST.only ? "No formula here has questions. Untick the box to see them all." : "Nothing matches."}</p>`;
+    }
+    $("nav").innerHTML = h;
+    const ids = curList(), master = ST.tab === "formula" && ST.f;
+    $("railtext").innerHTML = master ? `Mastering ${esc(short(F[ST.f].name, 34))} · <b>${rightOf(ids)}/${ids.length}</b> right` : ST.los && ST.tab === "los" ? `LOS questions · <b>${ids.length}</b>` : "Show the list";
+    if (!ST.los && !ST.f) { const first = $("nav").querySelector("details.mod"); if (first) first.open = true; }
+  }
+  function questionList(ids, up, kicker, title) {
+    const what = "case study";
+    return `<div class="row">${up}</div><div class="head"><small>${esc(kicker)}</small><b>${esc(title)}</b><small>${ids.length} ${what} question${ids.length === 1 ? "" : "s"}</small></div>` +
+      (ST.tab === "formula" && ST.f && ids.length ? `<div class="mastery"><span><b>${rightOf(ids)} of ${ids.length}</b> right so far, in order below</span></div>` : "") +
+      (ids.length ? ids.map((id, k) => { const q = Q[id], fs = q.f.map((x) => F[x.id] && F[x.id].name).filter(Boolean), prevQ = Q[ids[k - 1]];
+        const sec = ST.src === "all" && (!prevQ || prevQ.src !== q.src) ? `<div class="secn">${esc(SRCS.find(([s]) => s === q.src)[2])} · ${ids.filter((x) => Q[x].src === q.src).length}</div>` : "";
+        return sec + `<button type="button" class="q${ST.q === id ? " on" : ""}" data-q="${id}">${id in RES ? `<i class="mk ${RES[id] ? "ok" : "no"}">${RES[id] ? "✓" : "✗"}</i>` : ""}<small><span class="num" style="display:inline">${k + 1}.</span>${esc(q.label)}</small><span>${esc(cap(q.asks))}</span><i>${q.kind === "formula" ? esc(fs.join(" · ")) : q.kind === "concept" ? "no formula: concept" : "a calculation not on the sheets"}</i></button>`; }).join("")
+        : `<p class="empty">No ${what} questions here.</p>`);
+  }
+
+  // ------------------------------------------------------------ the yellow: the formula being mastered
+  function formulaCard(fid, q) {
+    const f = F[fid]; if (!f) return "";
+    const ids = byF(fid), cue = q && (q.f.find((x) => x.id === fid) || {}).cue, into = (f.inside || []).filter((i) => F[i]);
+    return `<h1>${esc(f.name)}</h1><div class="mod-line">${esc(f.module)}${f.los ? ` · LOS ${f.los[1] + 1}: ${esc(short(losText(f.los[0], f.los[1]), 120))}` : ""}</div><div class="tex">${tex(f.latex, true)}</div>` +
+      (cue ? `<div class="note cue"><b>What calls for it in this question</b>${esc(cue)}</div>` : "") +
+      (f.use ? `<div class="note"><b>When to use it</b>${esc(f.use)}</div>` : "") + (f.pitfall ? `<div class="note trap"><b>Trap</b>${esc(f.pitfall)}</div>` : "") +
+      ((f.variables || []).length ? `<details class="vars"><summary>What each symbol means</summary><ul>${f.variables.map((v) => `<li>${tex(v.latex)}: ${esc(v.meaning)}</li>`).join("")}</ul></details>` : "") +
+      (into.length ? `<div class="note"><b>Built into</b><div class="row" style="margin-top:4px">${into.map((i) => `<button type="button" class="chip ghost" data-f="${i}">${esc(F[i].name)} <small>${byF(i).length}</small></button>`).join("")}</div></div>` : "") +
+      `<div class="mod-line" style="margin-top:8px">${ids.length} question${ids.length === 1 ? "" : "s"} use it${ids.length && ST.f !== fid ? ` · <a href="#" data-f="${fid}">master it ›</a>` : ""}</div>`;
+  }
+  let QF = null;   // which of the question's formulas the yellow shows
+  function paintFormula() {
+    const q = ST.q && Q[ST.q], fids = q ? q.f.map((x) => x.id).filter((i) => F[i]) : [];
+    let h;
+    if (q && fids.length && !(ST.tab === "formula" && ST.f && fids.includes(ST.f) && !QF)) {
+      const cur = fids.includes(QF) ? QF : ST.f && fids.includes(ST.f) ? ST.f : fids[0];
+      h = (fids.length > 1 ? `<div class="row" style="margin-bottom:8px"><small class="muted">This question uses:</small>${fids.map((i) => `<button type="button" class="chip${i === cur ? " on" : ""}" data-qf="${i}">${esc(F[i].name)}</button>`).join("")}</div>` : "") + formulaCard(cur, q);
+    } else if (ST.f) h = formulaCard(ST.f, q);
+    else if (q) h = `<h1>${q.kind === "concept" ? "No formula: a concept question" : "A calculation not on the formula sheets"}</h1><div class="note cue"><b>${q.kind === "concept" ? "What it turns on" : "What it asks"}</b>${esc(cap(q.cue || q.asks))}</div>`;
+    else h = `<p class="empty">The formula you're mastering shows here: pick one under By formula, or open a question to see the formula it needs.</p>`;
+    $("fview").innerHTML = h;
+  }
+
+  // ------------------------------------------------------------ the green: the question, then the solution
+  let MD = null, mdLoad = null, PV = null;
+  const guideLink = (id) => `<a class="chip ghost" href="video.html#q=${encodeURIComponent(id)}">Video walkthrough ›</a>`;
+  const flagsOf = () => Promise.resolve(null);
+  const curList = () => (ST.tab === "formula" && ST.f ? byF(ST.f) : ST.tab === "los" && ST.los ? qsOfLos(ST.los) : [ST.q]).filter(Boolean);
+  async function paintQuestion() {
+    const q = ST.q && Q[ST.q];
+    if (!q) { $("qview").innerHTML = `<p class="empty">Pick an LOS or a formula on the left, then a question: its case shows here.</p>`; paintSolution(); return; }
+    if (q.src === "case") return paintCase(q);
+  }
+  // a Q-bank question: its case and question typed, from its walkthrough's file (static/videos/<id>.json "case" and "question")
+  const TYPED = new Map();
+  const typedOf = (id) => { if (!TYPED.has(id)) TYPED.set(id, get(`static/videos/${encodeURIComponent(id)}.json`)); return TYPED.get(id); };
+  const inl = (x) => esc(x).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<i>$2</i>");
+  function md(src) {   // paragraphs, **bold**, *italics*, headings and pipe tables
+    const out = []; let para = [], tbl = [];
+    const endP = () => { if (para.length) out.push(`<p>${inl(para.join(" "))}</p>`); para = []; };
+    const endT = () => { if (!tbl.length) return;
+      const rows = tbl.filter((r) => !/^\s*\|?[\s:|-]+\|?\s*$/.test(r)).map((r) => r.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim()));
+      const num = (c) => /^[\s(−+$€£-]*[\d.,]+\s*(%|bp|bps|x|×)?\)?$/.test(c);
+      out.push(`<div class="tw"><table>${rows.map((r, i) => `<tr>${r.map((c, j) => (i ? `<td${j && num(c) ? ' class="r"' : ""}>${inl(c)}</td>` : `<th>${inl(c)}</th>`)).join("")}</tr>`).join("")}</table></div>`); tbl = []; };
+    for (const l of String(src || "").replace(/\r\n?/g, "\n").split("\n")) {
+      if (/^\s*\|/.test(l)) { endP(); tbl.push(l); continue; }
+      endT(); const h = l.match(/^#{1,6}\s+(.*)/);
+      if (h) { endP(); out.push(`<h4>${inl(h[1])}</h4>`); } else if (!l.trim()) endP(); else para.push(l.trim());
+    }
+    endP(); endT(); return out.join("");
+  }
+  async function paintCase(q) {
+    $("qview").innerHTML = `<div class="mod-line">${esc(q.label)}</div><h1>${esc(cap(q.asks))}</h1><p class="empty">Opening the case…</p>`;
+    const v = await typedOf(q.id);
+    if (ST.q !== q.id) return;
+    const list = curList(), at = list.indexOf(q.id), prev = list[at - 1], next = list[at + 1], key = q.key, master = ST.tab === "formula" && ST.f;
+    const nav = `<div class="acts" style="justify-content:space-between"><span>${prev ? `<button type="button" class="chip ghost" data-q="${prev}">‹ Previous</button>` : ""}</span>${guideLink(q.id)}<span>${next ? `<button type="button" class="chip ghost" data-q="${next}">Next ›</button>` : ""}</span></div>`;
+    if (!v || !v.case || !v.question) { $("qview").innerHTML = `<div class="mod-line">${esc(q.label)}</div><h1>${esc(cap(q.asks))}</h1><p class="empty">This question's text can't be read just now; its full guide is linked below.</p>` + nav; $("aview").innerHTML = ""; paintSolution(); return; }
+    const mline = master ? `<div class="mastery"><span>Mastering <b>${esc(F[ST.f].name)}</b> · question ${at + 1} of ${list.length} · ${rightOf(list)} right</span><button type="button" class="chip ghost" data-exit>Exit</button></div>` : "";
+    const after = !ST.checked ? "" : next ? `<button type="button" class="btn" data-q="${next}">Next question ›</button>` : master ? `<span class="verdict">Set done: ${rightOf(list)} of ${list.length} right.</span><button type="button" class="btn" data-exit>Back to the formula browser</button>` : "";
+    const keys = Object.keys(v.question.options || {}).sort();
+    $("qview").innerHTML = mline + `<div class="mod-line">${esc(q.label)}</div>` +
+      `<details class="vig"${innerWidth > 1100 ? " open" : ""}><summary>The case · ${esc(v.case.title || q.vig)}</summary><div class="typed">${md(v.case.md)}</div></details>` + nav;
+    paintAnswer(keys, key, (k) => `<div class="typed">${inl(v.question.options[k])}</div>`, after, `<div class="typed"><b>${inl(v.question.stem)}</b></div>`);
+    paintSolution();
+  }
+  function paintAnswer(keys, key, body, after, stem) {
+    $("aview").innerHTML = !keys ? "" : (stem ? `<div class="mod-line">The question</div>${stem}` : "") + `<div class="mod-line">Your answer</div>` +
+      keys.map((k) => `<button type="button" class="opt${ST.chosen === k ? " on" : ""}${ST.checked && k === key ? " right" : ""}${ST.checked && ST.chosen === k && k !== key ? " wrong" : ""}" data-opt="${k}"${ST.checked ? " disabled" : ""}><span class="ol">${k}</span>${body(k)}</button>`).join("") +
+      `<div class="acts">${ST.checked ? `<span class="verdict ${ST.chosen === key ? "ok" : "no"}">${ST.chosen ? (ST.chosen === key ? `Right: ${esc(key)}` : `Not ${esc(ST.chosen)}: the answer is ${esc(key)}`) : `The answer is ${esc(key)}`}</span>` : `<button type="button" class="btn" data-check ${ST.chosen ? "" : "disabled"}>Check my answer</button><button type="button" class="chip ghost" data-reveal>Show the solution</button>`}${after}</div>`;
+  }
+  async function paintSolution(m) {
+    const q = ST.q && Q[ST.q];
+    if (!q) { $("aview").innerHTML = ""; $("sview").innerHTML = `<p class="empty">Pick a question: the question and its choices show here, then the solution once you check.</p>`; return; }
+    if (!ST.checked) { $("sview").innerHTML = `<p class="empty">Check your answer: the solution shows here. Nothing gives it away before.</p>`; return; }
+    const mm = m || (MD && MD.Q[q.id]) || {}, w = mm.walk || {}, id = q.id;
+    const walk = (w.tests ? `<div class="note"><b>What it tests</b>${text(w.tests)}</div>` : "") +
+      ((w.steps || []).length ? `<ol class="steps">${w.steps.map((x) => `<li>${text(x)}</li>`).join("")}</ol>` : `<p class="empty">No worked solution for this question yet.</p>`) +
+      (w.trap ? `<div class="note trap"><b>The trap</b>${text(w.trap)}</div>` : "") + (w.others ? `<div class="note"><b>Why the others tempt</b>${text(w.others)}</div>` : "");
+    const T = await flagsOf(id), D = window.FlagsDraw;
+    if (ST.q !== id || !ST.checked) return;
+    if (!T || !D) {   // no Quick Guide card (a practice question, or a copy without them): the answer, the worked solution where there is one, the full guide
+      $("sview").innerHTML = `<h2 style="margin-top:0">Answer: ${esc(q.key || mm.key || "")}${q.answer && !w.answer ? ` · ${esc(q.answer)}` : ""}</h2>${w.answer ? `<p>${text(w.answer)}</p>` : ""}${(w.steps || []).length || w.tests || q.src !== "case" ? walk : ""}<div class="acts">${guideLink(id)}</div>`;
+      return;
+    }
+  }
+
+  // ------------------------------------------------------------ the address, the study page's Last opened, and the clicks
+  function toHash() {
+    const p = new URLSearchParams();
+    if (ST.src !== SRCS[0][0]) p.set("src", ST.src);
+    p.set("tab", ST.tab);
+    if (ST.tab === "los" && ST.los) p.set("los", ST.los);
+    if (ST.f) p.set("f", ST.f);
+    if (ST.q) p.set("q", ST.q);
+    history.replaceState(null, "", location.pathname + location.search + "#" + p.toString());
+  }
+  function fromHash() {
+    const p = new URLSearchParams(location.hash.slice(1));
+    const sp = p.get("src") === "both" ? "all" : p.get("src");
+    if (sp === "all" || SRCS.some(([k]) => k === sp)) ST.src = sp;
+    ST.f = F[p.get("f")] ? p.get("f") : null;
+    ST.tab = p.get("tab") === "los" ? "los" : "formula";   // By formula unless the address says By LOS (the owner, 10 Nov 2026)
+    ST.los = byL.has(p.get("los") || "") || p.get("los") ? p.get("los") : null;
+    ST.q = Q[p.get("q")] ? p.get("q") : null;
+    if (ST.f) ST.topic = F[ST.f].topic;
+    else if (ST.los) { const m = losOf(ST.los)[0], t = IX.topics.find((x) => x.modules.some((md) => md.module === m)); if (t) ST.topic = t.name; }
+    else if (ST.q) { const l = (Q[ST.q].los || [])[0], t = l && IX.topics.find((x) => x.modules.some((md) => md.module === l[0])); if (t) ST.topic = t.name; }
+  }
+  function paint() { document.body.classList.toggle("qmode", !!ST.q); document.body.classList.toggle("fmode", !!ST.f); paintLeft(); paintFormula(); paintQuestion(); toHash(); fit(); }
+  function openQ(id) { ST.q = id; ST.chosen = null; ST.checked = false; QF = null; paint(); if (innerWidth <= 1100) scrollTo(0, 0); else { $("question").scrollTop = 0; $("solution").scrollTop = 0; } }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-src],[data-tab],[data-topic],[data-los],[data-f],[data-q],[data-qf],[data-uplos],[data-upf],[data-opt],[data-check],[data-reveal],[data-back],[data-exit],[data-fold],[data-unfold]");
+    if (!b || b.disabled) return;
+    if (b.tagName === "A") e.preventDefault();
+    const d = b.dataset;
+    if (d.src) { ST.src = d.src; if (ST.q && !inSrc(Q[ST.q])) ST.q = null; paint(); }
+    else if (d.tab) { ST.tab = d.tab; paint(); }
+    else if (d.topic) { ST.topic = d.topic; ST.los = null; ST.find = ""; paint(); }
+    else if (d.los) { ST.los = d.los; paint(); }
+    else if ("uplos" in d) { ST.los = null; paint(); }
+    else if ("upf" in d) { ST.f = null; paint(); }
+    else if (d.qf) { QF = d.qf; paintFormula(); fit(); }
+    else if (d.f) {   // a formula's mastery: its questions in order, starting at the first not yet right
+      if (!ST.f) LISTTOP = innerWidth <= 1100 ? scrollY : $("list").scrollTop;   // a phone scrolls the page, a wide screen the panel
+      ST.f = d.f; ST.tab = "formula"; ST.topic = F[d.f].topic; QF = null;
+      const ids = byF(d.f), first = ids.find((id) => RES[id] !== 1) || ids[0];
+      if (first) { ST.q = null; openQ(first); } else { ST.q = null; paint(); }
+      $("list").scrollTop = 0;
+    }
+    else if ("exit" in d) { const was = ST.f; ST.f = null; ST.q = null; ST.tab = "formula"; paint();
+      setTimeout(() => { if (innerWidth <= 1100) scrollTo(0, LISTTOP); else $("list").scrollTop = LISTTOP;
+        const c = was && $("nav").querySelector(`[data-f="${was}"]`), r = c && c.getBoundingClientRect(); if (r && (r.top < 0 || r.bottom > innerHeight)) c.scrollIntoView({ block: "center" }); }, 30); }
+    else if ("fold" in d) { document.body.classList.add("folded"); setTimeout(fit, 60); }
+    else if ("unfold" in d) { document.body.classList.remove("folded"); setTimeout(fit, 60); }
+    else if (d.q) openQ(d.q);
+    else if (d.opt) { ST.chosen = d.opt; paintQuestion(); }
+    else if ("check" in d || "reveal" in d) {
+      ST.checked = true;
+      if ("check" in d && ST.chosen && ST.q) { RES[ST.q] = ST.chosen === (Q[ST.q].key || (MD && MD.Q[ST.q] || {}).key) ? 1 : 0; keepRes(); paintLeft(); }
+      paintQuestion(); fit();
+    }
+    else if ("back" in d) { ST.q = null; paint(); }
+  });
+  document.addEventListener("input", (e) => { if (e.target.id === "find") { ST.find = e.target.value; const at = e.target.selectionStart; paintLeft(); const f = $("find"); if (f) { f.focus(); f.setSelectionRange(at, at); } } });
+  document.addEventListener("change", (e) => { if (e.target.id === "only") { ST.only = e.target.checked; paintLeft(); } });
+  fromHash(); paint();
+  if (!window.katex) { const t0 = Date.now(), again = () => (window.katex ? (paintLeft(), paintFormula(), ST.checked && paintSolution(), fit()) : Date.now() - t0 < 8000 && setTimeout(again, 100)); again(); }
+})();
+</script>
+</body>
+</html>
