@@ -60,6 +60,7 @@
   .nc .f p { font-size: .9em; margin: 0 0 .6mm; }
   .nc .foot { margin-top: 1.4mm; font-size: .82em; color: #6b7280; }
   .nc .foot.again { color: #454b57; }
+  .nc .md sup, .nc .md sub { font-size: .72em; line-height: 0; }   /* plain-text formulas tidied by tidyMath() */
   .nc .katex-display { margin: 1.2mm 0; text-align: center; overflow-x: auto; overflow-y: hidden; }  /* on a narrow screen a formula still too wide at the smallest size scrolls in its own box */
   .nc .katex-display > .katex { display: inline-block; white-space: nowrap; }
   .nc .table-wrap { overflow: hidden; }
@@ -149,14 +150,29 @@
   .flip-bar label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
   .flip-card { position: relative; border-radius: 14px; background: #fff; color: var(--ink); box-shadow: 0 2px 18px rgba(0, 0, 0, .28); cursor: pointer; outline-offset: 3px;
     font: 15px/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif; }
-  .flip-card .ff { box-sizing: border-box; min-height: min(56vh, 420px); max-height: 68vh; overflow-y: auto; padding: 18px 22px 16px; display: flex; flex-direction: column; }
-  .flip-card .ff.back, .flip-card.turned .ff.front { display: none; }
+  .flip-card .ff { box-sizing: border-box; min-height: min(56vh, 420px); padding: 18px 22px 16px; display: flex; flex-direction: column; }   /* no cap: the whole answer shows, and the page scrolls */
+  /* the answer joins the question instead of covering it (the owner, 11 Nov 2026: "so we can still see the question we are reading"):
+     beside it on a wide screen, under it on a narrow one, always whole ("make sure we can see the full answer"). On a wide screen the
+     answer is laid out from the start, invisible under a note until the card is turned, so showing it moves nothing; and the question
+     stays in view (sticky) while a long answer is read down the page */
+  .flip-card .ff.back { display: none; position: relative; border-top: 1px dashed var(--rule); }
   .flip-card.turned .ff.back { display: flex; }
-  .flip-card.turn .ff { animation: nc-turn .22s ease-out; }
+  .flip-card .fwait { display: none; }
+  .flip-card:not(.turned) .fwait { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; color: #6b7280; font-size: 14px; line-height: 1.6; }
+  .flip-card:not(.turned) .ff.back > :not(.fwait) { visibility: hidden; }
+  @media (min-width: 1000px) {
+    body[data-view="flip"] main { max-width: 1680px; }   /* the page's own main and the shell's: both are held to 860px otherwise */
+    .flip { max-width: none; }
+    .flip-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .flip-card .ff.back { display: flex; border-top: 0; border-left: 1px dashed var(--rule); }
+    .flip-card .ff.front .fbody { flex: 0 0 auto; position: sticky; top: 14px; min-height: calc(min(56vh, 420px) - 84px); display: flex; flex-direction: column; justify-content: center; }
+    .flip-card .ff.front .fhint { margin-top: auto; }
+  }
+  .flip-card.turn .ff.back { animation: nc-turn .22s ease-out; }   /* only the answer moves: the question stays put */
   @keyframes nc-turn { from { transform: scaleX(.05); opacity: .4; } to { transform: scaleX(1); opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .flip-card.turn .ff { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .flip-card.turn .ff.back { animation: none; } }
   .flip-card .ctop { font-size: 12px; }
-  .flip-card .fbody { flex: 1; margin-top: 12px; }
+  .flip-card .fbody { flex: 1 0 auto; margin-top: 12px; overflow: visible; }   /* full height, never squeezed: a long answer scrolls in its half instead of being cut off (the .nc card style hides overflow) */
   .flip-card .ff.front h4 { font-size: 1.35em; text-align: center; }
   .flip-card .ff.front .fbody > :not(h4) { max-width: 520px; margin-left: auto; margin-right: auto; }
   .flip-card .fhint { margin-top: 10px; text-align: center; font-size: 12.5px; color: #6b7280; }
@@ -254,8 +270,25 @@ function math(tex, display) {
   if (!window.katex) return esc(display ? `\\[${tex}\\]` : `\\(${tex}\\)`);
   try { return katex.renderToString(tex, { displayMode: display, throwOnError: false }); } catch { return esc(tex); }
 }
+// Plain-text formulas (owner, 11 Nov 2026: "clean the formula in the note card"): many cards write maths as text, e.g.
+// F0 = 70 × 1.01^(1/12) − 2.20 or 3,500 × e^{(0.0015 − 0.03)×0.25}. Outside the \( \) and \[ \] spans (KaTeX draws those),
+// ^{..}, ^(..) and ^x become superscripts, _{..} and x_y subscripts, a stray \sigma or \times its symbol, and F0, D1, P0 get
+// their subscript only when an =, /, ×, − or + touches them (so "F1 score" and "BT Group" stay as they are).
+const TEXSYM = { infty: "∞", times: "×", cdot: "·", sigma: "σ", beta: "β", alpha: "α", Delta: "Δ", delta: "δ", mu: "μ", rho: "ρ", lambda: "λ",
+  theta: "θ", pi: "π", varepsilon: "ε", epsilon: "ε", gamma: "γ", approx: "≈", ge: "≥", le: "≤", geq: "≥", leq: "≤", sum: "Σ", pm: "±" };
+function tidyMath(h) {
+  return h
+    .replace(/\\([A-Za-z]+)(?![A-Za-z])/g, (m, w) => TEXSYM[w] || m)
+    .replace(/\^\{([^{}<>]{1,40})\}/g, "<sup>$1</sup>")
+    .replace(/\^\(([^()<>]{1,20})\)/g, "<sup>$1</sup>")
+    .replace(/\^([−-]?[0-9A-Za-z]+(?:\.[0-9]+)?)/g, "<sup>$1</sup>")
+    .replace(/_\{([^{}<>]{1,20})\}/g, "<sub>$1</sub>")
+    .replace(/(^|[^\wͰ-Ͽ])([A-Za-zͰ-Ͽ]+)_([A-Za-z0-9]{1,6})\b/g, "$1$2<sub>$3</sub>")   // no look-behinds: older iPad Safari can't read them (walk_audit.js)
+    .replace(/\b([DPEFSVBK])([01T])\b(?=\s?[=/×−+)])/g, "$1<sub>$2</sub>")
+    .replace(/([=/×−+(]\s?)\b([DPEFSVBK])([01T])\b/g, "$1$2<sub>$3</sub>");
+}
 function inline(s, slots) {
-  return esc(s)
+  return tidyMath(esc(s))
     .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<em>$2</em>")
@@ -549,15 +582,29 @@ function flipDraw(turning) {
   $("f-prev").disabled = FL.at === 0;
   $("f-next").disabled = FL.at >= FL.cards.length - 1;
   el.className = "flip-card" + (FL.turned ? " turned" : "") + (turning ? " turn" : "") + (c.cls ? " k-" + c.cls : "");
-  el.innerHTML = `<div class="ff front"><div class="ctop"><span>${esc(c.kind)}</span><span>${esc(c.k)}</span></div><div class="fbody"><h4>${c.title}</h4>${c.open ? "" : c.front}</div><div class="fhint">Tap the card, or press Space, to see the answer</div></div>
-    <div class="ff back"><div class="ctop"><span>${esc(c.kind)} · answer</span><span>${esc(c.k)}</span></div><div class="fbody nc">${c.back}${c.after || ""}</div></div>`;
-  $("f-turn").textContent = FL.turned ? "Show the question" : "Show the answer";
+  el.innerHTML = `<div class="ff front"><div class="ctop"><span>${esc(c.kind)}</span><span>${esc(c.k)}</span></div><div class="fbody"><h4>${c.title}</h4>${c.open ? "" : c.front}</div><div class="fhint">${flipHint()}</div></div>
+    <div class="ff back">${flipBack(c)}</div>`;
+  $("f-turn").textContent = FL.turned ? "Hide the answer" : "Show the answer";
   $("f-know").classList.toggle("on", MARK[c.id] === 1);
   $("f-again").classList.toggle("on", MARK[c.id] === 0);
   fit($("flip"));
   alignMenu();
 }
-const flipTurn = () => { if (FL.cards[FL.at]) { FL.turned = !FL.turned; flipDraw(true); } };
+// the answer's half, and the hint under the question (kept in place, its words changed, so the question doesn't move)
+const flipHint = () => `Tap the card, or press Space, to ${FL.turned ? "hide" : "see"} the answer`;
+const flipBack = (c) => `<div class="fwait">The answer shows here.<br>Tap the card, or press Space.</div><div class="ctop"><span>${esc(c.kind)} · answer</span><span>${esc(c.k)}</span></div><div class="fbody nc">${c.back}${c.after || ""}</div>`;   // the answer is always there; the page's style hides it under the note until the card is turned
+// turning shows or hides the answer only: the question's half is left as it is (not drawn again), so nothing on it shifts (11 Nov 2026)
+const flipTurn = () => {
+  const c = FL.cards[FL.at], el = $("f-card"), back = el.querySelector(".ff.back"), hint = el.querySelector(".fhint");
+  if (!c) return;
+  FL.turned = !FL.turned;
+  if (!back || !hint) { flipDraw(true); return; }
+  el.classList.toggle("turned", FL.turned);
+  el.classList.remove("turn"); void el.offsetWidth; el.classList.add("turn");   // the answer's half comes in again each time
+  hint.textContent = flipHint();
+  $("f-turn").textContent = FL.turned ? "Hide the answer" : "Show the answer";
+  fit(back);
+};
 const flipGo = (d) => { const to = FL.at + d; if (to >= 0 && to < FL.cards.length) { FL.at = to; FL.turned = false; flipDraw(); } };
 function flipMark(v) {
   const c = FL.cards[FL.at];
@@ -628,10 +675,9 @@ function paintMenu() {
 function alignMenu() {
   const menu = $("menu"), card = $("f-card");
   if (!menu) return;
-  menu.style.marginTop = "";
-  if (document.body.dataset.view !== "flip" || !matchMedia("(min-width: 900px)").matches || !card) return;
-  const gap = card.getBoundingClientRect().top - menu.getBoundingClientRect().top;
-  if (gap > 0) menu.style.marginTop = Math.round(gap) + "px";
+  if (document.body.dataset.view !== "flip" || !matchMedia("(min-width: 900px)").matches || !card) { menu.style.marginTop = ""; return; }
+  const cur = parseFloat(menu.style.marginTop) || 0, want = Math.max(0, Math.round(cur + card.getBoundingClientRect().top - menu.getBoundingClientRect().top));
+  if (want !== cur) menu.style.marginTop = want ? want + "px" : "";   // adjusted, never cleared first: clearing shortened the page for a moment
 }
 function pick(ph, m) {
   $("phase").value = ph;
