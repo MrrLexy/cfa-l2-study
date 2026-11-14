@@ -23,11 +23,8 @@
 <script defer src="static/katex/katex.min.js"></script>
 <style>
   body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.55 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
-  .k-top .k-tabs { flex: 0 1 auto; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .k-top .k-tabs::-webkit-scrollbar { display: none; }
+  /* the bar in one row: the shell does it for every page now (shell.css, 12 Nov 2026); this page's own rules of 10 Nov taken out */
   .k-shell .k-page { grid-template-columns: minmax(0, 1fr); box-sizing: border-box; }   /* its padding inside the screen's height, so the panes' bottoms show */
-  @media (min-width: 801px) { .k-shell .k-top { flex-wrap: nowrap; } }
-  @media (max-width: 800px) { .k-top .k-tabs { flex: 1 1 100%; max-width: 100%; } }
   .k-content > div:has(> .fx) { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   .fx { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(290px, 350px) minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; }
   .right { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, auto); gap: 12px; }
