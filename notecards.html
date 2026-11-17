@@ -161,7 +161,7 @@
   .flip-card:not(.turned) .fwait { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; color: #6b7280; font-size: 14px; line-height: 1.6; }
   .flip-card:not(.turned) .ff.back > :not(.fwait) { visibility: hidden; }
   @media (min-width: 1000px) {
-    body[data-view="flip"] main { max-width: 1680px; }   /* the page's own main and the shell's: both are held to 860px otherwise */
+    body[data-view="flip"] main, body[data-view="cut"] main { max-width: 1680px; }   /* the page's own main and the shell's: both are held to 860px otherwise; the cut view too (16 Nov 2026), so its strips aren't shrunk on an iPad */
     .flip { max-width: none; }
     .flip-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
     .flip-card .ff.back { display: flex; border-top: 0; border-left: 1px dashed var(--rule); }
@@ -204,7 +204,7 @@
     .mod.first { break-before: auto; margin-top: 5mm; }
     .nc, .mod-h, .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .nc .katex-display { overflow: hidden; }
-    .sheet.cut { width: auto; max-width: none; overflow: visible; }
+    .sheet.cut { width: auto; max-width: none; overflow: visible; zoom: 1 !important; }
     .sheet.cut .cuthow, #flip { display: none !important; }
     .cface { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
@@ -554,6 +554,18 @@ function layCut(deck, none) {
   sheet.innerHTML = pairs.length ? `<p class="cuthow">${plural(deck.length, "card")} on ${plural(pairs.length, "strip")}, about ${plural(pages, "page")}. Each strip is one card: question on the left, answer on the right.</p>${pairs.join("")}` : none;
   tidy();
   CUT = { cards: deck.length, strips: pairs.length, pages, tidy };
+  cutFit();
+}
+// on screen the strips are shown smaller when they're wider than the page (16 Nov 2026, the owner on the iPad: the answer half was cut
+// off and scrolled sideways); printing is unchanged: zoom is 1 in print, the cards keep their size on paper
+function cutFit() {
+  const sheet = document.querySelector(".sheet.cut"), pair = sheet && sheet.querySelector(".cpair:not(.probe)");
+  if (!sheet || !pair) return;
+  sheet.style.zoom = 1;
+  const host = sheet.parentElement, cs = getComputedStyle(sheet), room = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
+  const z = Math.min(1, room / pair.offsetWidth);
+  sheet.style.zoom = z < 0.995 ? z.toFixed(3) : "";
+  if (z < 0.995 && CUT && CUT.tidy) CUT.tidy();   // Safari wraps scaled text a little differently: the last line of a full card could slip under its edge
 }
 
 // ---------------------------------------------------------------- flip through on screen
@@ -866,7 +878,7 @@ function start() {
       a.textContent = label;
     } catch { a.textContent = "The PDF needs a connection the first time. Try again when you're online."; }
   });
-  window.addEventListener("resize", () => { const v = document.body.dataset.view; if (v === "flip") fit($("flip")); else if (v !== "cut") fit(); });
+  window.addEventListener("resize", () => { const v = document.body.dataset.view; if (v === "flip") fit($("flip")); else if (v !== "cut") fit(); else cutFit(); });
   load();
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
